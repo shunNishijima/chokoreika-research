@@ -1,0 +1,699 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>高齢者×三方よし 事業モデル事例集</title>
+<meta name="description" content="受益者・負担者・運営者の全員に見返りがある高齢者関連事業の事例を、お金・労力・価値の流れ図で整理した調査（超幸齢化プロジェクト向け、2026-11-21）。">
+<meta property="og:title" content="高齢者×三方よし 事業モデル事例集">
+<meta property="og:description" content="受益者・負担者・運営者の全員に見返りがある高齢者関連事業の事例を、お金・労力・価値の流れ図で整理した調査（超幸齢化プロジェクト向け、2026-11-21）。">
+<meta property="og:type" content="article">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f7f6f2; --surface:#ffffff; --surface2:#f0eee8; --text:#1f2328; --muted:#5b6169; --border:#d9d6cd;
+  --accent:#2b4c7e;
+  --money:#0072B2; --labor:#C25A00; --value:#007A5A; --none:#C0292B;
+  --node-bg:#ffffff; --node-border:#8a8f96; --hub-bg:#eef2f8; --hub-border:#2b4c7e;
+  --badge-bg:#ece9df; --badge-text:#4a4f56; --snip-bg:#fff3d6; --snip-text:#7a5300; --tbd-bg:#fde4e4; --tbd-text:#8a1c1c;
+  --ok:#1d6b46; --closed:#8a1c1c; --unk:#6b6b6b; --pivot:#7a5300;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#15171a; --surface:#1e2125; --surface2:#262a2f; --text:#e6e6e3; --muted:#a3a8ae; --border:#3a3f45;
+    --accent:#8fb0e0;
+    --money:#56B4E9; --labor:#F0A040; --value:#3CC9A0; --none:#FF6B6B;
+    --node-bg:#24282d; --node-border:#7d848c; --hub-bg:#22304a; --hub-border:#8fb0e0;
+    --badge-bg:#2c3036; --badge-text:#c9ccd0; --snip-bg:#3d3215; --snip-text:#f2cf7a; --tbd-bg:#4a2222; --tbd-text:#ffb3b3;
+    --ok:#6fd3a0; --closed:#ff9b9b; --unk:#b0b0b0; --pivot:#f2cf7a;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#15171a; --surface:#1e2125; --surface2:#262a2f; --text:#e6e6e3; --muted:#a3a8ae; --border:#3a3f45;
+  --accent:#8fb0e0;
+  --money:#56B4E9; --labor:#F0A040; --value:#3CC9A0; --none:#FF6B6B;
+  --node-bg:#24282d; --node-border:#7d848c; --hub-bg:#22304a; --hub-border:#8fb0e0;
+  --badge-bg:#2c3036; --badge-text:#c9ccd0; --snip-bg:#3d3215; --snip-text:#f2cf7a; --tbd-bg:#4a2222; --tbd-text:#ffb3b3;
+  --ok:#6fd3a0; --closed:#ff9b9b; --unk:#b0b0b0; --pivot:#f2cf7a;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font-family:"Noto Sans JP","Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;line-height:1.75;font-size:16px;overflow-x:hidden}
+a{color:var(--accent);word-break:break-all}
+.wrap{max-width:1120px;margin:0 auto;padding:0 16px}
+header.hero{padding:40px 0 24px;border-bottom:1px solid var(--border)}
+.hero h1{font-size:clamp(1.4rem,4.5vw,2.1rem);line-height:1.35;margin:0 0 6px}
+.hero .sub{color:var(--muted);margin:0 0 16px}
+.hero .lead{background:var(--surface);border-left:4px solid var(--accent);padding:14px 16px;margin:0;border-radius:4px}
+section{padding:28px 0;border-bottom:1px solid var(--border)}
+h2{font-size:1.3rem;margin:0 0 12px}
+h3{font-size:1.05rem;margin:0 0 6px}
+p{margin:0 0 10px}
+.muted{color:var(--muted)}
+.small{font-size:.86rem}
+.defs{display:grid;gap:10px;grid-template-columns:1fr}
+.defs div{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:10px 12px}
+.legend{display:flex;flex-wrap:wrap;gap:8px 20px;margin-top:12px;align-items:center}
+.legend span{display:inline-flex;align-items:center;gap:8px;font-size:.92rem}
+table{border-collapse:collapse;width:100%}
+.types-table td,.types-table th{border-bottom:1px solid var(--border);padding:8px 6px;vertical-align:top;text-align:left;font-size:.92rem}
+.types-table th{color:var(--muted);font-weight:500}
+.tw{overflow-x:auto}
+@media (max-width:600px){.types-table thead{display:none}.types-table tr{display:block;border-bottom:1px solid var(--border);padding:8px 0}.types-table td{display:block;border:0;padding:2px 0}.types-table td[data-l]::before{content:attr(data-l);display:inline-block;min-width:7.5em;color:var(--muted);font-size:.8rem}}
+.tag{display:inline-block;font-size:.75rem;line-height:1.4;padding:1px 7px;border-radius:999px;background:var(--badge-bg);color:var(--badge-text);margin:0 4px 4px 0;white-space:nowrap}
+.tag.t{font-weight:700}
+.badge{display:inline-block;font-size:.68rem;line-height:1.4;padding:0 5px;border-radius:3px;margin-left:4px;vertical-align:1px;white-space:nowrap}
+.b-snip{background:var(--snip-bg);color:var(--snip-text)}
+.b-tbd{background:var(--tbd-bg);color:var(--tbd-text)}
+.b-hyp{background:var(--snip-bg);color:var(--snip-text);font-size:.8rem;padding:1px 8px}
+.filters{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.fgroup{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.fgroup .lab{font-size:.85rem;color:var(--muted);margin-right:4px}
+.fbtn{font:inherit;font-size:.85rem;padding:4px 10px;border-radius:999px;border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer}
+.fbtn[aria-pressed="true"]{background:var(--accent);color:var(--bg);border-color:var(--accent)}
+.count{font-size:.85rem;color:var(--muted)}
+.grid{display:grid;gap:16px;grid-template-columns:1fr}
+@media (min-width:720px){.grid{grid-template-columns:1fr 1fr}.defs{grid-template-columns:repeat(3,1fr)}}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px;min-width:0;display:flex;flex-direction:column;gap:8px}
+.card.hidden{display:none}
+.card h3{font-size:1.05rem;line-height:1.4}
+.meta{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.st{font-size:.75rem;padding:1px 7px;border-radius:3px;border:1px solid currentColor}
+.st-ok{color:var(--ok)}.st-closed{color:var(--closed)}.st-unk{color:var(--unk)}.st-pivot{color:var(--pivot)}
+.diagram{background:var(--surface2);border-radius:6px;padding:4px}
+.diagram svg{display:block;width:100%;height:auto}
+.roles{font-size:.82rem}
+.roles th,.roles td{border-bottom:1px solid var(--border);padding:4px 4px;text-align:left;vertical-align:top}
+.roles th{color:var(--muted);font-weight:500;white-space:nowrap}
+.roles td:first-child{width:34%}
+.roles .rn{color:var(--muted);font-size:.75rem}
+.figs{margin:0;padding-left:1.1em;font-size:.84rem}
+.figs li{margin-bottom:3px}
+.lesson{font-size:.9rem;border-top:1px dashed var(--border);padding-top:8px;margin:0}
+.lesson b{color:var(--accent)}
+.proposal{display:grid;gap:16px;grid-template-columns:1fr}
+@media (min-width:860px){.proposal{grid-template-columns:1fr 1fr 1fr}}
+.prop{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px;min-width:0}
+.prop.bad{border-color:var(--none)}
+.prop ul{padding-left:1.1em;margin:6px 0 0;font-size:.9rem}
+ol.src{padding-left:1.4em;font-size:.84rem}
+ol.src li{margin-bottom:4px}
+footer{padding:24px 0 48px;color:var(--muted);font-size:.85rem}
+.themebtn{float:right;font:inherit;font-size:.8rem;padding:3px 10px;border-radius:999px;border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer}
+svg text{font-family:inherit}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <marker id="ah-money" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--money)"/></marker>
+    <marker id="ah-labor" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--labor)"/></marker>
+    <marker id="ah-value" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--value)"/></marker>
+    <marker id="ah-none" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--none)"/></marker>
+  </defs>
+</svg>
+
+<header class="hero">
+  <div class="wrap">
+    <button class="themebtn" id="themebtn" type="button">表示切替</button>
+    <h1>高齢者×三方よし 事業モデル事例集</h1>
+    <p class="sub">超幸齢化プロジェクト向け調査 / 調査日 2026-11-21</p>
+    <p class="lead">続いている事例は、担い手(運営者)に現金・住まい・単位/時間証明・採用接点・役割のどれかが返り、負担者に“自分の利益として払う理由”がある。</p>
+  </div>
+</header>
+
+<main>
+<section id="howto">
+  <div class="wrap">
+    <h2>読み方</h2>
+    <div class="defs">
+      <div><h3>受益者</h3><p class="small">サービスを受ける高齢者等。事例によっては子どもや地域住民。</p></div>
+      <div><h3>負担者</h3><p class="small">お金を出す人・組織。保険会社、自治体、法人、利用者本人、客など。</p></div>
+      <div><h3>運営者</h3><p class="small">現場で動く人。学生、シニア自身、有償スタッフ、ボランティアなど。</p></div>
+    </div>
+    <p class="small muted" style="margin-top:10px">構造図は上に受益者、左下に負担者、右下に運営者を置き、仲介する組織がある場合は中央に事業体を置いています。同じ人が二役を兼ねる場合は「=受益者」のように注記しています。</p>
+    <div class="legend" id="legend"></div>
+    <p class="small muted" style="margin-top:10px">
+      <span class="badge b-snip">スニペット</span> 検索結果の抜粋のみで確認し、本文を読めていない数値。
+      <span class="badge b-tbd">TBD</span> 不明・未確認。
+      「推論」は出典ではなく調査者の解釈です。
+    </p>
+  </div>
+</section>
+
+<section id="types">
+  <div class="wrap">
+    <h2>「型」一覧</h2>
+    <p class="small muted">担い手と負担者に何が返るかで分類しています。1つの事例が複数の型に入ることがあります。</p>
+    <div class="tw"><table class="types-table" id="typesTable">
+      <thead><tr><th>型</th><th>担い手に返るもの</th><th>負担者とその利益</th><th>該当事例</th></tr></thead>
+      <tbody></tbody>
+    </table></div>
+  </div>
+</section>
+
+<section id="cases">
+  <div class="wrap">
+    <h2>事例カード</h2>
+    <div class="filters">
+      <div class="fgroup" id="fType"><span class="lab">型</span></div>
+      <div class="fgroup" id="fRegion"><span class="lab">地域</span></div>
+      <div class="count" id="count"></div>
+    </div>
+    <div class="grid" id="grid"></div>
+  </div>
+</section>
+
+<section id="implications">
+  <div class="wrap">
+    <h2>超幸齢化プロジェクトへの示唆</h2>
+    <p>豊中の学生運営NPO（シニア向け食事会・映画上映）では「学生の動機が続かない」ことが課題になっています。事例と並べると、現状は運営者（学生）に何も返っていない点が構造上の破綻点です。</p>
+    <p class="small"><span class="badge b-hyp">仮説</span> 右の2案は事例から組み立てた仮説で、支払う主体・金額・制度の適用可否はいずれも未検証（TBD）です。</p>
+    <div class="proposal" id="proposal"></div>
+  </div>
+</section>
+
+<section id="sources">
+  <div class="wrap">
+    <h2>出典一覧</h2>
+    <ol class="src" id="srcList"></ol>
+    <h3 style="margin-top:20px">データの注意</h3>
+    <ul class="small">
+      <li><span class="badge b-snip">スニペット</span> が付いた数値は、検索結果の抜粋だけで確認したもので、本文（ペイウォール・403等）を読めていません。引用前に原典を確認してください。</li>
+      <li><span class="badge b-tbd">TBD</span> は調査時点で一次情報を確認できなかった項目です。推測で埋めていません。</li>
+      <li>規模の数値は出典ごとに時点が異なります（例: Humanitas Deventer は2015年報道、いろどりは2023年7月記事）。現在値ではありません。</li>
+      <li>社会参加と健康・介護費の関係を示す研究は観察研究が中心で、「もともと健康な人ほど参加する」逆因果を完全には除けません。小規模事業が自前で示せるのは参加者の変化までです。</li>
+      <li>AgeWellJapan の項目は下記4件の出典で確認した情報です。売上の絶対額は非公開のため TBD です。</li>
+    </ul>
+  </div>
+</section>
+</main>
+
+<footer><div class="wrap">高齢者×三方よし 事業モデル事例集 / 調査日 2026-11-21 / 数値は各出典の記載時点のもの</div></footer>
+
+<script>
+"use strict";
+/* ---------- 型定義 ---------- */
+var TYPES = [
+  {id:"A", name:"住まいとの交換", ret:"家賃無料・低家賃の住まい", pay:"家主・施設・自治体（空き部屋の活用、安心、住宅政策）"},
+  {id:"B", name:"保険・法人が払う有償の相棒", ret:"時給・謝礼", pay:"保険プラン・介護施設（医療費・満足度、人手・採用）"},
+  {id:"C", name:"時間クレジット・ポイント", ret:"将来の介護、ポイント（換金）", pay:"自治体（介護予防、入所の遅延、人手不足の補填）"},
+  {id:"D", name:"役割逆転（シニアが先生・シェフ・担い手）", ret:"シニア側に役割と報酬", pay:"客、学校、国（教育成果・体験）"},
+  {id:"E", name:"単位・時間証明", ret:"単位・奉仕時間の証明・履歴", pay:"州・大学・保険会社の基金"},
+  {id:"F", name:"シニアの製品・サービスを売る", ret:"売上収入・分配金・役割", pay:"購入者・客・提携企業（商品価値、売上歩合）"},
+  {id:"G", name:"公的にシニアを有償雇用", ret:"月給・活動手当", pay:"国・自治体（所得保障、社会参加）"},
+  {id:"H", name:"拠点運営費の公費補助", ret:"（担い手への直接の見返りは薄い）", pay:"国＋自治体の共同負担（地域拠点の維持）"},
+  {id:"I", name:"体験をR&Dにして法人に売る", ret:"時給", pay:"法人顧客（シニア市場の知見・研修・事業開発）"},
+  {id:"R", name:"参考（型外：財団・寄付型）", ret:"担い手はボランティア／有給スタッフ", pay:"財団・企業・遺贈・寄付"}
+];
+
+/* ---------- 事例データ ----------
+ nodes: ben(受益者) / pay(負担者) / op(運営者) / hub(事業体・任意)
+ edges: [from, to, kind(money|labor|value|none), label]
+ roles: [出すもの, 得るもの]
+ figs: {t:本文, u:URL, n:出典名, s:スニペットか} */
+var CASES = [
+{id:"awj", name:"AgeWellJapan（もっとメイト）", country:"日本", region:"jp", types:["I"], status:"ok", statusText:"運営中",
+ nodes:{ben:"高齢者\n（もっとメイト利用者）", pay:"法人顧客\n（＋個人利用者）", op:"エイジウェル\nデザイナー", hub:"AgeWellJapan"},
+ edges:[["pay","hub","money","研修・調査費"],["hub","pay","value","シニアの知見"],["ben","hub","money","月額料金"],["ben","hub","value","リアルな声"],["hub","op","money","時給"],["op","ben","labor","訪問・付添い"]],
+ roles:{ben:["月額料金、生活の実態","スマホ指導・外出付き添い・書類整理"], pay:["研修・事業開発・市場調査・CRM設計の対価","シニアの実態に基づく知見"], op:["訪問・付き添いの労力","時給、研修"]},
+ figs:[
+  {t:"個人向け「もっとメイト」: 月額1万2000円で月1回2時間の訪問", u:"https://www.businessinsider.jp/article/295679/", n:"Business Insider Japan"},
+  {t:"担い手130人、うち8割が大学生、時給1500〜2250円（2024-11記事）", u:"https://www.businessinsider.jp/article/295679/", n:"Business Insider Japan"},
+  {t:"法人向け（研修・事業開発・市場調査・CRM設計）が売上の約9割（2024-11時点、導入例: ソフトバンク、きらぼし銀行）", u:"https://www.businessinsider.jp/article/295679/", n:"Business Insider Japan"},
+  {t:"代表 赤木円香氏「売り上げ構成比として伸ばす気がない。シニアのリアルを把握するためのR&D」", u:"https://www.businessinsider.jp/article/295679/", n:"Business Insider Japan"},
+  {t:"初期研修28時間以上、応募月200件超・通過率17〜20%", u:"https://www.businessinsider.jp/article/295679/", n:"Business Insider Japan (2024-11-11)"},
+  {t:"2023-12 に6500万円を調達", u:"https://thebridge.jp/2023/12/agewelljapan-jpy65m-round-funding", n:"BRIDGE 2023-12"},
+  {t:"2025-03 シリーズAで1.3億円、累計2.5億円（Central Japan Seed Fund、ポーラ・オルビスHD、いよぎんキャピタル、広島ベンチャーキャピタル、ユナイテッド等）", u:"https://thebridge.jp/2025/03/senior-lifestyle-support-service-agewelljapan-raises-130-million-yen-in-series-a-funding", n:"BRIDGE 2025-03"},
+  {t:"目標: 2030年までにエイジウェルデザイナー3.7万人、売上50億円規模で上場", u:"https://www.businessinsider.jp/article/295679/", n:"Business Insider Japan (2024-11-11)"},
+  {t:"展開: 東京・神奈川・千葉・埼玉", u:"https://thebridge.jp/2025/03/senior-lifestyle-support-service-agewelljapan-raises-130-million-yen-in-series-a-funding", n:"THE BRIDGE (2025-03-05)"},
+  {t:"売上の絶対額は非公開", tbd:true}
+ ],
+ lesson:"個人向けサービスは利益源ではなく「シニアのリアルを知るR&D」と位置づけ、その知見を法人に売って担い手の時給を払う。"},
+
+{id:"papa", name:"Papa（Papa Pals）", country:"米国", region:"ov", types:["B"], status:"ok", statusText:"運営中（2023年に主要契約を喪失）",
+ nodes:{ben:"保険加入の高齢者", pay:"保険プラン・雇用主", op:"Papa Pal\n（独立請負）", hub:"Papa"},
+ edges:[["pay","hub","money","利用料"],["hub","pay","value","満足度・医療費"],["hub","op","money","時給・手当"],["op","ben","labor","話し相手・送迎"]],
+ roles:{ben:["（保険経由は無料）","話し相手・家事・送迎"], pay:["サービス費用","加入者の満足度・医療費の改善（狙い）"], op:["訪問の労力","時給、走行距離手当、ボーナス"]},
+ figs:[
+  {t:"基本時給 $13〜18 という報道", u:"https://gigworker.com/how-much-papa-pals-make/", n:"gigworker.com", s:true},
+  {t:"訪問は累計220万回超、7,300都市超", u:"https://www.fiercehealthcare.com/sponsored/papas-new-impact-programs-add-value-health-plans", n:"Fierce Healthcare", s:true},
+  {t:"2021-11 シリーズD $150M、評価額 $1.4B", u:"https://medcitynews.com/2021/11/senior-care-startup-papa-valued-at-1-4b/", n:"MedCity News", s:true},
+  {t:"2023-09 Humana・Aetna・Molina が契約を更新せず", u:"https://www.bloomberg.com/news/articles/2023-09-11/eldercare-startup-papa-loses-contracts-with-major-health-insurers", n:"Bloomberg", s:true},
+  {t:"2026-08時点: オンボード済み Pal 約10万人、常時稼働約1万人、保険経由の利用者約100万人。家族払いの直販を $30/時 で開始", u:"https://refreshmiami.com/news/miami-startup-papa-unveils-direct-to-consumer-companionship-model/", n:"Refresh Miami 2026-08-19"}
+ ],
+ lesson:"払う理由が強い負担者（保険）で規模は出るが、担い手をギグ化すると審査・安全のコストが後から噴き出し、負担者は評判リスクで一斉に離れる。"},
+
+{id:"humanitas", name:"Humanitas Deventer", country:"オランダ", region:"ov", types:["A"], status:"unk", statusText:"不明（2023年以降の継続を確認できず）",
+ nodes:{ben:"施設の入居者", pay:"介護施設\n（Humanitas）", op:"学生"},
+ edges:[["pay","op","value","家賃無料の部屋"],["op","ben","labor","良き隣人"],["ben","pay","value","入居者の幸福"]],
+ roles:{ben:["（負担なし）","学生との日常的な交流"], pay:["空き部屋","入居者のウェルビーイングと評判"], op:["決められた時間を「良き隣人」として過ごす（監視なし）","家賃無料の部屋"]},
+ figs:[
+  {t:"学生は月30時間以上「良き隣人」として過ごし、家賃無料で住む。学生6人、入居者約160人（2015年報道）", u:"https://www.pbs.org/newshour/world/dutch-retirement-home-offers-rent-free-housing-students-one-condition", n:"PBS NewsHour", s:true},
+  {t:"2012年に施設長が開始。入居者約150人とする記事もある", u:"https://beam.eo.nl/artikel/student-max-woont-in-een-verzorgingstehuis", n:"EO Beam", s:true}
+ ],
+ lesson:"担い手の見返り（家賃ゼロ）が大きく義務は緩い。ただし1施設あたり数人で規模は小さい。"},
+
+{id:"homeshare", name:"住まい交換型（Homeshare UK / Wohnen für Hilfe / Convive）", country:"英国・ドイツ・スペイン", region:"ov", types:["A"], status:"ok", statusText:"運営中",
+ nodes:{ben:"家主の高齢者", pay:"家主・同居者\n（手数料）", op:"同居する若者\n（学生等）", hub:"仲介団体"},
+ edges:[["pay","hub","money","手数料"],["hub","ben","labor","マッチング"],["ben","op","value","安い住まい"],["op","ben","labor","手伝い・見守り"]],
+ roles:{ben:["自宅の空き部屋","手伝い、夜に誰かいる安心感"], pay:["仲介手数料","相性を見たマッチングと同居後の支援"], op:["手伝いの時間（身体介護は含まない）","安い住まい"]},
+ figs:[
+  {t:"Homeshare UK 2024-25: 報告8団体のマッチ数91件（前年59件）、支援時間28,213時間、手伝いは週約10時間", u:"https://homeshareuk.org/wp-content/uploads/2026/03/State-of-Homeshare-in-the-UK-24-25.pdf", n:"State of Homeshare in the UK 24-25"},
+  {t:"家主の手数料は月最大£200・平均£120。ホームシェアラーの93%が26歳超（学生中心ではない）", u:"https://homeshareuk.org/wp-content/uploads/2026/03/State-of-Homeshare-in-the-UK-24-25.pdf", n:"同上"},
+  {t:"家主の70%が「夜に誰かいる安心感」を挙げた", u:"https://generationsworkingtogether.org/news/homeshare-in-the-uk-2024-25-report-31-03-2026", n:"Generations Working Together"},
+  {t:"Wohnen für Hilfe: 部屋1㎡ごとに月1時間の手伝いが目安。約11の学生支援団体が関与", u:"https://studierendenwerke.de/themen/wohnen/tipps-zur-wohnungssuche/wohnen-fuer-hilfe", n:"Studierendenwerke", s:true},
+  {t:"Convive（マドリード）: 市と市内8大学が協力、20年超で累計1,500組", u:"https://www.madrid.es/UnidadesDescentralizadas/Mayores/Especial%20informativo/Intergeneracional/Informacion_CONVIVE.pdf", n:"madrid.es", s:true}
+ ],
+ lesson:"交換レートを公式化（1㎡=月1時間）すると標準化しやすく、大学が公式パートナーだと担い手が毎年補充される。ただし1件ずつの手作業で規模は伸びにくい。"},
+
+{id:"judson", name:"Judson Manor", country:"米国", region:"ov", types:["A"], status:"unk", statusText:"不明",
+ nodes:{ben:"入居者", pay:"高齢者住宅\n（Judson Manor）", op:"音楽院の学生"},
+ edges:[["pay","op","value","無料の住まい"],["op","ben","labor","演奏"],["ben","op","value","本番の場"]],
+ roles:{ben:["聴衆として参加","入居者向けの演奏"], pay:["空き部屋","入居者向けの文化活動"], op:["入居者向けの演奏","家賃無料の住まい、聴衆のいる本番の場"]},
+ figs:[
+  {t:"クリーブランド音楽院の大学院生などが家賃無料で住み、月1回以上演奏。2010年以降で約20人が入居", u:"https://www.smithsonianmag.com/innovation/college-students-are-living-rent-free-in-cleveland-retirement-home-180956930/", n:"Smithsonian", s:true}
+ ],
+ lesson:"担い手の専門スキル（演奏）をそのまま提供物にし、住まいに加えて「発表の場」も見返りにしている。"},
+
+{id:"timebank", name:"時間銀行（南京 / Zeitvorsorge St. Gallen）", country:"中国・スイス", region:"ov", types:["C"], status:"ok", statusText:"運営中",
+ nodes:{ben:"独居高齢者など", pay:"自治体", op:"登録志願者\n（スイスは50歳以上）", hub:"時間銀行\n（市の委託運営）"},
+ edges:[["pay","hub","money","運営費"],["hub","pay","value","入所を遅らせる"],["op","ben","labor","付添い・家事"],["hub","op","value","時間の貯蓄"]],
+ roles:{ben:["（負担なし）","食事・通院・入浴・清掃・スマホ指導など"], pay:["プラットフォームと拠点の運営費","施設入所の遅延・介護人材不足の補填（検証中）"], op:["支援の時間","将来自分が受けるサービスの時間、家族への譲渡"]},
+ figs:[
+  {t:"南京: 2019年に市レベルで開始。登録志願者約9万人、拠点1,370か所、完了注文約130万件", u:"https://www.news.cn/local/20250328/f4186741eb99483b9a09898e8fbd63f0/c.html", n:"新華網 2025-03-28"},
+  {t:"北京: 1万コイン貯めると公営養老施設に入居する権利", u:"https://en.people.cn/n3/2022/0723/c90000-10126550.html", n:"People's Daily 2022-07-23"},
+  {t:"Zeitvorsorge: 2014年以降の累計約10万時間", u:"https://www.zeitvorsorge.ch", n:"zeitvorsorge.ch"},
+  {t:"Zeitvorsorge: 50歳以上が付き添い等をし、その時間を将来のサービス用に貯める。2012年試行、2014年半ば本格開始、市の委託で運営", u:"https://www.kalaidos-fh.ch/en-GB/Forschung/Fachbereich-Gesundheit/Projekte/Zeitvorsorge", n:"Kalaidos FH"},
+  {t:"Zeitvorsorge の参加者数", tbd:true}
+ ],
+ lesson:"「将来の介護」は遠く不確実な見返りなので、南京・北京は即時記録・家族への譲渡・施設入居権など近い見返りを足している（推論）。"},
+
+{id:"ec", name:"AARP Foundation Experience Corps", country:"米国", region:"ov", types:["D"], status:"ok", statusText:"運営中",
+ nodes:{ben:"小学生", pay:"AmeriCorps・\n学校区・財団", op:"50歳以上の\nボランティア", hub:"AARP Foundation"},
+ edges:[["pay","hub","money","助成"],["hub","op","money","謝礼（一部）"],["op","ben","labor","読み書き指導"],["hub","pay","value","学力・健康"]],
+ roles:{ben:["（負担なし）","読み書きの個別指導"], pay:["助成","子どもの学力向上、高齢者の健康・社会参加"], op:["指導の時間","役割、地域によって謝礼"]},
+ figs:[
+  {t:"50歳以上が小学生に読み書きを教える。2023-24学年度: ボランティア1,284人が児童3,659人を支援、実施地域18", u:"https://Www.Aarp.org/experience-corps/experience-corps-volunteer/", n:"AARP", s:true},
+  {t:"指導を受けた児童は読解等の伸びが比較群より60%超大きい（2009年評価）", u:"https://source.washu.edu/2009/04/study-finds-students-with-experience-corps-tutors-make-60-more-progress-in-critical-reading-skills-than-students-without-tutors/", n:"WashU Source", s:true},
+  {t:"謝礼ありは平均週15時間で謝礼なしのほぼ2倍。62%が「謝礼なしでは参加できなかった/難しかった」", u:"https://core.ac.uk/download/233233378.pdf", n:"WashU CSD 研究", s:true},
+  {t:"現在の謝礼額", tbd:true}
+ ],
+ lesson:"シニアを「教える側」にし、教育成果と結びつけると公費がつく。少額でも謝礼は活動時間を大きく伸ばす。"},
+
+{id:"enoteca", name:"Enoteca Maria", country:"米国", region:"ov", types:["D","F"], status:"ok", statusText:"運営中",
+ nodes:{ben:"来店客", pay:"来店客\n（=受益者）", op:"各国の祖母シェフ", hub:"Enoteca Maria"},
+ edges:[["pay","hub","money","飲食代"],["hub","op","money","時間給"],["op","ben","labor","家庭料理"],["hub","op","value","役割・継承"]],
+ roles:{ben:["飲食代","他にない家庭料理の体験"], pay:["飲食代","料理と体験"], op:["日替わりのシェフ勤務","報酬、役割、自国料理の継承"]},
+ figs:[
+  {t:"2007年開業、35席。2015年から多国籍の祖母を雇用", u:"https://www.nbcnews.com/pop-culture/pop-culture-news/nonnas-netflix-vince-vaughn-true-story-inspiration-rcna206646", n:"NBC News", s:true},
+  {t:"祖母は月1回程度の勤務、時間に対して報酬", u:"https://www.cbsnews.com/newyork/news/enoteca-maria-the-dig", n:"CBS NY", s:true},
+  {t:"報酬額", tbd:true}
+ ],
+ lesson:"シニアを「客」でなく「シェフ（担い手）」にすると、体験そのものが商品になり事業として成り立つ。"},
+
+{id:"korea", name:"韓国 老人雇用（노인일자리）", country:"韓国", region:"ov", types:["G"], status:"ok", statusText:"運営中・拡大中",
+ nodes:{ben:"地域社会", pay:"国・自治体", op:"60歳以上のシニア\n（公益型は65歳以上）"},
+ edges:[["pay","op","money","活動手当"],["op","ben","labor","公益活動"],["op","pay","value","所得保障・参加"]],
+ roles:{ben:["（負担なし）","公益活動・サービス"], pay:["予算","高齢者の貧困対策と社会参加"], op:["月単位の活動時間","手当（月給）、役割"]},
+ figs:[
+  {t:"参加資格は公益活動型が65歳以上の基礎年金受給者、それ以外は60歳以上。2025年: 109.8万件、予算2兆1,847億ウォン（公益活動型69.2万、能力活用型17.1万、共同体事業団23.5万）", u:"https://m.korea.kr/briefing/pressReleaseView.do?newsId=156663338", n:"korea.kr"},
+  {t:"2026年: 115.2万件。公益活動型は月30時間程度で月29万ウォン、能力活用型は月60時間で最大約76万ウォン", u:"https://biz.sbs.co.kr/amp/article/20000274958", n:"SBS Biz", s:true}
+ ],
+ lesson:"シニア自身を担い手にして国が直接払う最大規模の例。公益活動型は所得補填の性格が強い。"},
+
+{id:"mgh", name:"Mehrgenerationenhäuser（多世代の家）", country:"ドイツ", region:"ov", types:["H"], status:"ok", statusText:"運営中（2021〜2028年の補助期間）",
+ nodes:{ben:"地域住民（多世代）", pay:"連邦＋自治体", op:"ボランティア", hub:"多世代の家"},
+ edges:[["pay","hub","money","運営費補助"],["op","hub","labor","ボランティア"],["hub","ben","labor","居場所・講座"],["hub","pay","value","地域の拠点"]],
+ roles:{ben:["（利用）","居場所・講座・交流"], pay:["連邦補助と自治体の共同負担","地域拠点の維持（自治体にも当事者意識）"], op:["活動の時間","（直接の見返りは薄い）"]},
+ figs:[
+  {t:"補助対象約530か所。連邦補助は1か所あたり年最大4万ユーロ、自治体等による年1万ユーロの共同負担が条件", u:"https://www.bmbfsfj.bund.de/bmbfsfj/themen/engagement-und-gesellschaft/mehrgenerationenhaeuser/mehrgenerationenhaeuser-74018", n:"BMBFSFJ"},
+  {t:"1日あたり利用者 46,196人（2021）→56,543人（2024）。ボランティア 29,523人→29,688人でほぼ横ばい", u:"https://mehrgenerationenhaeuser.de/fileadmin/Daten/Zwischenbericht_BPMGH_Evaluationszeitraum_2021-2024-2.pdf", n:"中間評価報告 2021-2024", s:true}
+ ],
+ lesson:"国の補助に自治体の共同負担を条件づけると拠点は長く続く。ただし担い手への見返りがなく、ボランティア数は伸びていない。"},
+
+{id:"sheds", name:"Men's Sheds", country:"豪州・アイルランド・英国", region:"ov", types:["D","H"], status:"ok", statusText:"運営中",
+ nodes:{ben:"シニア男性\n（=運営者）", pay:"政府助成・会員", op:"シニア男性\nメンバー", hub:"各地の Shed"},
+ edges:[["pay","hub","money","助成"],["op","hub","labor","運営・作業"],["hub","ben","value","仲間・役割"]],
+ roles:{ben:["参加","木工などの作業を通じた仲間と役割"], pay:["設備・場所への助成","男性の孤立対策"], op:["運営の労力","受益者と同一（仲間・役割）"]},
+ figs:[
+  {t:"英国 登録1,180か所、アイルランド 500か所超、豪州 900か所超", u:"https://mensshed.org/wp-content/uploads/2024/10/Plenary-3.-International-Mens-Shed-update-10th-National-Mens-Shed-Gathering.pdf", n:"International Men's Shed update 2024", s:true},
+  {t:"アイルランド島内に約450か所、毎週1万人以上が通う（別報道）", u:"https://www.irishexaminer.com/news/arid-40313405.html", n:"Irish Examiner", s:true},
+  {t:"豪州 National Shed Development Programme: 2024/25年度 $1,000,000", u:"https://mensshed.org/nsdp/", n:"AMSA NSDP", s:true},
+  {t:"資金不足が無償で働くメンバーのストレスになり得るとの研究指摘", u:"https://link.springer.com/article/10.1007/s11266-025-00767-7", n:"Springer Voluntas 2025", s:true}
+ ],
+ lesson:"担い手と受益者が同じ人なので動機の問題が起きにくい。論点は家賃・工具などの固定費をどう賄うか。"},
+
+{id:"reengage", name:"Re-engage", country:"英国", region:"ov", types:["R"], status:"ok", statusText:"運営中",
+ nodes:{ben:"75歳以上の高齢者", pay:"財団・企業・遺贈", op:"ボランティア", hub:"Re-engage\n（本部は有給）"},
+ edges:[["pay","hub","money","寄付・助成"],["hub","op","labor","運営支援"],["op","ben","labor","お茶会・電話"],["hub","pay","value","孤立対策の成果"]],
+ roles:{ben:["（無料）","月1回のお茶会、電話の話し相手"], pay:["寄付・助成","孤立対策への貢献"], op:["お茶会の運営・送迎","（金銭の見返りなし）"]},
+ figs:[
+  {t:"2024-25年度: 支援した人6,625人、ボランティア7,613人、収入£2.70M（財団£1.38M・企業£0.60M）、有給スタッフ54.29 FTE、支出の78%が人件費", u:"https://opencharities.uk/ew/1146149/files/2025-03-31-accounts.md", n:"Re-engage 2025年3月期決算"},
+  {t:"75歳以上を対象に月1回日曜のお茶会と電話の話し相手を無料提供。2023-24年度: 定期開催のお茶会363グループ", u:"https://reengage.org.uk/site/assets/files/1708/annual_report_2324_signed.pdf", n:"Re-engage AR 2023-24", s:true}
+ ],
+ lesson:"現場はボランティア、本部は有給の少数精鋭。単純な型（月1回のお茶会）と財源の分散で規模を出した。"},
+
+{id:"cares", name:"The Cares Family", country:"英国", region:"ov", types:["R"], status:"closed", statusText:"閉鎖（2023年）",
+ nodes:{ben:"高齢者", pay:"寄付・助成", op:"若者・有給スタッフ", hub:"The Cares Family\n（地域チャリティ）"},
+ edges:[["pay","hub","money","寄付（減少）"],["hub","op","money","給与"],["op","ben","labor","映画会・ディナー"]],
+ roles:{ben:["（無料）","映画会・テック講座・ディナーなどの Social Clubs"], pay:["寄付・助成","（コロナ後に減少）"], op:["企画・運営","スタッフは給与、若者ボランティアは交流"]},
+ figs:[
+  {t:"2011年開始。全国組織1つと地域チャリティ5つ。閉鎖理由は厳しい資金調達環境、寄付減、準備金がなかったこと", u:"https://www.charitytimes.com/ct/Desperately-difficult-fundraising-environment-forces-charity-group-closure.php", n:"Charity Times"},
+  {t:"累計で高齢者・若者26,000人をつないだ", u:"https://en.wikipedia.org/wiki/The_Cares_Family", n:"Wikipedia", s:true}
+ ],
+ lesson:"超幸齢化プロジェクトと同じ形の活動でも、拠点ごとに有給スタッフを置き準備金を持たない構造は、資金環境の悪化で全体が倒れる。"},
+
+{id:"monami", name:"Mon Ami", country:"米国", region:"ov", types:["B"], status:"pivot", statusText:"転換（ソフトウェア事業へ）",
+ nodes:{ben:"高齢者", pay:"家族", op:"大学生", hub:"Mon Ami"},
+ edges:[["pay","hub","money","時間料金"],["hub","op","money","時給"],["op","ben","labor","話し相手"]],
+ roles:{ben:["（家族が負担）","大学生の話し相手"], pay:["時間料金","家族の安心"], op:["訪問の時間","時給"]},
+ figs:[
+  {t:"当初は家族が$25/時を払い、大学生に$20/時を渡すモデル", u:"https://abc7ny.com/mon-ami-loneliness-app-connects-senior-citizens-college-students/5701664/", n:"ABC7", s:true},
+  {t:"シード資金 $3.4M", u:"https://prnewswire.com/news-releases/mon-ami-raises-3-4m-to-tackle-social-isolation-in-aging-300930347.html", n:"PR Newswire", s:true},
+  {t:"現在は地域の高齢者支援機関・州向けのケース管理・ボランティア管理ソフトの会社", u:"https://www.monami.io/who-we-serve/area-agencies-on-aging", n:"monami.io", s:true},
+  {t:"転換理由の一次情報", tbd:true}
+ ],
+ lesson:"家族が払う B2C の有償学生コンパニオンは単価と需要が合わなかった可能性がある（推論）。Papa は保険経由で規模を取った。"},
+
+{id:"cyber", name:"Cyber-Seniors / URI Engaging Generations", country:"カナダ・米国", region:"ov", types:["E"], status:"ok", statusText:"運営中（URI は2022年春までの報告）",
+ nodes:{ben:"高齢者", pay:"州・政府・\n保険会社の基金", op:"高校生・大学生", hub:"プログラム\n（大学・団体）"},
+ edges:[["pay","hub","money","助成"],["hub","op","value","単位・時間証明"],["op","ben","labor","IT指導"]],
+ roles:{ben:["（負担なし）","スマホ・ITの個別指導"], pay:["助成","高齢者のデジタル包摂"], op:["指導の時間","単位、奉仕時間の証明、デジタルバッジ"]},
+ figs:[
+  {t:"URI: 2016年〜2022年春学期で、学生356人が高齢者1,468人を6,280時間支援。資金は州の Office of Healthy Aging と BCBS of RI の基金", u:"https://web.uri.edu/wp-content/uploads/sites/1267/URI-OHA-PILOT-FINAL-REPORT.pdf", n:"URI OHA Pilot Final Report"},
+  {t:"Cyber-Seniors: 2020年4月以降、オンラインプログラム参加は延べ4万人超", u:"https://cyberseniors.org/about/", n:"cyberseniors.org", s:true},
+  {t:"政府 New Horizons for Seniors Program 助成: 2024-25年度 CAD 23,509", u:"https://search.open.canada.ca/grants/record/esdc-edsc%2C014-2024-2025-Q4-03118%2Ccurrent", n:"Open Canada", s:true}
+ ],
+ lesson:"担い手の見返りを単位・時間証明にすると、学校・大学の制度が毎年担い手を供給してくれる。"},
+
+{id:"irodori", name:"いろどり（葉っぱビジネス）", country:"日本（徳島県上勝町）", region:"jp", types:["F"], status:"ok", statusText:"運営中",
+ nodes:{ben:"高齢農家\n（=運営者）", pay:"料理人・料亭", op:"高齢農家", hub:"いろどり"},
+ edges:[["pay","hub","money","仕入れ代"],["hub","pay","value","料理の装飾"],["op","hub","labor","つまもの出荷"],["hub","op","money","売上収入"],["hub","ben","value","売上ランキング"]],
+ roles:{ben:["（運営者と同一）","収入、生きがい"], pay:["仕入れ代","料理の装飾用のつまもの"], op:["つまものの栽培・出荷、タブレット受注","売上収入"]},
+ figs:[
+  {t:"最高で年間2億6000万円の売上、145軒が就農、平均70歳超の農家（2023年7月記事）", u:"https://www.nippon.com/ja/guide-to-japan/gu900259/", n:"nippon.com"},
+  {t:"直近の売上・生産者数", tbd:true}
+ ],
+ lesson:"買い手の自己利益（市場ニーズ）が先で、福祉は結果。ランキングによる見える化が高齢の担い手のやる気装置になる。"},
+
+{id:"jiiba", name:"ジーバー「街仲食堂 byジーバーFOOD」", country:"日本", region:"jp", types:["D","F"], status:"ok", statusText:"拡大中",
+ nodes:{ben:"地域住民\n（来店客）", pay:"パートナー企業\n（後方支援）", op:"シニアの組合員", hub:"街仲食堂\n（シニア組合）"},
+ edges:[["ben","hub","money","飲食代"],["hub","pay","money","売上歩合"],["pay","hub","labor","後方支援"],["hub","op","money","分配金"],["op","ben","labor","食事提供"]],
+ roles:{ben:["飲食代","食事と地域の場"], pay:["後方支援","売上の歩合"], op:["食堂の経営・運営","活動頻度に応じた分配金（時間給より少ない場合もある）"]},
+ figs:[
+  {t:"売上の10〜25%がパートナー企業へ。経費控除後の残額をシニアが活動頻度に応じて平等分配", u:"https://www.businessinsider.jp/article/nagano-kenta/", n:"Business Insider Japan 2026-09-02"},
+  {t:"シニア累計約400人、パートナー86地域（2026-08-01時点）", u:"https://www.businessinsider.jp/article/nagano-kenta/", n:"同上"}
+ ],
+ lesson:"パートナー企業に売上歩合が入ることが「支える理由」になり、シニアは担い手として分配金を得る。食事会の担い手をシニアに移す際の最有力モデル。"},
+
+{id:"ukiha", name:"うきはの宝", country:"日本（福岡県うきは市）", region:"jp", types:["D","F"], status:"ok", statusText:"運営中",
+ nodes:{ben:"購入者・購読者", pay:"購入者・\n定期購読企業", op:"75歳以上の\nばあちゃん", hub:"うきはの宝"},
+ edges:[["pay","hub","money","商品代・購読料"],["hub","op","money","時給"],["op","hub","labor","製造・新聞"],["hub","ben","value","商品・新聞"]],
+ roles:{ben:["代金","干し芋・もんぺ・新聞"], pay:["商品代・購読料","商品、企業は広報・CSR（推論を含む）"], op:["週数日・午前の勤務","最低賃金の時給、生きがい"]},
+ figs:[
+  {t:"2019年設立。75歳以上を雇用、目的は「収入」と「生きがい」", u:"https://www.moneypost.jp/1255677", n:"マネーポストWEB", s:true},
+  {t:"週1〜2日・午前3〜4時間、時給は福岡県最低賃金992円。「月刊ばあちゃん新聞」1部330円・5000部、企業・銀行・スーパー等も定期購読（2025-06-10記事）", u:"https://www.nippon.com/ja/japan-topics/b107013/", n:"nippon.com"}
+ ],
+ lesson:"高齢者を「雇用」して最低賃金を払い、企業の定期購読で負担者の自己利益を取り込んでいる。"},
+
+{id:"sukketter", name:"スケッター（プラスロボ）", country:"日本", region:"jp", types:["B"], status:"ok", statusText:"自治体展開中",
+ nodes:{ben:"介護施設の\n入居者・職員", pay:"介護施設・自治体", op:"有償ボランティア\n（16歳から）", hub:"スケッター"},
+ edges:[["pay","hub","money","利用料・委託"],["pay","op","money","謝礼"],["op","ben","labor","施設の手伝い"],["op","pay","value","採用接点"]],
+ roles:{ben:["（負担なし）","施設の手伝い"], pay:["システム利用料、謝礼","人手と、ミスマッチの少ない職員採用"], op:["短時間の手伝い","謝礼、介護現場の経験"]},
+ figs:[
+  {t:"16歳から登録可、施設から謝礼金。目黒区は同社と委託契約", u:"https://www.city.meguro.tokyo.jp/koureifukushi/kusei/jinjisaiyou/yuushovolunteer.html", n:"目黒区"},
+  {t:"仙台市実証（R7.2.1〜7.31）: 登録施設44、登録者647名、マッチング971件。課題は小規模事業所にとって月額2〜3万円のシステム利用料", u:"https://www.city.sendai.jp/kaigohoken-kanri/kaigojinzai/documents/jigyouhoukokusho_1.pdf", n:"仙台市 事業報告書"}
+ ],
+ lesson:"介護施設が払う理由は「人手」と「採用」。担い手には謝礼に加えて現場経験が返る。"},
+
+{id:"solidaire", name:"京都ソリデール（次世代下宿）", country:"日本（京都府）", region:"jp", types:["A"], status:"ok", statusText:"運営中",
+ nodes:{ben:"空き室のある\n高齢者", pay:"京都府＋学生", op:"学生", hub:"マッチング事業者\n（府委託）"},
+ edges:[["pay","hub","money","委託費"],["hub","ben","labor","面談・フォロー"],["ben","op","value","低廉な部屋"],["op","ben","money","居住費"]],
+ roles:{ben:["空き室","居住費、同居による交流"], pay:["マッチング委託費、居住費","住宅政策・若者定着（府）"], op:["居住費","低廉な住まい"]},
+ figs:[
+  {t:"平成28年度開始。同居実績72組、利用者100名以上（高齢者43名、学生72名）。2026年で10周年", u:"https://www.pref.kyoto.jp/press/documents/2026082705.pdf", n:"京都府 報道発表"},
+  {t:"居住費2.5〜3.5万円程度（光熱費別）", u:"https://www.pref.kyoto.jp/jutaku/documents/260927chirashi.pdf", n:"京都府 チラシ", s:true}
+ ],
+ lesson:"丁寧な1対1マッチングは質が高いが、10年で72組と規模は出にくい。"},
+
+{id:"toei", name:"都営住宅×大学 / UR団地×大学", country:"日本（東京都・愛知県）", region:"jp", types:["A","E"], status:"ok", statusText:"運営中",
+ nodes:{ben:"団地自治会・住民", pay:"東京都 / UR", op:"学生", hub:"大学（協定）"},
+ edges:[["pay","op","value","低家賃"],["op","ben","labor","自治会活動"],["hub","op","labor","募集・送り出し"]],
+ roles:{ben:["（負担なし）","自治会活動の担い手"], pay:["家賃水準の調整","団地の地域活動の維持"], op:["自治会活動（URは時間数が条件）","低家賃・割引家賃"]},
+ figs:[
+  {t:"東京都: 学生が都営住宅に住み団地自治会の活動に協力。協定12大学（2025-03-06時点）", u:"https://www.metro.tokyo.lg.jp/information/press/2025/03/2025030601", n:"東京都"},
+  {t:"都営文花団地で2DK家賃約2万5千円（自治会費込）", u:"https://www.city.sumida.lg.jp/kurashi/zyuutaku/sumaiinfo/sumaikata_kengaku/toeibunkadanti.files/1004_genkou.pdf", n:"墨田区", s:true},
+  {t:"UR豊明団地（藤田医科大学）: 学生25名が年40時間以上の地域貢献を条件に家賃10〜20%引き（35,000〜37,500円）", u:"https://www.fujita-hu.ac.jp/~chuukaku/media/20260210-142640-550.pdf", n:"藤田医科大学", s:true}
+ ],
+ lesson:"「住まいの割引と引き換えに地域活動を義務化」すると、活動時間を契約で担保できる。"},
+
+{id:"sasaeai", name:"とよなか地域ささえ愛ポイント", country:"日本（大阪府豊中市）", region:"jp", types:["C"], status:"ok", statusText:"運営中",
+ nodes:{ben:"施設利用者など", pay:"豊中市\n（介護保険財源）", op:"65歳以上の市民", hub:"豊中市社会福祉\n協議会（委託）"},
+ edges:[["pay","hub","money","委託"],["hub","op","money","活動支援金"],["op","ben","labor","支援活動"],["op","pay","value","介護予防"]],
+ roles:{ben:["（負担なし）","支援活動"], pay:["ポイント原資と委託費","担い手本人の介護予防（将来の給付費抑制）"], op:["支援活動の時間","ポイント（活動支援金として振込）"]},
+ figs:[
+  {t:"対象は満65歳以上の市民（学生は対象外）。1回1時間程度で100ポイント、1日200ポイント上限、年間5,000ポイント（5,000円）上限", u:"https://www.city.toyonaka.osaka.jp/kenko/kaigo_hukushi/ikigaizukuri/tiikisasaeaipoint.files/sasaeaigaiyou.pdf", n:"豊中市 事業概要"},
+  {t:"全国: 介護予防の取組やボランティアへのポイント付与を実施する市町村は34.1%（593市町村、令和元年度）", u:"https://www.mhlw.go.jp/content/000761589.pdf", n:"厚労省 手引き"},
+  {t:"NPOの食事会・上映会を対象活動に追加できるか", tbd:true}
+ ],
+ lesson:"財源が介護予防なので、担い手を高齢者に寄せると行政が払う理由が立つ。金額は小さく、謝礼より参加のきっかけ・記録として効く。"},
+
+{id:"nalc", name:"NALC（時間預託）", country:"日本", region:"jp", types:["C"], status:"ok", statusText:"運営中",
+ nodes:{ben:"会員・その家族", pay:"会員（年会費）", op:"会員", hub:"NALC"},
+ edges:[["pay","hub","money","年会費"],["op","ben","labor","支援活動"],["hub","op","value","時間預託点"]],
+ roles:{ben:["（会員として）","必要な時の支援"], pay:["年会費","互助の仕組み"], op:["支援の時間","預託点（本人・配偶者・両親等が利用）"]},
+ figs:[
+  {t:"「1時間=1点」が基本。預託点は本人・配偶者・両親等がサービスを必要とした時に使う", u:"https://nalc.jp/jikan-yotaku", n:"NALC"},
+  {t:"会員8,100名、66拠点（2026年6月末）、年会費3,000円", u:"https://nalc.jp/nalc", n:"NALC"}
+ ],
+ lesson:"時間預託は「将来の自分の介護」という遠い見返りなので、学生には効きにくくシニア同士の互助向き。"}
+];
+
+/* ---------- 示唆の図 ---------- */
+var PROPOSALS = [
+ {title:"現状の構造", bad:true, hyp:false,
+  nodes:{ben:"高齢者（豊中）", pay:"負担者 TBD", op:"学生", hub:"学生運営NPO"},
+  edges:[["op","ben","labor","食事会・映画上映"],["hub","op","none","見返りなし"],["pay","hub","money","不安定（TBD）"]],
+  notes:["運営者（学生）に返るものがなく、動機が続かない（破綻点）","払う理由を持つ負担者が定まっていない"]},
+ {title:"組み直し案1: 役割逆転＋企業の採用接点（D型）", bad:false, hyp:true,
+  nodes:{ben:"高齢者", pay:"地元企業", op:"シニア（当番・語り手）\n＋学生（企画）", hub:"NPO"},
+  edges:[["pay","hub","money","協賛"],["hub","pay","value","学生との接点"],["hub","op","value","役割・活動証明"],["op","ben","labor","会食・上映"]],
+  notes:["シニアを語り手・当番として担い手側に回す（Enoteca Maria・ジーバー・うきはの宝の型）","学生には活動証明（E型）、企業には学生へのリーチを返す","手伝うシニアがささえ愛ポイントを得られるかは TBD（市・社協への確認が必要）","企業が払う動機と金額は TBD"]},
+ {title:"組み直し案2: 体験をR&Dにして法人に売る（I型）", bad:false, hyp:true,
+  nodes:{ben:"高齢者", pay:"法人\n（調査・研修）", op:"学生", hub:"NPO"},
+  edges:[["pay","hub","money","調査・研修費"],["hub","pay","value","シニアの知見"],["ben","hub","value","生の声"],["hub","op","money","謝礼"],["op","ben","labor","会食・聞き取り"]],
+  notes:["会食・上映の場をシニアの実態を知る場として位置づける（AgeWellJapan の型）","法人が払う対価で学生に謝礼を払う","豊中の規模で法人が払うかは TBD"]}
+];
+
+var EXTRA_SOURCES = [
+ {n:"AgeWellJapan 公式サイト", u:"https://agewelljapan.co.jp/"},
+ {n:"Business Insider Japan（AgeWellJapan）", u:"https://www.businessinsider.jp/article/295679/"},
+ {n:"BRIDGE 2025-03（AgeWellJapan シリーズA）", u:"https://thebridge.jp/2025/03/senior-lifestyle-support-service-agewelljapan-raises-130-million-yen-in-series-a-funding"},
+ {n:"BRIDGE 2023-12（AgeWellJapan 6500万円調達）", u:"https://thebridge.jp/2023/12/agewelljapan-jpy65m-round-funding"}
+];
+
+/* ---------- ユーティリティ ---------- */
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];});}
+var NS="http://www.w3.org/2000/svg";
+function el(tag,attrs,parent){var e=document.createElementNS(NS,tag);for(var k in attrs){e.setAttribute(k,attrs[k]);}if(parent)parent.appendChild(e);return e;}
+function textWidth(s,fs){var w=0;for(var i=0;i<s.length;i++){var c=s.charCodeAt(i);w+=(c<0x2000)?fs*0.58:fs;}return w;}
+
+var KIND = {
+ money:{color:"var(--money)",dash:"",width:2.2,marker:"ah-money",name:"お金"},
+ labor:{color:"var(--labor)",dash:"1.5 4",width:2.6,marker:"ah-labor",name:"労力・サービス"},
+ value:{color:"var(--value)",dash:"7 4",width:2,marker:"ah-value",name:"価値・見返り"},
+ none:{color:"var(--none)",dash:"3 3",width:2.6,marker:"ah-none",name:"見返りなし（破綻点）"}
+};
+
+/* ---------- 構造図 ---------- */
+var W=360,H=312,NW=134,NH=52,HW=120,HH=46;
+var CENTER={x:180,y:150};
+function layout(hasHub){
+ return {ben:{x:180,y:34,w:NW,h:NH,role:"受益者"}, pay:{x:72,y:262,w:NW,h:NH,role:"負担者"}, op:{x:288,y:262,w:NW,h:NH,role:"運営者"}, hub:hasHub?{x:180,y:150,w:HW,h:HH,role:"事業体"}:null};
+}
+function boundary(n,tx,ty){
+ var dx=tx-n.x,dy=ty-n.y;if(dx===0&&dy===0)return {x:n.x,y:n.y};
+ var hw=n.w/2+3,hh=n.h/2+3;var t=Math.min(dx!==0?hw/Math.abs(dx):Infinity, dy!==0?hh/Math.abs(dy):Infinity);
+ return {x:n.x+dx*t,y:n.y+dy*t};
+}
+function drawDiagram(container,data,ariaLabel){
+ var hasHub=!!data.nodes.hub;var P=layout(hasHub);
+ var svg=el("svg",{viewBox:"0 0 "+W+" "+H,role:"img","aria-label":ariaLabel});
+ var gEdges=el("g",{},svg),gNodes=el("g",{},svg),gLabels=el("g",{},svg);
+ // ペアごとにまとめる（向きを問わない）
+ var groups={};
+ data.edges.forEach(function(e,i){var k=[e[0],e[1]].sort().join("|");(groups[k]=groups[k]||[]).push(i);});
+ var labels=[];
+ Object.keys(groups).forEach(function(k){
+  var idxs=groups[k];var ids=k.split("|");var A=P[ids[0]],B=P[ids[1]];
+  var mx=(A.x+B.x)/2,my=(A.y+B.y)/2;var dx=B.x-A.x,dy=B.y-A.y;var len=Math.sqrt(dx*dx+dy*dy);
+  var px=-dy/len,py=dx/len;
+  // 外向き（中心から遠ざかる向き）を正にそろえる
+  if(((mx+px)-CENTER.x)*((mx+px)-CENTER.x)+((my+py)-CENTER.y)*((my+py)-CENTER.y) < (mx-CENTER.x)*(mx-CENTER.x)+(my-CENTER.y)*(my-CENTER.y)){px=-px;py=-py;}
+  var outer=hasHub&&ids.indexOf("hub")<0&&k!=="op|pay";
+  var n=idxs.length;
+  idxs.forEach(function(ei,j){
+   var e=data.edges[ei];var off;
+   if(outer){off=26+j*30;} else {off=(n===1)?0:(j-(n-1)/2)*34;}
+   var cx=mx+px*off*2,cy=my+py*off*2; // 2次ベジェの制御点（頂点ずれ=off）
+   var S=P[e[0]],T=P[e[1]];
+   var s=boundary(S,cx,cy),t=boundary(T,cx,cy);
+   var kd=KIND[e[2]];
+   el("path",{d:"M"+s.x.toFixed(1)+","+s.y.toFixed(1)+" Q"+cx.toFixed(1)+","+cy.toFixed(1)+" "+t.x.toFixed(1)+","+t.y.toFixed(1),fill:"none",style:"stroke:"+kd.color,"stroke-width":kd.width,"stroke-dasharray":kd.dash,"stroke-linecap":"round","marker-end":"url(#"+kd.marker+")"},gEdges);
+   var lx=0.25*s.x+0.5*cx+0.25*t.x,ly=0.25*s.y+0.5*cy+0.25*t.y;
+   labels.push({x:lx,y:ly,text:e[3],kind:e[2],nx:px,ny:py});
+  });
+ });
+ // ノード
+ ["ben","pay","op","hub"].forEach(function(key){
+  var n=P[key];if(!n)return;var name=data.nodes[key];
+  var isHub=key==="hub";
+  el("rect",{x:n.x-n.w/2,y:n.y-n.h/2,width:n.w,height:n.h,rx:8,style:"fill:"+(isHub?"var(--hub-bg)":"var(--node-bg)")+";stroke:"+(isHub?"var(--hub-border)":"var(--node-border)"),"stroke-width":isHub?1.6:1.2},gNodes);
+  var lines=String(name).split("\n");
+  var role=el("text",{x:n.x,y:n.y-n.h/2+12,"text-anchor":"middle","font-size":10,style:"fill:var(--muted)"},gNodes);role.textContent=n.role;
+  var fs=lines.some(function(l){return textWidth(l,13)>n.w-8;})?11:13;
+  var startY=n.y-n.h/2+12+ (lines.length===1?17:13);
+  lines.forEach(function(l,i){var t=el("text",{x:n.x,y:startY+i*(fs+1.5),"text-anchor":"middle","font-size":fs,"font-weight":500,style:"fill:var(--text)"},gNodes);t.textContent=l;});
+ });
+ // ラベル（重なり回避）
+ var FS=11.5;var nodeRects=["ben","pay","op","hub"].filter(function(k){return P[k];}).map(function(k){var n=P[k];return {x1:n.x-n.w/2,y1:n.y-n.h/2,x2:n.x+n.w/2,y2:n.y+n.h/2};});
+ function rectOf(L){var w=textWidth(L.text,FS)+10,h=FS+6;return {x1:L.x-w/2,y1:L.y-h/2,x2:L.x+w/2,y2:L.y+h/2,w:w,h:h};}
+ function hit(a,b){return a.x1<b.x2&&b.x1<a.x2&&a.y1<b.y2&&b.y1<a.y2;}
+ var placed=[];
+ labels.forEach(function(L){
+  var tries=0,r=rectOf(L);var sign=1;
+  while(tries<14){
+   var bad=placed.some(function(p){return hit(r,p);})||nodeRects.some(function(p){return hit(r,p);});
+   if(!bad)break;
+   tries++;var step=7*Math.ceil(tries/2)*(tries%2?1:-1);
+   L.x+=L.nx*step*sign;L.y+=L.ny*step*sign;
+   // 縦方向の微調整も混ぜる
+   if(tries>6){L.y+=(tries%2?6:-6);}
+   r=rectOf(L);
+  }
+  // 画面内に収める
+  var dxL=0,dyL=0;if(r.x1<2)dxL=2-r.x1;if(r.x2>W-2)dxL=W-2-r.x2;if(r.y1<2)dyL=2-r.y1;if(r.y2>H-2)dyL=H-2-r.y2;
+  L.x+=dxL;L.y+=dyL;r=rectOf(L);
+  placed.push(r);
+  var kd=KIND[L.kind];
+  el("rect",{x:r.x1,y:r.y1,width:r.w,height:r.h,rx:3,style:"fill:var(--surface);stroke:"+kd.color,"stroke-width":0.8},gLabels);
+  var t=el("text",{x:L.x,y:L.y+FS*0.36,"text-anchor":"middle","font-size":FS,"font-weight":L.kind==="none"?700:500,style:"fill:"+kd.color},gLabels);t.textContent=L.text;
+ });
+ container.appendChild(svg);
+}
+
+/* ---------- 凡例 ---------- */
+(function(){
+ var lg=document.getElementById("legend");
+ ["money","labor","value","none"].forEach(function(k){
+  var kd=KIND[k];var span=document.createElement("span");
+  var svg=el("svg",{width:46,height:14,viewBox:"0 0 46 14","aria-hidden":"true"});
+  el("line",{x1:2,y1:7,x2:38,y2:7,style:"stroke:"+kd.color,"stroke-width":kd.width,"stroke-dasharray":kd.dash,"stroke-linecap":"round","marker-end":"url(#"+kd.marker+")"},svg);
+  span.appendChild(svg);span.appendChild(document.createTextNode(kd.name+(k==="money"?"（実線）":k==="labor"?"（点線）":k==="value"?"（破線）":"")));
+  lg.appendChild(span);
+ });
+})();
+
+/* ---------- 型一覧 ---------- */
+(function(){
+ var tb=document.querySelector("#typesTable tbody");
+ TYPES.forEach(function(t){
+  var cs=CASES.filter(function(c){return c.types.indexOf(t.id)>=0;}).map(function(c){return '<a href="#case-'+c.id+'">'+esc(c.name)+'</a>';}).join("、");
+  var tr=document.createElement("tr");
+  tr.innerHTML='<td><span class="tag t">'+t.id+'</span>'+esc(t.name)+'</td><td data-l="担い手に返る">'+esc(t.ret)+'</td><td data-l="負担者と利益">'+esc(t.pay)+'</td><td data-l="該当事例">'+cs+'</td>';
+  tb.appendChild(tr);
+ });
+})();
+
+/* ---------- 事例カード ---------- */
+var STCLS={ok:"st-ok",closed:"st-closed",unk:"st-unk",pivot:"st-pivot"};
+var ROLE_NAMES={ben:"受益者",pay:"負担者",op:"運営者"};
+(function(){
+ var grid=document.getElementById("grid");
+ CASES.forEach(function(c){
+  var card=document.createElement("article");card.className="card";card.id="case-"+c.id;
+  card.dataset.types=c.types.join(",");card.dataset.region=c.region;
+  var tags=c.types.map(function(t){var ty=TYPES.filter(function(x){return x.id===t;})[0];return '<span class="tag"><b>'+t+'</b> '+esc(ty.name)+'</span>';}).join("");
+  var html='<h3>'+esc(c.name)+'</h3>'+
+   '<div class="meta"><span class="tag">'+esc(c.country)+'</span><span class="st '+STCLS[c.status]+'">'+esc(c.statusText)+'</span></div>'+
+   '<div class="meta">'+tags+'</div>'+
+   '<div class="diagram"></div>'+
+   '<div class="tw"><table class="roles"><thead><tr><th>立場</th><th>出すもの</th><th>得るもの</th></tr></thead><tbody>'+
+   ["ben","pay","op"].map(function(r){return '<tr><td><span class="rn">'+ROLE_NAMES[r]+'</span><br>'+esc(c.nodes[r].replace(/\n/g,""))+'</td><td>'+esc(c.roles[r][0])+'</td><td>'+esc(c.roles[r][1])+'</td></tr>';}).join("")+
+   '</tbody></table></div>'+
+   '<ul class="figs">'+c.figs.map(function(f){
+     if(f.tbd)return '<li>'+esc(f.t)+'<span class="badge b-tbd">TBD</span></li>';
+     return '<li>'+esc(f.t)+'（<a href="'+esc(f.u)+'"'+(f.any?'':' target="_blank" rel="noopener"')+'>'+esc(f.n)+'</a>）'+(f.s?'<span class="badge b-snip">スニペット</span>':'')+'</li>';
+   }).join("")+'</ul>'+
+   '<p class="lesson"><b>教訓</b> '+esc(c.lesson)+'</p>';
+  card.innerHTML=html;
+  drawDiagram(card.querySelector(".diagram"),c,c.name+" の構造図");
+  grid.appendChild(card);
+ });
+})();
+
+/* ---------- フィルタ ---------- */
+var state={type:"all",region:"all"};
+function applyFilter(){
+ var n=0;
+ document.querySelectorAll("#grid .card").forEach(function(card){
+  var okT=state.type==="all"||card.dataset.types.split(",").indexOf(state.type)>=0;
+  var okR=state.region==="all"||card.dataset.region===state.region;
+  var show=okT&&okR;card.classList.toggle("hidden",!show);if(show)n++;
+ });
+ document.getElementById("count").textContent=n+" 件を表示 / 全 "+CASES.length+" 件";
+}
+function makeButtons(containerId,items,key){
+ var box=document.getElementById(containerId);
+ items.forEach(function(it){
+  var b=document.createElement("button");b.type="button";b.className="fbtn";b.textContent=it.label;b.dataset.v=it.v;
+  b.setAttribute("aria-pressed",it.v===state[key]?"true":"false");
+  b.addEventListener("click",function(){state[key]=it.v;box.querySelectorAll(".fbtn").forEach(function(x){x.setAttribute("aria-pressed",x.dataset.v===it.v?"true":"false");});applyFilter();});
+  box.appendChild(b);
+ });
+}
+makeButtons("fType",[{v:"all",label:"すべて"}].concat(TYPES.map(function(t){return {v:t.id,label:t.id==="R"?"参考（型外）":t.id+" "+t.name.replace(/（.*）/,"")};})),"type");
+makeButtons("fRegion",[{v:"all",label:"すべて"},{v:"jp",label:"国内"},{v:"ov",label:"海外"}],"region");
+applyFilter();
+
+/* ---------- 示唆 ---------- */
+(function(){
+ var box=document.getElementById("proposal");
+ PROPOSALS.forEach(function(p){
+  var d=document.createElement("div");d.className="prop"+(p.bad?" bad":"");
+  d.innerHTML='<h3>'+esc(p.title)+(p.hyp?' <span class="badge b-hyp">仮説</span>':'')+'</h3><div class="diagram"></div><ul>'+p.notes.map(function(x){return '<li>'+esc(x).replace(/TBD/g,'<span class="badge b-tbd">TBD</span>')+'</li>';}).join("")+'</ul>';
+  drawDiagram(d.querySelector(".diagram"),p,p.title);
+  box.appendChild(d);
+ });
+})();
+
+/* ---------- 出典一覧 ---------- */
+(function(){
+ var seen={},list=[];
+ CASES.forEach(function(c){c.figs.forEach(function(f){if(f.u&&f.u.charAt(0)!=="#"&&!seen[f.u]){seen[f.u]=1;list.push({n:c.name+" — "+f.n,u:f.u,s:f.s});}});});
+ EXTRA_SOURCES.forEach(function(s){if(!seen[s.u]){seen[s.u]=1;list.push(s);}});
+ var ol=document.getElementById("srcList");
+ list.forEach(function(s,i){var li=document.createElement("li");if(s.u===EXTRA_SOURCES[0].u)li.id="awj-src";li.innerHTML=esc(s.n)+(s.s?'<span class="badge b-snip">スニペット</span>':'')+'<br><a href="'+esc(s.u)+'" target="_blank" rel="noopener">'+esc(s.u)+'</a>';ol.appendChild(li);});
+ // AgeWellJapan 4件はまとめて参照できるよう先頭アンカーを付与
+ var first=null;ol.querySelectorAll("li").forEach(function(li){if(!first&&/AgeWellJapan/.test(li.textContent))first=li;});
+ if(first&&!document.getElementById("awj-src"))first.id="awj-src";
+ else if(first){var old=document.getElementById("awj-src");if(old!==first){old.removeAttribute("id");first.id="awj-src";}}
+})();
+
+/* ---------- テーマ切替 ---------- */
+(function(){
+ var root=document.documentElement,btn=document.getElementById("themebtn");
+ try{var saved=localStorage.getItem("theme");if(saved)root.setAttribute("data-theme",saved);}catch(e){}
+ btn.addEventListener("click",function(){
+  var cur=root.getAttribute("data-theme");
+  var dark=cur?cur==="dark":window.matchMedia("(prefers-color-scheme: dark)").matches;
+  var next=dark?"light":"dark";root.setAttribute("data-theme",next);
+  try{localStorage.setItem("theme",next);}catch(e){}
+ });
+})();
+</script>
+</body>
+</html>
