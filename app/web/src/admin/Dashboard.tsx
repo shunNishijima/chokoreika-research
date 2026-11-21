@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { api, jpDate } from "../lib/api";
+import { TownMap, type TownValue } from "./TownMap";
 
 type Cell = { visits: number | null; uniques: number | null; newcomers: number | null; helpers: number | null; avgVisits: number | null; suppressed: boolean };
 type Dash = {
@@ -131,13 +132,16 @@ function TownHeat({ d, metric, setMetric }: { d: Dash; metric: MetricKey; setMet
   const fmt = (v: number | null) => (v == null ? "—" : metric === "avgVisits" ? v.toFixed(1) : String(v));
 
   return (
-    <Panel title="地域ごとの活性度" note={`町 × 月。色が濃いほど「${m.label}」が多い。${m.help}。`}>
+    <Panel title="地域ごとの活性度" note={`色が濃いほど「${m.label}」が多い。${m.help}。地図は期間合計、下の表は月ごと。`}>
       <div className="no-print flex flex-wrap gap-2 mb-4" role="radiogroup" aria-label="ヒートマップの軸">
         {METRICS.map((x) => (
           <button key={x.key} role="radio" aria-checked={metric === x.key} onClick={() => setMetric(x.key)}
             className={`rounded-full px-4 py-2 font-bold border-2 ${metric === x.key ? "bg-navy text-white border-navy" : "bg-card border-line"}`}>{x.label}</button>
         ))}
       </div>
+      <TownMap label={m.label} unit={m.unit} fmt={fmt} ramp={RAMP} colorOf={(v) => rampColor(v, totalMax)}
+        values={new Map<string, TownValue>(totals.map((t) => [t.town, { value: t[metric], suppressed: t.suppressed, detail: `参加 ${t.uniques ?? 0}人・延べ ${t.visits ?? 0}回・はじめて ${t.newcomers ?? 0}人` }]))} />
+      <h3 className="text-lg font-bold mt-6 mb-2">月ごとの変化（町 × 月）</h3>
       <div className="overflow-x-auto">
         <table className="border-separate" style={{ borderSpacing: 2 }}>
           <thead>
@@ -185,7 +189,7 @@ function TownHeat({ d, metric, setMetric }: { d: Dash; metric: MetricKey; setMet
         <span className="flex items-center gap-2"><span className="w-6 h-4 inline-block" style={{ background: "repeating-linear-gradient(45deg,#ece7dc 0 4px,#f6f3ec 4px 8px)" }} /> 5人未満で非表示</span>
         <span className="min-h-5 font-bold text-ink" aria-live="polite">{hover}</span>
       </div>
-      <p className="text-sm text-ink-soft mt-2">地図上の表示は、町の境界データを用意してから追加します。「不明」は記録に同意しなかった人や町を答えなかった人です。</p>
+      <p className="text-sm text-ink-soft mt-2">「不明」は記録に同意しなかった人や町を答えなかった人です（地図には出ません）。</p>
     </Panel>
   );
 }
