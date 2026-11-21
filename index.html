@@ -599,6 +599,8 @@ main section.panel{border-bottom:0}
     <h2>ダッシュボード 要件定義 v0.1</h2>
     <p class="lead2"><b>ゴール:</b> シニアでも受付で入力でき、出席と属性を集計して、地域ごとの広がりや継続をグラフで見せ、そのまま企業に提案できるダッシュボードを作る。</p>
     <p class="small"><span class="badge b-hyp">草案</span> チームで確認して確定する。<span class="badge b-tbd">TBD</span> は未決定の項目。</p>
+    <div class="focus"><b>試作（Step 1）:</b> <a href="reception/">受付の試作を開く</a>（タブレット・スマホ両対応）<br><span class="small muted">試作版のため、データはその端末のブラウザの中だけに保存されます。端末ごとに別のデータになり、CSVで書き出せます。</span></div>
+    <p class="small"><b>決まったこと（2026-11-21）</b>: 入力は老人会の担当が中心（初期は学生の代理入力も可）/ 端末はタブレットとスマホの両方 / 地域の単位は町名</p>
 
     <h3 style="margin-top:20px">1. 目的と使う人</h3>
     <div class="tw"><table class="types-table">
@@ -633,7 +635,7 @@ main section.panel{border-bottom:0}
         <tr><td data-l="項目"><b>記録への同意</b></td><td data-l="選択肢">はい / いいえ</td><td data-l="いつ">初回</td><td data-l="必須">必須</td><td data-l="指標">いいえの人は人数だけ数える</td></tr>
         <tr><td data-l="項目"><b>年代</b></td><td data-l="選択肢">60代 / 70代 / 80代 / 90代以上 / 学生 / その他</td><td data-l="いつ">初回</td><td data-l="必須">必須</td><td data-l="指標">年代の内訳、世代の混ざり具合</td></tr>
         <tr><td data-l="項目"><b>性別</b></td><td data-l="選択肢">男性 / 女性 / 答えない</td><td data-l="いつ">初回</td><td data-l="必須">必須</td><td data-l="指標">男女比（「男の人は来やすい」の確認）</td></tr>
-        <tr><td data-l="項目"><b>住んでいる地域</b></td><td data-l="選択肢">小学校区（または町名。単位は TBD）</td><td data-l="いつ">初回</td><td data-l="必須">必須</td><td data-l="指標">地域ヒートマップ</td></tr>
+        <tr><td data-l="項目"><b>住んでいる地域</b></td><td data-l="選択肢">町名（運営が一覧を登録して選ぶ形）</td><td data-l="いつ">初回</td><td data-l="必須">必須</td><td data-l="指標">地域ヒートマップ</td></tr>
         <tr><td data-l="項目"><b>老人会</b></td><td data-l="選択肢">所属している会の名前 / 入っていない</td><td data-l="いつ">初回（入会したら更新）</td><td data-l="必須">必須</td><td data-l="指標">非会員の参加率、入会率、他の会からの参加</td></tr>
         <tr><td data-l="項目"><b>来たきっかけ</b></td><td data-l="選択肢">チラシ / 知り合いに誘われた / 老人会の声かけ / その他</td><td data-l="いつ">初回</td><td data-l="必須">必須</td><td data-l="指標">集客経路、口コミの判定</td></tr>
         <tr><td data-l="項目"><b>一人暮らし</b></td><td data-l="選択肢">はい / いいえ / 答えない</td><td data-l="いつ">初回</td><td data-l="必須">任意</td><td data-l="指標">孤立しがちな人に届いているか</td></tr>
@@ -663,14 +665,14 @@ main section.panel{border-bottom:0}
 
     <h3 style="margin-top:20px">5. 表示する画面</h3>
     <div class="proposal">
-      <div class="prop"><h3>運営用</h3><ul><li>主要な数字のタイル（参加実人数、継続率、担い手化率など）</li><li>月ごとの参加人数の推移グラフ</li><li><b>地域ヒートマップ</b>（校区ごとの参加実人数）</li><li>属性の内訳（年代・性別・会員/非会員・来たきっかけ）</li><li>継続の段階（初参加 → 2回目 → 3か月 → 担い手）</li></ul></div>
+      <div class="prop"><h3>運営用</h3><ul><li>主要な数字のタイル（参加実人数、継続率、担い手化率など）</li><li>月ごとの参加人数の推移グラフ</li><li><b>地域ヒートマップ</b>（町名ごとの参加実人数）</li><li>属性の内訳（年代・性別・会員/非会員・来たきっかけ）</li><li>継続の段階（初参加 → 2回目 → 3か月 → 担い手）</li></ul></div>
       <div class="prop"><h3>老人会用</h3><ul><li>自分の会の開催回数と参加人数</li><li>会員以外の参加者と入会者</li><li>担当・協力者の人数</li></ul></div>
       <div class="prop"><h3>企業提案用</h3><ul><li>1画面で印刷・PDFにできる</li><li>期間を選べる。集計値のみ</li><li>「誰に届いたか・続いたか・担い手が生まれたか」の流れで見せる</li><li>匿名の声（「話す人いないのよ〜」など）を添える</li><li>企業が見たい数字は TBD（ヒアリングで確認）</li></ul></div>
     </div>
 
     <h3 style="margin-top:20px">6. 守ること（非機能要件）</h3>
     <ul class="small">
-      <li><b>個人情報</b>: 氏名・住所を取らない。地域は校区（または町名）まで。外部に見せるのは集計値だけ。人数が少なすぎて個人が分かるマス（例: 5人未満）は地図やグラフに出さない</li>
+      <li><b>個人情報</b>: 氏名・住所を取らない。地域は町名まで。外部に見せるのは集計値だけ。町名は校区より細かく、1つの町の人数が少なくなりやすいので、個人が分かってしまうマス（例: 5人未満）は地図やグラフに出さない</li>
       <li><b>同意</b>: 初回に、何のために記録するかを伝えて同意を取る（文面は TBD）</li>
       <li><b>使いやすさ</b>: シニアが手伝いなしで受付を終えられる</li>
       <li><b>引き継ぎ</b>: 管理者のアカウントを個人ではなく団体で持ち、運営者が替わっても使い続けられる</li>
@@ -702,9 +704,10 @@ main section.panel{border-bottom:0}
     <div class="tw"><table class="types-table">
       <thead><tr><th>論点</th><th>選択肢</th></tr></thead>
       <tbody>
-        <tr><td data-l="論点">入力するのは誰か</td><td data-l="選択肢">シニア本人 / 老人会の担当 / 運営（学生）</td></tr>
-        <tr><td data-l="論点">端末</td><td data-l="選択肢">受付に置くタブレット1台 / 各自のスマートフォン</td></tr>
-        <tr><td data-l="論点">地域の単位</td><td data-l="選択肢">小学校区 / 町名。地図の境界データが手に入るかを確認する</td></tr>
+        <tr><td data-l="論点">入力するのは誰か</td><td data-l="選択肢"><b>決定</b>: 老人会の担当が中心。初期は学生の代理入力も可</td></tr>
+        <tr><td data-l="論点">端末</td><td data-l="選択肢"><b>決定</b>: タブレットとスマホの両方</td></tr>
+        <tr><td data-l="論点">地域の単位</td><td data-l="選択肢"><b>決定</b>: 町名。地図に描くための町の境界データの入手先は TBD</td></tr>
+        <tr><td data-l="論点">複数の端末のデータをまとめる方法</td><td data-l="選択肢">試作は端末ごとにCSVで書き出す。本番は共有のデータ保存先が必要（TBD）</td></tr>
         <tr><td data-l="論点">企業が見たい数字</td><td data-l="選択肢">企業へのヒアリングで決める</td></tr>
         <tr><td data-l="論点">データの保存場所と管理者</td><td data-l="選択肢">TBD</td></tr>
         <tr><td data-l="論点">同意の取り方と文面</td><td data-l="選択肢">TBD</td></tr>
