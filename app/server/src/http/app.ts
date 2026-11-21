@@ -3,9 +3,10 @@ import { Hono, type Context } from "hono";
 import { getSignedCookie, setSignedCookie } from "hono/cookie";
 import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 import { z } from "zod";
-import { and, asc, desc, eq, gte, like, max } from "drizzle-orm";
+import { and, asc, desc, eq, gte, inArray, like, max } from "drizzle-orm";
 import type { Db } from "../db/client.js";
-import { attendances, events, options, participants, settings } from "../db/schema.js";
+import { answers, attendances, events, options, participants, questions, settings } from "../db/schema.js";
+import { BUILTIN_QUESTIONS, resolveOptions } from "../domain/questions.js";
 import { buildDashboard, nextCode } from "../domain/metrics.js";
 import { buildReport } from "../domain/report.js";
 import { CHOICES } from "../domain/choices.js";
@@ -28,6 +29,8 @@ const registerSchema = z.object({
   mobility: opt(CHOICES.mobility),
   birthYear: z.number().int().min(1900).max(2030).nullish(),
   mood,
+  // 追加した質問への回答（キーは質問ID）
+  extra: z.record(z.string(), z.string().trim().min(1).max(200)).optional(),
 });
 const codeSchema = z.object({ code: z.string().regex(/^\d{1,4}$/), mood });
 const eventSchema = z.object({
@@ -74,6 +77,22 @@ export function createApp({ db, sessionSecret, kioskOpen = false, authenticateAd
   async function optionLists() {
     const rows = await db.select().from(options).orderBy(asc(options.sort), asc(options.id));
     return { town: rows.filter((r) => r.kind === "town").map((r) => r.label), club: rows.filter((r) => r.kind === "club").map((r) => r.label) };
+  }
+
+  // 最初からある質問を（なければ）入れる。編集済みの内容は上書きしない
+  let seeded: Promise<void> | null = null;
+  function ensureQuestions() {
+    seeded ??= (async () => {
+      const rows = BUILTIN_QUESTIONS.map((b, i) => ({ key: b.key, title: b.title, hint: b.hint, type: b.type, optional: b.optional, builtin: true, sort: i * 10, options: [] as string[] }));
+      await db.insert(questions).values(rows).onConflictDoNothing();
+    })();
+    return seeded;
+  }
+  async function listQuestions(onlyEnabled: boolean) {
+    await ensureQuestions();
+    const lists = await optionLists();
+    const rows = await db.select().from(questions).orderBy(asc(questions.sort), asc(questions.id));
+    return rows.filter((q) => !onlyEnabled || q.enabled).map((q) => ({ ...q, options: q.builtin ? resolveOptions(q.key, q.options, lists) : q.options }));
   }
 
   // ---------- 受付（iPad） ----------
@@ -151,7 +170,7 @@ export function createApp({ db, sessionSecret, kioskOpen = false, authenticateAd
   app.get("/api/kiosk/events/:id/session", async (c) => {
     const ev = await kioskEvent(c);
     if (!ev) return c.json({ error: "unauthorized" }, 401);
-    return c.json({ event: { id: ev.id, date: ev.date, kind: ev.kind, place: ev.place, host: ev.host, nextDate: ev.nextDate }, options: await optionLists(), choices: CHOICES });
+    return c.json({ event: { id: ev.id, date: ev.date, kind: ev.kind, place: ev.place, host: ev.host, nextDate: ev.nextDate }, options: await optionLists(), choices: CHOICES, questions: (await listQuestions(true)).map((q) => ({ id: q.id, key: q.key, title: q.title, hint: q.hint, type: q.type, options: q.options, optional: q.optional, builtin: q.builtin })) });
   });
 
   app.post("/api/kiosk/events/:id/register", async (c) => {
@@ -163,6 +182,15 @@ export function createApp({ db, sessionSecret, kioskOpen = false, authenticateAd
     const attrs = a.consent
       ? { name: a.name || null, ageGroup: a.ageGroup ?? null, gender: a.gender ?? null, town: a.town ?? null, club: a.club ?? null, trigger: a.trigger ?? null, livingAlone: a.livingAlone ?? null, mobility: a.mobility ?? null, birthYear: a.birthYear ?? null }
       : {};
+    // 追加した質問への回答を検証する（選択式は選択肢の中から、文字は200文字まで）
+    const extra = Object.entries(a.extra ?? {});
+    if (extra.length) {
+      const qs = await db.select().from(questions).where(inArray(questions.id, extra.map(([k]) => Number(k)).filter(Number.isInteger)));
+      for (const [k, v] of extra) {
+        const q = qs.find((x) => x.id === Number(k));
+        if (!q || q.builtin || (q.type === "single" && !q.options.includes(v))) return c.json({ error: "invalid" }, 400);
+      }
+    }
     // ID の重複は一意制約で防ぎ、衝突したら取り直す
     for (let i = 0; i < 5; i++) {
       try {
@@ -170,6 +198,8 @@ export function createApp({ db, sessionSecret, kioskOpen = false, authenticateAd
           const [{ m }] = await tx.select({ m: max(participants.code) }).from(participants);
           const [p] = await tx.insert(participants).values({ code: nextCode(m ?? null), consent: a.consent, ...attrs }).returning();
           await tx.insert(attendances).values({ eventId: ev.id, participantId: p.id, moodBefore: a.mood ?? null });
+          // 同意しない人の回答は保存しない
+          if (a.consent && extra.length) await tx.insert(answers).values(extra.map(([k, v]) => ({ participantId: p.id, questionId: Number(k), value: v })));
           return p;
         });
         return c.json({ code: p.code, name: p.name ?? null, nextDate: ev.nextDate }, 201);
@@ -313,6 +343,71 @@ export function createApp({ db, sessionSecret, kioskOpen = false, authenticateAd
     return c.json({ present: false });
   });
 
+  // ---------- アンケートの質問（追加・編集・削除・並べ替え） ----------
+  const optionList = z.array(z.string().trim().min(1).max(40)).max(20);
+  const newQuestion = z.object({
+    title: z.string().trim().min(1).max(80),
+    hint: z.string().trim().max(200).default(""),
+    type: z.enum(["single", "text"]),
+    options: optionList.default([]),
+    optional: z.boolean().default(false),
+    enabled: z.boolean().default(true),
+  }).refine((q) => q.type === "text" || (q.options.length >= 1 && new Set(q.options).size === q.options.length), { message: "選択肢を1つ以上（重複なし）" });
+
+  adminApi.get("/questions", async (c) => c.json(await listQuestions(false)));
+
+  adminApi.post("/questions", async (c) => {
+    const body = newQuestion.safeParse(await c.req.json().catch(() => null));
+    if (!body.success) return c.json({ error: "invalid", issues: body.error.issues.map((i) => i.message) }, 400);
+    await ensureQuestions();
+    const [{ m }] = await db.select({ m: max(questions.sort) }).from(questions);
+    const q = body.data;
+    const [row] = await db.insert(questions).values({ key: `q_${randomBytes(6).toString("hex")}`, title: q.title, hint: q.hint, type: q.type, options: q.type === "text" ? [] : q.options, optional: q.optional, enabled: q.enabled, builtin: false, sort: (m ?? 0) + 10 }).returning();
+    return c.json(row, 201);
+  });
+
+  // 並べ替え（:id より先に定義する）
+  adminApi.put("/questions/order", async (c) => {
+    const body = z.object({ ids: z.array(z.number().int()).max(200) }).safeParse(await c.req.json().catch(() => null));
+    if (!body.success) return c.json({ error: "invalid" }, 400);
+    await db.transaction(async (tx) => {
+      for (const [i, id] of body.data.ids.entries()) await tx.update(questions).set({ sort: i * 10 }).where(eq(questions.id, id));
+    });
+    return c.json({ ok: true });
+  });
+
+  adminApi.patch("/questions/:id", async (c) => {
+    const [q] = await db.select().from(questions).where(eq(questions.id, Number(c.req.param("id"))));
+    if (!q) return c.json({ error: "not found" }, 404);
+    const raw = await c.req.json().catch(() => null);
+    const editable = z.object({
+      title: z.string().trim().min(1).max(80).optional(),
+      hint: z.string().trim().max(200).optional(),
+      optional: z.boolean().optional(),
+      enabled: z.boolean().optional(),
+      type: z.enum(["single", "text"]).optional(),
+      options: optionList.optional(),
+    }).strict();
+    const body = editable.safeParse(raw);
+    if (!body.success) return c.json({ error: "invalid" }, 400);
+    // 最初からある質問は、選択肢と種類を変えられない（指標の計算に使うため）
+    if (q.builtin && (body.data.options !== undefined || body.data.type !== undefined)) return c.json({ error: "最初からある質問の選択肢は変更できません" }, 400);
+    const type = body.data.type ?? q.type;
+    const opts = type === "text" ? [] : body.data.options ?? q.options;
+    if (!q.builtin && type === "single" && (opts.length < 1 || new Set(opts).size !== opts.length)) return c.json({ error: "選択肢を1つ以上（重複なし）" }, 400);
+    const [row] = await db.update(questions).set({ ...body.data, ...(q.builtin ? {} : { type, options: opts }) }).where(eq(questions.id, q.id)).returning();
+    const lists = await optionLists();
+    return c.json({ ...row, options: row.builtin ? resolveOptions(row.key, row.options, lists) : row.options });
+  });
+
+  adminApi.delete("/questions/:id", async (c) => {
+    const [q] = await db.select().from(questions).where(eq(questions.id, Number(c.req.param("id"))));
+    if (!q) return c.json({ error: "not found" }, 404);
+    if (q.builtin) return c.json({ error: "最初からある質問は削除できません（出さない設定にできます）" }, 400);
+    await db.delete(questions).where(eq(questions.id, q.id)); // 回答も一緒に消える
+    return c.json({ ok: true });
+  });
+
   adminApi.get("/participants", async (c) => c.json(await db.select().from(participants).orderBy(asc(participants.code))));
 
   adminApi.get("/options", async (c) => c.json(await optionLists()));
@@ -337,7 +432,10 @@ export function createApp({ db, sessionSecret, kioskOpen = false, authenticateAd
       db.select().from(participants),
       db.select({ eventId: attendances.eventId, participantId: attendances.participantId, role: attendances.role, moodBefore: attendances.moodBefore, moodAfter: attendances.moodAfter }).from(attendances),
     ]);
-    return c.json(buildDashboard({ events: evs, participants: ps, attendances: as }, { from: q.from || undefined, to: q.to || undefined, kind: q.kind || undefined, suppressBelow: q.suppress === "1" ? 5 : undefined }));
+    await ensureQuestions();
+    const customQuestions = (await db.select().from(questions).where(eq(questions.builtin, false)).orderBy(asc(questions.sort), asc(questions.id))).map((q) => ({ id: q.id, title: q.title, type: q.type, options: q.options }));
+    const ans = await db.select({ participantId: answers.participantId, questionId: answers.questionId, value: answers.value }).from(answers);
+    return c.json(buildDashboard({ events: evs, participants: ps, attendances: as, customQuestions, answers: ans }, { from: q.from || undefined, to: q.to || undefined, kind: q.kind || undefined, suppressBelow: q.suppress === "1" ? 5 : undefined }));
   });
 
   // 報告書（行政・協賛企業向け）。既定は外部共有（5人未満を隠す）
@@ -366,6 +464,12 @@ export function createApp({ db, sessionSecret, kioskOpen = false, authenticateAd
         .from(attendances).innerJoin(events, eq(attendances.eventId, events.id)).innerJoin(participants, eq(attendances.participantId, participants.id))
         .orderBy(asc(events.date), asc(participants.code));
       csv = toCSV(rows, ["date", "kind", "code", "role", "checkedInAt", "checkedOutAt", "moodBefore", "moodAfter"]);
+    } else if (name === "answers.csv") {
+      // 追加した質問への回答（名前は含めない）
+      const rows = await db.select({ code: participants.code, question: questions.title, value: answers.value, answeredAt: answers.createdAt })
+        .from(answers).innerJoin(participants, eq(answers.participantId, participants.id)).innerJoin(questions, eq(answers.questionId, questions.id))
+        .orderBy(asc(participants.code), asc(questions.sort));
+      csv = toCSV(rows, ["code", "question", "value", "answeredAt"]);
     } else if (name === "events.csv") {
       csv = toCSV(await db.select().from(events).orderBy(asc(events.date)), ["id", "date", "kind", "place", "host", "nextDate"]);
     } else return c.json({ error: "not found" }, 404);

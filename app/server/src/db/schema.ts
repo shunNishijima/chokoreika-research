@@ -61,3 +61,34 @@ export const settings = pgTable("settings", {
   key: text("key").primaryKey(),
   value: text("value").notNull(),
 });
+
+// アンケートの質問（管理画面で追加・編集・削除）。builtin は participants の列に保存する最初からある質問
+export const questions = pgTable(
+  "questions",
+  {
+    id: serial("id").primaryKey(),
+    key: text("key").notNull().unique(),
+    title: text("title").notNull(),
+    hint: text("hint").notNull().default(""),
+    type: text("type").notNull().default("single"), // single（選択肢から選ぶ）| text（文字で答える）
+    options: text("options").array().notNull().default([]),
+    optional: boolean("optional").notNull().default(false),
+    enabled: boolean("enabled").notNull().default(true),
+    builtin: boolean("builtin").notNull().default(false),
+    sort: integer("sort").notNull().default(0),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+);
+
+// 追加した質問への回答（最初からある質問の回答は participants の列）
+export const answers = pgTable(
+  "answers",
+  {
+    id: serial("id").primaryKey(),
+    participantId: integer("participant_id").notNull().references(() => participants.id, { onDelete: "cascade" }),
+    questionId: integer("question_id").notNull().references(() => questions.id, { onDelete: "cascade" }),
+    value: text("value").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex("answers_participant_question").on(t.participantId, t.questionId)],
+);

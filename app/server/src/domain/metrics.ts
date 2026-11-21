@@ -7,7 +7,9 @@ export type Participant = {
 };
 export type EventRow = { id: number; date: string; kind: string };
 export type Attendance = { eventId: number; participantId: number; role: string; moodBefore?: number | null; moodAfter?: number | null };
-export type Dataset = { events: EventRow[]; participants: Participant[]; attendances: Attendance[] };
+export type CustomQuestion = { id: number; title: string; type: string; options: string[] };
+export type Answer = { participantId: number; questionId: number; value: string };
+export type Dataset = { events: EventRow[]; participants: Participant[]; attendances: Attendance[]; customQuestions?: CustomQuestion[]; answers?: Answer[] };
 export type Range = { from?: string; to?: string; kind?: string; suppressBelow?: number };
 
 export const HELPER_ROLES = ["準備を手伝った", "担当"];
@@ -134,6 +136,19 @@ export function buildDashboard(data: Dataset, range: Range) {
     afterDist: dist(after),
   };
 
+  // 追加した質問の内訳（期間内に来た、同意した人の回答だけ）
+  const consentedIds = new Set(consented.map((p) => p.id));
+  const custom = (data.customQuestions ?? []).map((q) => {
+    const vals = (data.answers ?? []).filter((a) => a.questionId === q.id && consentedIds.has(a.participantId)).map((a) => a.value);
+    const counts = new Map<string, number>();
+    for (const v of vals) counts.set(v, (counts.get(v) ?? 0) + 1);
+    const order = q.type === "single" ? q.options : [...counts.keys()];
+    const rows = q.type === "single"
+      ? order.filter((o) => counts.has(o)).map((label) => { const n = counts.get(label)!; return { label, count: below && n < below ? null : n }; })
+      : [];
+    return { id: q.id, title: q.title, type: q.type, answered: vals.length, rows };
+  });
+
   return {
     kpis,
     mood,
@@ -142,6 +157,7 @@ export function buildDashboard(data: Dataset, range: Range) {
     breakdowns: {
       gender: breakdown("gender"), ageGroup: breakdown("ageGroup"), club: breakdown("club"),
       trigger: breakdown("trigger"), livingAlone: breakdown("livingAlone"), mobility: breakdown("mobility"),
+      custom,
     },
     noConsent: ids.length - consented.length,
   };
