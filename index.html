@@ -162,6 +162,7 @@ main section.panel{border-bottom:0}
 <nav class="sidenav" id="sidenav" aria-label="ページ内タブ">
   <div class="grp">受付アプリ</div>
   <a href="#appguide">使い方</a>
+  <a href="#design">サービス設計</a>
   <div class="grp">プロジェクト設計</div>
   <a href="#breakfast">朝ご飯会</a>
   <a href="#plan">検証計画</a>
@@ -182,6 +183,78 @@ main section.panel{border-bottom:0}
   <a href="#sources">出典一覧</a>
 </nav>
 <main>
+<section id="design" class="panel">
+  <div class="wrap">
+    <h2>サービス設計（受付アプリ）</h2>
+    <p class="lead2">朝ご飯会・映画会などの受付で、出欠と参加者の基本情報・今の気持ちを記録し、地域ごとの活性度や気持ちの変化をダッシュボードで見せる。iPad で運営のシニアが操作する前提で作っている。</p>
+    <p class="small muted">2026-11-22 時点の実装に基づく。【試用】は試用モードの間だけの仕様。</p>
+
+    <h3 style="margin-top:20px">1. システム構成</h3>
+    <div class="diagram"><svg viewBox="0 0 760 300" role="img" aria-label="システム構成図" style="width:100%;height:auto;display:block">
+<style>.n{fill:var(--surface);stroke:var(--node-border);stroke-width:1.5}.h{fill:var(--hub-bg);stroke:var(--hub-border);stroke-width:1.5}.t{fill:var(--text);font-size:13px;font-weight:700}.s{fill:var(--muted);font-size:11px}.l{stroke:var(--muted);stroke-width:1.5;fill:none;marker-end:url(#ah-value)}</style>
+<rect class="n" x="10" y="20" width="150" height="56" rx="8"/><text class="t" x="85" y="44" text-anchor="middle">iPad（受付）</text><text class="s" x="85" y="62" text-anchor="middle">/kiosk・/neko</text>
+<rect class="n" x="10" y="110" width="150" height="56" rx="8"/><text class="t" x="85" y="134" text-anchor="middle">PC・スマホ（運営）</text><text class="s" x="85" y="152" text-anchor="middle">/admin</text>
+<rect class="h" x="250" y="50" width="220" height="90" rx="10"/><text class="t" x="360" y="78" text-anchor="middle">Cloud Run: choko-checkin</text><text class="s" x="360" y="98" text-anchor="middle">画面（React）＋ API（Hono）</text><text class="s" x="360" y="116" text-anchor="middle">大阪府の地図データを同梱</text>
+<rect class="n" x="560" y="40" width="190" height="56" rx="8"/><text class="t" x="655" y="64" text-anchor="middle">Cloud SQL</text><text class="s" x="655" y="82" text-anchor="middle">PostgreSQL 16</text>
+<rect class="n" x="560" y="120" width="190" height="56" rx="8"/><text class="t" x="655" y="144" text-anchor="middle">Secret Manager</text><text class="s" x="655" y="162" text-anchor="middle">DB接続・セッション鍵</text>
+<rect class="n" x="250" y="210" width="220" height="56" rx="8"/><text class="t" x="360" y="234" text-anchor="middle">GitHub（main）→ Actions</text><text class="s" x="360" y="252" text-anchor="middle">テスト → 自動デプロイ</text>
+<rect class="n" x="560" y="210" width="190" height="56" rx="8"/><text class="t" x="655" y="234" text-anchor="middle">Cloud Run: choko-reception</text><text class="s" x="655" y="252" text-anchor="middle">旧試作（静的・端末内保存）</text>
+<path class="l" d="M160 48 H250"/><path class="l" d="M160 138 H250"/><path class="l" d="M470 72 H560"/><path class="l" d="M470 120 H560"/><path class="l" d="M360 210 V140"/><path class="l" d="M470 238 H560"/>
+</svg></div>
+    <div class="tw"><table class="types-table"><thead><tr><th>要素</th><th>使っているもの</th><th>役割</th></tr></thead><tbody><tr><td data-l="要素">画面</td><td data-l="使っているもの">React・Vite・Tailwind CSS、地図は d3-geo（SVG）</td><td data-l="役割">受付（/kiosk・/neko）と管理画面（/admin）</td></tr><tr><td data-l="要素">API</td><td data-l="使っているもの">Hono（Node.js）、入力検証は zod</td><td data-l="役割">受付・管理・集計・CSV・デモデータ</td></tr><tr><td data-l="要素">DB</td><td data-l="使っているもの">Cloud SQL（PostgreSQL 16）、ORM は Drizzle</td><td data-l="役割">参加者・会・出席・選択肢・設定。起動時にマイグレーション</td></tr><tr><td data-l="要素">実行環境</td><td data-l="使っているもの">Cloud Run（asia-northeast1）</td><td data-l="役割">画面と API を1つのサービスで配信。使っていないときは0台</td></tr><tr><td data-l="要素">デプロイ</td><td data-l="使っているもの">GitHub Actions（Workload Identity 連携、鍵なし）</td><td data-l="役割">main に push → テスト → 変更があったサービスだけ自動デプロイ</td></tr><tr><td data-l="要素">地図データ</td><td data-l="使っているもの">e-Stat 国勢調査 2020 小地域境界（大阪府）</td><td data-l="役割">市区町村単位（43）にまとめて同梱。大阪市・堺市は区をまとめて1つ</td></tr></tbody></table></div>
+
+    <h3 style="margin-top:20px">2. 使う人と入口</h3>
+    <div class="tw"><table class="types-table"><thead><tr><th>使う人</th><th>入口</th><th>できること</th></tr></thead><tbody><tr><td data-l="使う人">運営のシニア（受付係）</td><td data-l="入口">受付 /kiosk（または /neko）</td><td data-l="できること">老人会と会の種類を入れて会を始める。参加者の受付を手伝う</td></tr><tr><td data-l="使う人">参加者（シニア・学生）</td><td data-l="入口">受付の iPad</td><td data-l="できること">今の気持ち、はじめての登録、ID で受付、退出</td></tr><tr><td data-l="使う人">運営（学生インターン など）</td><td data-l="入口">管理画面 /admin</td><td data-l="できること">ダッシュボード、会と出席の確認、役割の付与、参加者一覧、CSV、設定、デモデータ</td></tr></tbody></table></div>
+
+    <h3 style="margin-top:20px">3. 画面遷移：標準の受付（/kiosk）</h3>
+    <p class="small"><b>運営の準備（会ごとに1回）</b></p>
+    <div class="flow"><span>老人会を選ぶ<br><small>一覧から選ぶ／名前を入力</small></span><span>会の種類<br><small>朝ご飯会・映画会・ご飯会・その他</small></span><span>次回の日付<br><small>参加カードに印字／未定可</small></span><span>ようこそ（待ち受け）<br><small>同じ日・老人会・種類なら同じ会を開く</small></span></div>
+    <p class="small" style="margin-top:12px"><b>参加者の受付（1人ずつ）</b></p>
+    <div class="flow"><span>ようこそ<br><small>画面を押す</small></span><span>今の気持ち<br><small>5つの表情（来たときの気持ち）</small></span><span>はじめて／2回目以降<br><small>ここで分かれる</small></span></div>
+    <div class="proposal" style="margin-top:10px">
+      <div class="prop"><h3>はじめての方</h3><ul><li>記録の同意（いいえ → 何も保存せず完了）</li><li>名前</li><li>老人会（入っていない も可）</li><li>お住まいの市町村</li><li>来たきっかけ</li><li>年代 → 性別</li><li>一人暮らし・来た手段（とばせる）</li><li>完了：ID（4桁）と参加カード（QR・次回の日付）</li></ul></div>
+      <div class="prop"><h3>2回目からの方</h3><ul><li>ID を数字で押す（カードの QR をカメラで読んでも可）</li><li>「おかえりなさい、○○さん！」</li><li>同じ会で2回受付しても1回として記録</li></ul></div>
+      <div class="prop"><h3>退出（ようこそ画面の左下）</h3><ul><li>ID を押す（今日の受付がない人は案内を出す）</li><li>帰るときの気持ち</li><li>「ありがとうございました」と次回の日付</li></ul></div>
+    </div>
+    <p class="small muted" style="margin-top:8px">共通: 1画面1問・ボタンは高さ96px以上・UDフォント・「戻る」はいつでも可・読み上げのオン/オフ。操作がないと90秒で、完了画面は12〜15秒でようこそに戻る。</p>
+
+    <h3 style="margin-top:20px">3-2. 画面遷移：ネコ受付（/neko、受付パターン2）</h3>
+    <div class="flow"><span>寝ているネコ<br><small>タップして起こす</small></span><span>はじめて？<br><small>はい／2回目／かえる（退出）</small></span><span>今の気持ち<br><small></small></span><span>はじめて：同意 → 名前 → あなたについて → 豆知識 → 生まれ年<br><small>2回目：ID → 豆知識</small></span><span>ID の表示／おわり<br><small></small></span></div>
+    <p class="small muted" style="margin-top:6px">同じ API と DB を使う別デザインの受付。生まれ年を記録する（標準の受付は年代）。</p>
+
+    <h3 style="margin-top:20px">3-3. 画面遷移：管理画面（/admin）</h3>
+    <div class="tw"><table class="types-table"><thead><tr><th>タブ</th><th>内容</th></tr></thead><tbody><tr><td data-l="タブ">ダッシュボード</td><td data-l="内容">期間・会の種類で絞り込み → 主要な数字 → 開催ごとの新規/リピート → 気持ちの変化 → 地域ごとの活性度（大阪府の地図と市町村×月の表、軸の切り替え）→ 属性の内訳。外部共有モード（5人未満を隠す）、印刷・PDF</td></tr><tr><td data-l="タブ">開催</td><td data-l="内容">会の一覧 → 会を選ぶ → 出席者（ID・名前・気持ち・退出時刻）、役割の付与、出席の取り消し、受付を開く QR</td></tr><tr><td data-l="タブ">参加者</td><td data-l="内容">一覧（名前・属性）と CSV（参加者・出席・開催。CSV に名前は含めない）</td></tr><tr><td data-l="タブ">設定</td><td data-l="内容">デモデータの投入・削除、受付の合言葉【試用では不要】、市町村と老人会の一覧（「大阪府の市町村を読み込む」）</td></tr></tbody></table></div>
+
+    <h3 style="margin-top:20px">4. データ設計</h3>
+    <div class="tw"><table class="types-table"><thead><tr><th>表</th><th>主な項目</th><th>メモ</th></tr></thead><tbody><tr><td data-l="表">participants（参加者）</td><td data-l="主な項目">ID（4桁の連番）、同意、名前、年代、生まれ年、性別、市町村、老人会、きっかけ、一人暮らし、来た手段</td><td data-l="メモ">同意がない人は ID と同意だけ保存。住所・電話番号は持たない</td></tr><tr><td data-l="表">events（会）</td><td data-l="主な項目">日付、種類、会場、主催の老人会、次回の日付、受付トークン</td><td data-l="メモ">試用モードでは受付から作られる</td></tr><tr><td data-l="表">attendances（出席）</td><td data-l="主な項目">会、参加者、役割（参加／準備を手伝った／担当）、受付時刻、退出時刻、来たとき・帰るときの気持ち（1〜5）</td><td data-l="メモ">同じ会・同じ人は1件まで</td></tr><tr><td data-l="表">options（選択肢）</td><td data-l="主な項目">種類（市町村／老人会）、名前、並び順</td><td data-l="メモ">受付の選択肢。受付で入力した老人会も自動で追加</td></tr><tr><td data-l="表">settings（設定）</td><td data-l="主な項目">受付の合言葉（ハッシュ化）</td><td data-l="メモ">試用モードでは使わない</td></tr></tbody></table></div>
+
+    <h3 style="margin-top:20px">5. ダッシュボードの指標</h3>
+    <div class="tw"><table class="types-table"><thead><tr><th>指標</th><th>計算</th></tr></thead><tbody><tr><td data-l="指標">参加した人数／延べ参加回数</td><td data-l="計算">期間中に1回以上来た人数／出席の合計</td></tr><tr><td data-l="指標">はじめて来た人</td><td data-l="計算">全期間で最初の出席が期間内の人</td></tr><tr><td data-l="指標">リピート率</td><td data-l="計算">2回以上来た人 ÷ 参加した人数</td></tr><tr><td data-l="指標">担い手</td><td data-l="計算">準備・担当を1回以上した人</td></tr><tr><td data-l="指標">非会員・一人暮らし・杖や手押し車</td><td data-l="計算">同意した人（または回答した人）の中での割合</td></tr><tr><td data-l="指標">気持ちの変化</td><td data-l="計算">来たとき・帰るときの両方に答えた出席だけで、平均の差と良くなった／同じ／下がった人数</td></tr><tr><td data-l="指標">地域ごとの活性度</td><td data-l="計算">市町村ごと（と市町村×月）の延べ参加回数・参加した人数・はじめて・1人あたり回数・担い手</td></tr></tbody></table></div>
+
+    <h3 style="margin-top:20px">6. 試用モードと個人情報</h3>
+    <ul class="small">
+      <li>【試用】ログインなし（ADMIN_AUTH=none）。受付の合言葉も不要。URL を知っている人は誰でも管理画面を見られるため、URL は運営の中だけで共有する</li>
+      <li>全ページに検索エンジンに載せない設定（noindex）</li>
+      <li>名前は管理画面の画面だけに表示し、CSV と外部共有モードには出さない</li>
+      <li>本番では認証を戻す（Google ログインと許可リスト、または合言葉。実装済みで設定を切り替えるだけ）</li>
+    </ul>
+
+    <h3 style="margin-top:20px">7. デモデータ</h3>
+    <p class="small">管理画面の「設定」から投入・削除できる架空のデータ（過去6か月・約90人・大阪府内の市町村）。会場が「（デモデータ）」、名前が「デモ 」で始まる。削除するとデモだけが消え、本物の記録は残る。</p>
+
+    <h3 style="margin-top:20px">8. 決めていないこと</h3>
+    <ul class="small">
+      <li>本番運用での認証方式（Google ログイン／合言葉）</li>
+      <li>標準の受付とネコ受付のどちらを使うか、または両方か</li>
+      <li>年代と生まれ年のどちらで記録するか（今は受付ごとに違う）</li>
+      <li>企業・行政に見せる指標（ヒアリングで決める）</li>
+      <li>ekyam_japan（SCダッシュボード）への統合の仕方</li>
+    </ul>
+
+    <p class="small muted" style="margin-top:16px">関連: <a href="#appguide">使い方（画面の写真付き）</a> ／ <a href="#dashboard">ダッシュボード要件 v0.1</a> ／ ソース: app/（GitHub）</p>
+  </div>
+</section>
+
 <section id="appguide" class="panel">
   <div class="wrap">
     <h2>受付アプリの使い方</h2>
@@ -210,7 +283,7 @@ main section.panel{border-bottom:0}
     <div class="shots"><figure class="shot"><img src="guide/img/k4_welcome.jpg" alt="ようこそ（待ち受け）" loading="lazy"><figcaption>ようこそ（待ち受け）</figcaption></figure><figure class="shot"><img src="guide/img/k5_mood.jpg" alt="今の気持ち（表情がゆっくり揺れる。選ぶと弾む）" loading="lazy"><figcaption>今の気持ち（表情がゆっくり揺れる。選ぶと弾む）</figcaption></figure><figure class="shot"><img src="guide/img/k6_choose.jpg" alt="はじめての方 / 2回目からの方" loading="lazy"><figcaption>はじめての方 / 2回目からの方</figcaption></figure></div>
 
     <h3 style="margin-top:24px">③ 受付：はじめての方</h3>
-    <p class="small">1画面に1問。答えると自動で次へ進み、「戻る」はいつでも押せる。質問は順に、記録の同意 → 名前 → 老人会 → 町 → きっかけ → 年代 → 性別 → 一人暮らし → 来た手段（最後の2つは「とばす」可）。同意しない人は名前も含めて何も保存しない。最後に ID（4桁）と参加カード（QR・次回の日付）が出る。</p>
+    <p class="small">1画面に1問。答えると自動で次へ進み、「戻る」はいつでも押せる。質問は順に、記録の同意 → 名前 → 老人会 → 市町村 → きっかけ → 年代 → 性別 → 一人暮らし → 来た手段（最後の2つは「とばす」可）。同意しない人は名前も含めて何も保存しない。最後に ID（4桁）と参加カード（QR・次回の日付）が出る。</p>
     <div class="shots"><figure class="shot"><img src="guide/img/k7_consent.jpg" alt="記録の同意" loading="lazy"><figcaption>記録の同意</figcaption></figure><figure class="shot"><img src="guide/img/k8_name.jpg" alt="名前（ニックネームでも可）" loading="lazy"><figcaption>名前（ニックネームでも可）</figcaption></figure><figure class="shot"><img src="guide/img/k9_club_q.jpg" alt="老人会（入っていない も選べる）" loading="lazy"><figcaption>老人会（入っていない も選べる）</figcaption></figure><figure class="shot"><img src="guide/img/k10_done.jpg" alt="完了：ID と参加カード" loading="lazy"><figcaption>完了：ID と参加カード</figcaption></figure></div>
 
     <h3 style="margin-top:24px">③ 受付：2回目からの方</h3>
@@ -225,10 +298,10 @@ main section.panel{border-bottom:0}
     <div class="tw"><table class="types-table">
       <thead><tr><th>タブ</th><th>できること</th></tr></thead>
       <tbody>
-        <tr><td data-l="タブ"><b>ダッシュボード</b></td><td data-l="できること">期間（全期間・3か月・6か月・1年）と会の種類で絞り込み。主要な数字（参加した人数・はじめて来た人・リピート率・担い手・非会員・一人暮らし・杖や手押し車など）、開催ごとの新規/リピート、<b>気持ちの変化</b>、<b>地域ごとの活性度</b>（豊中市の地図と町×月の表。延べ参加回数・人数・はじめて・1人あたり回数・担い手を切り替え。地図は「参加のある町に寄せる / 市全体」を切り替え、町を押すと人数と町の人口が出る）、属性の内訳。「外部共有モード」で5人未満の値を隠し、「印刷・PDF」で企業や行政への資料にできる</td></tr>
+        <tr><td data-l="タブ"><b>ダッシュボード</b></td><td data-l="できること">期間（全期間・3か月・6か月・1年）と会の種類で絞り込み。主要な数字（参加した人数・はじめて来た人・リピート率・担い手・非会員・一人暮らし・杖や手押し車など）、開催ごとの新規/リピート、<b>気持ちの変化</b>、<b>地域ごとの活性度</b>（大阪府の地図と市町村×月の表。延べ参加回数・人数・はじめて・1人あたり回数・担い手を切り替え。地図は「参加のある市町村に寄せる / 大阪府全体」を切り替え、市町村を押すと人数と人口が出る）。「設定」の「デモデータを入れる」で、架空のデータで見え方を確かめられる、属性の内訳。「外部共有モード」で5人未満の値を隠し、「印刷・PDF」で企業や行政への資料にできる</td></tr>
         <tr><td data-l="タブ"><b>開催</b></td><td data-l="できること">会の一覧と出席者（ID・名前・気持ち・退出時刻）。出席者の役割を「参加 / 準備を手伝った / 担当」に変える（担い手の数に反映）、間違えた出席の取り消し。日付を指定して会を作ることもできる</td></tr>
         <tr><td data-l="タブ"><b>参加者</b></td><td data-l="できること">登録した人の一覧（名前・属性）。参加者・出席・開催の CSV ダウンロード（CSV には名前を含めない）</td></tr>
-        <tr><td data-l="タブ"><b>設定</b></td><td data-l="できること">受付で選ぶ「町名」と「老人会」の一覧（1行に1つ。並び順＝受付の表示順）。「豊中市の町名を読み込む」で地図と同じ105町が入る（町名をそろえると地図に色が付く）。老人会は受付で新しく入力した名前も自動で加わる。「受付の合言葉」は試用モードでは使わない</td></tr>
+        <tr><td data-l="タブ"><b>設定</b></td><td data-l="できること">受付で選ぶ「市町村」と「老人会」の一覧（1行に1つ。並び順＝受付の表示順）。「大阪府の市町村を読み込む」で地図と同じ43市町村が入る（名前をそろえると地図に色が付く）。老人会は受付で新しく入力した名前も自動で加わる。「受付の合言葉」は試用モードでは使わない</td></tr>
       </tbody>
     </table></div>
     <div class="shots"><figure class="shot wide"><img src="guide/img/a1b_heat.jpg" alt="地域ごとの活性度ヒートマップ（軸を切り替え）" loading="lazy"><figcaption>地域ごとの活性度ヒートマップ（軸を切り替え）</figcaption></figure></div>
