@@ -1,0 +1,88 @@
+# main に push したら、テストが通ったものだけ Cloud Run に自動デプロイする（CD）。
+# GCP の認証は Workload Identity 連携（鍵なし）。初回は app/deploy/gcp.sh setup-cd で設定する。
+name: deploy
+
+on:
+  push:
+    branches: [main]
+    paths: ["app/**", "reception/**", ".github/workflows/deploy.yml"]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      app: ${{ steps.filter.outputs.app }}
+      reception: ${{ steps.filter.outputs.reception }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - id: filter
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "app=true" >> "$GITHUB_OUTPUT"; echo "reception=true" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          changed=$(git diff --name-only HEAD~1 HEAD || true)
+          echo "$changed"
+          echo "app=$(echo "$changed" | grep -qE '^(app/|\.github/workflows/deploy\.yml)' && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          echo "reception=$(echo "$changed" | grep -qE '^(reception/|\.github/workflows/deploy\.yml)' && echo true || echo false)" >> "$GITHUB_OUTPUT"
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - name: アプリのテストとビルド
+        working-directory: app
+        run: |
+          npm ci
+          npm test
+          npm run build
+      - name: 旧試作のテスト
+        run: node --test reception/core.test.js
+
+  deploy-app:
+    needs: [changes, test]
+    if: needs.changes.outputs.app == 'true' && vars.GCP_WIF_PROVIDER != ''
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOY_SA }}
+      - uses: google-github-actions/setup-gcloud@v2
+      - name: 新しいアプリをデプロイ（環境変数・秘密情報・DB接続は既存の設定を引き継ぐ）
+        run: |
+          gcloud run deploy choko-checkin --source app \
+            --project "${{ vars.GCP_PROJECT_ID }}" --region "${{ vars.GCP_REGION }}" --quiet
+          curl -fsS "$(gcloud run services describe choko-checkin --project "${{ vars.GCP_PROJECT_ID }}" --region "${{ vars.GCP_REGION }}" --format 'value(status.url)')/api/health"
+
+  deploy-reception:
+    needs: [changes, test]
+    if: needs.changes.outputs.reception == 'true' && vars.GCP_WIF_PROVIDER != ''
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOY_SA }}
+      - uses: google-github-actions/setup-gcloud@v2
+      - name: 旧試作をデプロイ
+        run: |
+          gcloud run deploy choko-reception --source reception \
+            --project "${{ vars.GCP_PROJECT_ID }}" --region "${{ vars.GCP_REGION }}" --quiet

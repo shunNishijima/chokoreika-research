@@ -9,6 +9,7 @@
 #   ./deploy/gcp.sh set-admins a@x,b@y     # 管理者のメールを変更
 #   ADMIN_AUTH=none ./deploy/gcp.sh deploy # 管理画面を認証なしにする（URL を知っていれば誰でも見られる）
 #   ./deploy/gcp.sh deploy-reception       # 旧試作（reception/、データは端末内）を別サービスとして公開
+#   ./deploy/gcp.sh setup-cd               # GitHub の main に push したら自動デプロイ（鍵なしの Workload Identity 連携）
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -101,6 +102,42 @@ case "${1:-}" in
       --allow-unauthenticated --port 8080 --min-instances 0 --max-instances 2 --memory 256Mi --quiet
     echo
     echo "旧試作の公開URL: $(gcloud run services describe choko-reception --project "$PROJECT_ID" --region "$REGION" --format 'value(status.url)')"
+    ;;
+  setup-cd)
+    : "${PROJECT_ID:?先に setup を実行してください}"
+    REPO=${REPO:-shunNishijima/chokoreika-research}
+    PROJECT_NUMBER=$(gcloud projects describe "$PROJECT_ID" --format 'value(projectNumber)')
+    DEPLOY_SA="github-deployer@$PROJECT_ID.iam.gserviceaccount.com"
+    RUNTIME_SA="$PROJECT_NUMBER-compute@developer.gserviceaccount.com"
+    echo "== API を有効化"
+    gcloud services enable iamcredentials.googleapis.com sts.googleapis.com --project "$PROJECT_ID"
+    echo "== デプロイ専用のサービスアカウント"
+    gcloud iam service-accounts describe "$DEPLOY_SA" --project "$PROJECT_ID" >/dev/null 2>&1 || \
+      gcloud iam service-accounts create github-deployer --project "$PROJECT_ID" --display-name "GitHub Actions deployer"
+    for role in roles/run.admin roles/cloudbuild.builds.editor roles/storage.admin roles/artifactregistry.writer roles/serviceusage.serviceUsageConsumer roles/viewer; do
+      gcloud projects add-iam-policy-binding "$PROJECT_ID" --member "serviceAccount:$DEPLOY_SA" --role "$role" --condition None >/dev/null
+    done
+    # Cloud Run の実行用アカウントとしてデプロイできるようにする
+    gcloud iam service-accounts add-iam-policy-binding "$RUNTIME_SA" --project "$PROJECT_ID" \
+      --member "serviceAccount:$DEPLOY_SA" --role roles/iam.serviceAccountUser >/dev/null
+    echo "== Workload Identity 連携（$REPO の main ブランチだけを許可）"
+    gcloud iam workload-identity-pools describe github --location global --project "$PROJECT_ID" >/dev/null 2>&1 || \
+      gcloud iam workload-identity-pools create github --location global --project "$PROJECT_ID" --display-name "GitHub Actions"
+    gcloud iam workload-identity-pools providers describe github-repo --workload-identity-pool github --location global --project "$PROJECT_ID" >/dev/null 2>&1 || \
+      gcloud iam workload-identity-pools providers create-oidc github-repo --workload-identity-pool github --location global --project "$PROJECT_ID" \
+        --issuer-uri "https://token.actions.githubusercontent.com" \
+        --attribute-mapping "google.subject=assertion.sub,attribute.repository=assertion.repository,attribute.ref=assertion.ref" \
+        --attribute-condition "assertion.repository=='$REPO' && assertion.ref=='refs/heads/main'"
+    gcloud iam service-accounts add-iam-policy-binding "$DEPLOY_SA" --project "$PROJECT_ID" --role roles/iam.workloadIdentityUser \
+      --member "principalSet://iam.googleapis.com/projects/$PROJECT_NUMBER/locations/global/workloadIdentityPools/github/attribute.repository/$REPO" >/dev/null
+    echo "== GitHub のリポジトリ変数を設定（秘密情報ではない）"
+    gh variable set GCP_PROJECT_ID --repo "$REPO" --body "$PROJECT_ID"
+    gh variable set GCP_REGION --repo "$REPO" --body "$REGION"
+    gh variable set GCP_DEPLOY_SA --repo "$REPO" --body "$DEPLOY_SA"
+    gh variable set GCP_WIF_PROVIDER --repo "$REPO" --body "projects/$PROJECT_NUMBER/locations/global/workloadIdentityPools/github/providers/github-repo"
+    echo
+    echo "完了: 以後 main に push すると、テストが通れば自動でデプロイされます。"
+    echo "進み具合: https://github.com/$REPO/actions"
     ;;
   set-client-id)
     : "${PROJECT_ID:?先に setup を実行してください}"
