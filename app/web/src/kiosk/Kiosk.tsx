@@ -437,39 +437,45 @@ function NewFlow({ step, session, answers, onAnswer, onStep, onDone, say }: {
   const opts = q.options ?? [];
 
   return (
-    <section className="flex-1 flex flex-col screen-in max-w-5xl w-full mx-auto">
-      <div className="pt-2 pb-6" aria-label={`${qs.length}問中${step + 1}問目`}>
-        <div className="flex justify-between text-xl text-ink-soft mb-2"><span>はじめての方</span><span className="font-bold text-ink">{step + 1} / {qs.length}</span></div>
-        <div className="h-3 rounded-full bg-line overflow-hidden"><div className="h-full bg-navy rounded-full transition-all" style={{ width: `${((step + 1) / qs.length) * 100}%` }} /></div>
+    // iPad で画面いっぱいに出す: 文字は画面幅に合わせて大きく、選択肢は残りの高さを均等に分ける
+    <section className="flex-1 flex flex-col min-h-0 screen-in w-full">
+      <div className="pb-2" aria-label={`${qs.length}問中${step + 1}問目`}>
+        <div className="flex justify-between text-2xl text-ink-soft mb-1"><span>はじめての方</span><span className="font-bold text-ink">{step + 1} / {qs.length}</span></div>
+        <div className="h-4 rounded-full bg-line overflow-hidden"><div className="h-full bg-navy rounded-full transition-all" style={{ width: `${((step + 1) / qs.length) * 100}%` }} /></div>
       </div>
-      <h2 className="text-5xl font-bold leading-tight mb-3">{q.title}</h2>
-      {q.hint && <p className="text-2xl text-ink-soft leading-relaxed mb-6">{q.hint}</p>}
+      <h2 className="font-bold leading-tight mb-2" style={{ fontSize: "clamp(2.75rem, max(5.6vw, 4.2vh), 5.25rem)" }}>{q.title}</h2>
+      {q.hint && <p className="text-ink-soft leading-snug mb-3" style={{ fontSize: "clamp(1.6rem, 2.6vw, 2.4rem)" }}>{q.hint}</p>}
       {q.text ? (
-        <div className="mt-2">
+        <div className="flex-1 flex flex-col justify-center gap-6 min-h-0">
           <input value={text} onChange={(e) => setText(e.target.value)} maxLength={q.key === "name" ? 40 : 200} autoFocus aria-label={q.title}
-            className="w-full text-5xl rounded-2xl border-4 border-navy bg-card px-6 py-6" onKeyDown={(e) => e.key === "Enter" && text.trim() && advance(text.trim())} />
-          <button onClick={() => advance(text.trim())} disabled={!text.trim() || busy} className="mt-6 w-full rounded-2xl bg-navy text-white text-4xl font-bold min-h-28 disabled:opacity-40">次へ</button>
+            className="w-full rounded-3xl border-[6px] border-navy bg-card px-8 py-6 font-bold" style={{ fontSize: "clamp(2.75rem, 5.5vw, 5rem)" }}
+            onKeyDown={(e) => e.key === "Enter" && text.trim() && advance(text.trim())} />
+          <button onClick={() => advance(text.trim())} disabled={!text.trim() || busy} className="w-full rounded-3xl bg-navy text-white font-bold min-h-36 disabled:opacity-40" style={{ fontSize: "clamp(2.5rem, 4.5vw, 4rem)" }}>次へ</button>
         </div>
       ) : opts.length ? (
-        <div className={`grid gap-5 mt-2 ${opts.length <= 4 ? "grid-cols-2" : "grid-cols-2 lg:grid-cols-3"}`}>
+        <div className={`flex-1 min-h-0 grid gap-4 mt-2 auto-rows-fr ${opts.length <= 4 ? "grid-cols-2 portrait:grid-cols-1" : "grid-cols-3 portrait:grid-cols-2"}`}>
           {opts.map((o) => {
             const on = picked === o || (!picked && current === o);
+            // 選択肢が少ないほど文字を大きく
+            // 画面の幅と高さの大きいほうに合わせる（縦向きでも小さくならない）
+            const size = opts.length <= 2 ? "clamp(3.5rem, max(7.5vw, 7vh), 7rem)" : opts.length <= 4 ? "clamp(2.75rem, max(5.4vw, 5.2vh), 5rem)" : opts.length <= 6 ? "clamp(2.25rem, max(3.9vw, 4vh), 3.75rem)" : "clamp(1.9rem, max(3.2vw, 3.2vh), 3rem)";
             return (
               <button key={o} onClick={() => choose(o)} disabled={busy} aria-pressed={on}
-                className={`rounded-2xl border-4 min-h-28 px-6 py-5 text-3xl font-bold text-left flex items-center gap-4 transition active:scale-[.98] ${on ? "bg-navy text-white border-navy" : "bg-card border-line text-ink"}`}>
-                <span className={`grid place-items-center w-10 h-10 rounded-full border-4 shrink-0 ${on ? "border-white bg-white text-navy" : "border-line"}`}>{on && <CheckIcon className="w-6 h-6" />}</span>
-                {o}
+                className={`rounded-3xl border-[6px] min-h-24 px-6 font-bold text-left flex items-center gap-5 leading-tight transition active:scale-[.98] ${on ? "bg-navy text-white border-navy" : "bg-card border-line text-ink"}`}
+                style={{ fontSize: size }}>
+                <span className={`grid place-items-center rounded-full border-[6px] shrink-0 ${on ? "border-white bg-white text-navy" : "border-line"}`} style={{ width: "1.1em", height: "1.1em" }}>{on && <CheckIcon className="w-[.75em] h-[.75em]" />}</span>
+                <span className="min-w-0 break-words">{o}</span>
               </button>
             );
           })}
         </div>
       ) : (
-        <p className="text-2xl rounded-2xl bg-sun-soft p-6">市町村の一覧がまだ登録されていません。「とばす」を押してください。</p>
+        <p className="flex-1 text-3xl rounded-3xl bg-sun-soft p-8">市町村の一覧がまだ登録されていません。「とばす」を押してください。</p>
       )}
-      {error && <p role="alert" className="mt-6 text-2xl font-bold text-alert bg-alert-soft rounded-2xl p-5">{error}</p>}
-      <div className="mt-auto pt-8 flex gap-5">
-        <BigBack onClick={() => onStep(step - 1)} />
-        {(q.optional || (!q.text && !opts.length)) && <button onClick={() => advance(undefined)} disabled={busy} className="rounded-2xl border-4 border-line bg-card text-3xl font-bold px-10 min-h-24 ml-auto">とばす →</button>}
+      {error && <p role="alert" className="mt-4 text-3xl font-bold text-alert bg-alert-soft rounded-2xl p-5">{error}</p>}
+      <div className="pt-4 flex gap-5">
+        <button onClick={() => onStep(step - 1)} className="rounded-3xl border-[6px] border-line bg-card font-bold px-12 min-h-28" style={{ fontSize: "clamp(2rem, 3.4vw, 3rem)" }}>← 戻る</button>
+        {(q.optional || (!q.text && !opts.length)) && <button onClick={() => advance(undefined)} disabled={busy} className="rounded-3xl border-[6px] border-line bg-card font-bold px-12 min-h-28 ml-auto" style={{ fontSize: "clamp(2rem, 3.4vw, 3rem)" }}>とばす →</button>}
       </div>
     </section>
   );
