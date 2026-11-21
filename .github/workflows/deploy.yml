@@ -25,13 +25,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          fetch-depth: 0
       - id: filter
+        env:
+          BEFORE: ${{ github.event.before }}
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          # 手動実行、または比較元が取れない（初回 push など）場合は両方デプロイする
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] || [ -z "$BEFORE" ] || ! git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
             echo "app=true" >> "$GITHUB_OUTPUT"; echo "reception=true" >> "$GITHUB_OUTPUT"; exit 0
           fi
-          changed=$(git diff --name-only HEAD~1 HEAD || true)
+          # push に含まれるすべてのコミットの変更を見る（直前の1コミットだけだと、まとめて push したときに見落とす）
+          changed=$(git diff --name-only "$BEFORE" "${{ github.sha }}")
           echo "$changed"
           echo "app=$(echo "$changed" | grep -qE '^(app/|\.github/workflows/deploy\.yml)' && echo true || echo false)" >> "$GITHUB_OUTPUT"
           echo "reception=$(echo "$changed" | grep -qE '^(reception/|\.github/workflows/deploy\.yml)' && echo true || echo false)" >> "$GITHUB_OUTPUT"
