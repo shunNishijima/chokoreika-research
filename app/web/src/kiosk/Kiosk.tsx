@@ -9,7 +9,9 @@ import { QrScanner } from "./QrScanner";
 import { CardPreview } from "./CardPreview";
 import { MoodPicker } from "./Mood";
 
-type Session = { event: EventInfo; options: { town: string[]; club: string[] }; choices: Choices };
+// 質問は管理画面の「アンケート」で追加・編集した内容をサーバーから受け取る
+export type SurveyQuestion = { id: number; key: string; title: string; hint: string; type: "single" | "text"; options: string[]; optional: boolean; builtin: boolean };
+type Session = { event: EventInfo; options: { town: string[]; club: string[] }; choices: Choices; questions?: SurveyQuestion[] };
 type Screen =
   | { name: "welcome" }
   | { name: "mood" }
@@ -376,21 +378,18 @@ function Choose({ onNew, onReturning, onBack, say }: { onNew: () => void; onRetu
 
 type Q = { key: string; title: string; hint?: string; options?: string[]; text?: boolean; optional?: boolean };
 
+const CONSENT: Q = { key: "consent", title: "受付の記録をとってもよいですか？", hint: "お名前や住んでいる市町村などを、会の運営のためだけに使います。外に出すときは人数だけにします。", options: ["はい", "いいえ"] };
+const BUILTIN_KEYS = ["name", "club", "town", "trigger", "ageGroup", "gender", "livingAlone", "mobility"];
+
+// 記録の同意は必ず最初。そのあとは管理画面で決めた順番・内容
 function questions(s: Session): Q[] {
-  const c = s.choices;
   const host = s.event.host;
-  const clubs = [...new Set([host, ...s.options.club].filter(Boolean))];
-  return [
-    { key: "consent", title: "受付の記録をとってもよいですか？", hint: "お名前や住んでいる町などを、会の運営のためだけに使います。外に出すときは人数だけにします。", options: ["はい", "いいえ"] },
-    { key: "name", title: "お名前を教えてください", hint: "ニックネームでも大丈夫です。", text: true },
-    { key: "club", title: "どの老人会に入っていますか？", options: [...clubs, "ほかの老人会", "入っていない"] },
-    { key: "town", title: "お住まいの市町村はどちらですか？", options: s.options.town.length ? [...s.options.town, "それ以外"] : [], optional: true },
-    { key: "trigger", title: "今日は何がきっかけで来ましたか？", options: c.trigger },
-    { key: "ageGroup", title: "年代を教えてください", options: c.ageGroup },
-    { key: "gender", title: "性別を教えてください", options: c.gender },
-    { key: "livingAlone", title: "一人で暮らしていますか？", hint: "答えたくなければ「とばす」を押してください。", options: c.livingAlone, optional: true },
-    { key: "mobility", title: "今日はどうやって来ましたか？", hint: "答えたくなければ「とばす」を押してください。", options: c.mobility, optional: true },
-  ];
+  const list = (s.questions ?? []).map((q): Q => {
+    // 主催の老人会を一番上に出す
+    const options = q.key === "club" && host ? [host, ...q.options.filter((o) => o !== host)] : q.options;
+    return { key: q.builtin ? q.key : `extra:${q.id}`, title: q.title, hint: q.hint || undefined, options: q.type === "single" ? options : undefined, text: q.type === "text", optional: q.optional };
+  });
+  return [CONSENT, ...list];
 }
 
 function NewFlow({ step, session, answers, onAnswer, onStep, onDone, say }: {
@@ -412,7 +411,9 @@ function NewFlow({ step, session, answers, onAnswer, onStep, onDone, say }: {
     try {
       const consent = a.consent === true;
       const pick = (k: string) => (consent && typeof a[k] === "string" && a[k] ? (a[k] as string) : undefined);
-      await onDone({ consent, name: pick("name"), club: pick("club"), town: pick("town"), trigger: pick("trigger"), ageGroup: pick("ageGroup"), gender: pick("gender"), livingAlone: pick("livingAlone"), mobility: pick("mobility") });
+      const builtin = Object.fromEntries(BUILTIN_KEYS.map((k) => [k, pick(k)]));
+      const extra = Object.fromEntries(Object.keys(a).filter((k) => k.startsWith("extra:")).map((k) => [k.slice(6), pick(k)]).filter(([, v]) => v));
+      await onDone({ consent, ...builtin, extra });
     } catch {
       setError("うまく受付できませんでした。もう一度押すか、運営の人に声をかけてください。");
       setBusy(false);
@@ -445,7 +446,7 @@ function NewFlow({ step, session, answers, onAnswer, onStep, onDone, say }: {
       {q.hint && <p className="text-2xl text-ink-soft leading-relaxed mb-6">{q.hint}</p>}
       {q.text ? (
         <div className="mt-2">
-          <input value={text} onChange={(e) => setText(e.target.value)} maxLength={40} autoFocus aria-label={q.title}
+          <input value={text} onChange={(e) => setText(e.target.value)} maxLength={q.key === "name" ? 40 : 200} autoFocus aria-label={q.title}
             className="w-full text-5xl rounded-2xl border-4 border-navy bg-card px-6 py-6" onKeyDown={(e) => e.key === "Enter" && text.trim() && advance(text.trim())} />
           <button onClick={() => advance(text.trim())} disabled={!text.trim() || busy} className="mt-6 w-full rounded-2xl bg-navy text-white text-4xl font-bold min-h-28 disabled:opacity-40">次へ</button>
         </div>

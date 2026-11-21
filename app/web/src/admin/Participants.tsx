@@ -9,9 +9,9 @@ export function Participants() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center gap-3">
         <h1 className="text-2xl font-bold mr-4">参加者（{q.data?.length ?? 0}人）</h1>
-        {["participants", "attendances", "events"].map((n) => (
+        {["participants", "attendances", "events", "answers"].map((n) => (
           <a key={n} href={`/api/admin/export/${n}.csv`} className="rounded-xl border-2 border-line bg-card px-3 py-2 font-bold">
-            {{ participants: "参加者", attendances: "出席", events: "開催" }[n]}のCSV
+            {({ participants: "参加者", attendances: "出席", events: "開催", answers: "アンケート回答" } as Record<string, string>)[n]}のCSV
           </a>
         ))}
       </div>

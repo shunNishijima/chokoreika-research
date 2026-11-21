@@ -10,7 +10,7 @@ type Dash = {
   kpis: { events: number; uniques: number; visits: number; newcomers: number; repeatRate: number; helpers: number; nonMemberRate: number; livingAloneRate: number; assistedMobilityRate: number };
   series: { eventId: number; date: string; kind: string; total: number; newcomers: number; repeaters: number; helpers: number }[];
   townHeat: { months: string[]; towns: string[]; cells: (Cell & { town: string; month: string })[]; totals: (Cell & { town: string })[] };
-  breakdowns: Record<"gender" | "ageGroup" | "club" | "trigger" | "livingAlone" | "mobility", { label: string; count: number | null }[]>;
+  breakdowns: Record<"gender" | "ageGroup" | "club" | "trigger" | "livingAlone" | "mobility", { label: string; count: number | null }[]> & { custom?: { id: number; title: string; type: string; answered: number; rows: { label: string; count: number | null }[] }[] };
   noConsent: number;
   mood: { pairs: number; avgBefore: number | null; avgAfter: number | null; avgChange: number | null; improved: number; same: number; worse: number; beforeDist: number[]; afterDist: number[] };
 };
@@ -114,6 +114,16 @@ export function Dashboard() {
             <Breakdown title="一人暮らし" rows={d.breakdowns.livingAlone} />
             <Breakdown title="来た手段" rows={d.breakdowns.mobility} />
           </section>
+          {(d.breakdowns.custom ?? []).length > 0 && (
+            <>
+              <h2 className="text-xl font-bold">アンケート（追加した質問）</h2>
+              <section className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {d.breakdowns.custom!.map((q) => q.type === "single"
+                  ? <Breakdown key={q.id} title={q.title} rows={q.rows} />
+                  : <Panel key={q.id} title={q.title} note="文字で答える質問"><p className="text-3xl font-bold tabular-nums">{q.answered}件</p><p className="text-sm text-ink-soft">回答の中身は「参加者」の「アンケート回答のCSV」で見られます</p></Panel>)}
+              </section>
+            </>
+          )}
           <p className="text-sm text-ink-soft">属性の内訳は、記録に同意した人だけで数えています。外部共有モードでは、5人未満の項目と市町村を「—」で隠します。</p>
         </>
       )}

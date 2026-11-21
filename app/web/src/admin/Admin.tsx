@@ -8,6 +8,7 @@ import { Events } from "./Events";
 import { Participants } from "./Participants";
 import { Report } from "./Report";
 import { Settings } from "./Settings";
+import { Survey } from "./Survey";
 
 declare global {
   interface Window { google?: { accounts: { id: { initialize: (o: object) => void; renderButton: (el: HTMLElement, o: object) => void } } } }
@@ -66,7 +67,7 @@ function Login() {
   );
 }
 
-const tabs = [["", "ダッシュボード"], ["report", "報告書"], ["events", "開催"], ["participants", "参加者"], ["settings", "設定"]] as const;
+const tabs = [["", "ダッシュボード"], ["report", "報告書"], ["events", "開催"], ["participants", "参加者"], ["survey", "アンケート"], ["settings", "設定"]] as const;
 
 function Shell({ email }: { email: string }) {
   const qc = useQueryClient();
@@ -99,6 +100,7 @@ function Shell({ email }: { email: string }) {
           <Route path="report" element={<Report />} />
           <Route path="events" element={<Events />} />
           <Route path="participants" element={<Participants />} />
+          <Route path="survey" element={<Survey />} />
           <Route path="settings" element={<Settings />} />
           <Route path="*" element={<Navigate to="/admin" replace />} />
         </Routes>
