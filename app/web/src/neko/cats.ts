@@ -115,22 +115,37 @@ export function walking(name: string) {
 }
 
 // 丸くなって寝るネコ（鼻ちょうちん・Zzz つき）
-export function sleeping(name: string) {
+// 寝そべるネコ。mode: sleep（寝息・鼻ちょうちん・Zzz）/ awake（目を開けて顔を上げる）/ happy（笑顔でしっぽをふる・ハート）
+export function lying(name: string, mode: "sleep" | "awake" | "happy") {
   const p = pal(name);
   const z = function (x: number, y: number, size: number, begin: number) {
     return '<text x="' + x + '" y="' + y + '" font-size="' + size + '" font-weight="800" fill="#8a7663" font-family="sans-serif" opacity="0">Z' +
       '<animate attributeName="opacity" values="0;1;0" dur="3s" begin="' + begin + 's" repeatCount="indefinite"/>' +
       '<animateTransform attributeName="transform" type="translate" values="0 0;14 -30" dur="3s" begin="' + begin + 's" repeatCount="indefinite"/></text>';
   };
+  const heart = (x: number, begin: number, c: string) =>
+    '<path d="M0 6 C-10 -4 -6 -12 0 -6 C6 -12 10 -4 0 6 Z" fill="' + c + '" opacity="0">' +
+    '<animate attributeName="opacity" values="0;1;0" dur="2.4s" begin="' + begin + 's" repeatCount="indefinite"/>' +
+    '<animateTransform attributeName="transform" type="translate" values="' + x + " 70;" + (x + 8) + ' 0" dur="2.4s" begin="' + begin + 's" repeatCount="indefinite"/></path>';
+  const wag = mode === "sleep" ? "" : '<animateTransform attributeName="transform" type="rotate" values="0 206 120;' + (mode === "happy" ? "-14" : "-7") + ' 206 120;0 206 120" dur="' + (mode === "happy" ? ".6" : "1.4") + 's" repeatCount="indefinite"/>';
+  const headT = mode === "sleep" ? "translate(80,104) rotate(-10) scale(.72)" : "translate(80,92) rotate(-2) scale(.74)";
+  const headInner = mode === "sleep" ? head(p, "sleep", "w") : mode === "happy" ? head(p, "happy", "smile") : head(p, "open", "w");
+  const nod = mode === "sleep" ? "" : '<animateTransform attributeName="transform" type="rotate" values="0 0 40;' + (mode === "happy" ? "-6" : "-3") + ' 0 40;0 0 40;' + (mode === "happy" ? "6" : "3") + ' 0 40;0 0 40" dur="' + (mode === "happy" ? "1.2" : "4") + 's" repeatCount="indefinite" additive="sum"/>';
   return '<svg viewBox="0 0 250 160" aria-hidden="true">' +
     '<g class="breath"><path d="M44 128 C32 86 72 52 132 52 C188 52 218 86 212 118 C210 134 197 138 177 138 L62 138 C48 138 46 134 44 128 Z" fill="' + p.base + '"' + line() + "/>" +
     '<path d="M124 53 q7 14 0 26 M150 56 q7 14 0 24 M174 64 q6 12 0 22" fill="none" stroke="' + p.stripe + '" stroke-width="6" stroke-linecap="round"/></g>' +
     '<ellipse cx="98" cy="138" rx="15" ry="9" fill="' + p.white + '"' + line() + '/><ellipse cx="124" cy="139" rx="15" ry="9" fill="' + p.white + '"' + line() + "/>" +
-    tail("M206 120 C200 152 120 152 140 140", p, 12) +
-    '<g transform="translate(80,104) rotate(-10) scale(.72)">' + head(p, "sleep", "w") + "</g>" +
-    '<circle cx="64" cy="118" r="4" fill="#cfeeff" stroke="#7cc3ea" stroke-width="2" opacity=".85"><animate attributeName="r" values="3;12;3" dur="3.2s" repeatCount="indefinite"/></circle>' +
-    z(30, 60, 18, 0) + z(44, 46, 24, 1) + z(22, 40, 14, 2) +
+    "<g>" + tail("M206 120 C200 152 120 152 140 140", p, 12) + wag + "</g>" +
+    '<g transform="' + headT + '"><g>' + headInner + nod + "</g></g>" +
+    (mode === "sleep"
+      ? '<circle cx="64" cy="118" r="4" fill="#cfeeff" stroke="#7cc3ea" stroke-width="2" opacity=".85"><animate attributeName="r" values="3;12;3" dur="3.2s" repeatCount="indefinite"/></circle>' +
+        z(30, 60, 18, 0) + z(44, 46, 24, 1) + z(22, 40, 14, 2)
+      : mode === "happy" ? heart(30, 0, "#ff7f96") + heart(150, 0.8, "#ffb04d") + heart(200, 1.6, "#ff9ec0") : "") +
     "</svg>";
+}
+
+export function sleeping(name: string) {
+  return lying(name, "sleep");
 }
 
 // 気分ボタン用の顔

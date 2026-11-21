@@ -274,10 +274,11 @@ function Progress({ at, total }: { at: number; total: number }) {
 
 // ---------- 待ち受け ----------
 function Idle({ ev, onStart, onLeave }: { ev: Ev; onStart: () => void; onLeave: () => void }) {
-  const [leaving, setLeaving] = useState(false);
+  const [waking, setWaking] = useState(false);
   const [menu, setMenu] = useState(false);
   const hold = useRef<number | undefined>(undefined);
-  const start = () => { if (leaving) return; setLeaving(true); window.setTimeout(onStart, 450); };
+  // タップするとネコが起きて、少し喜んでから始まる
+  const start = () => { if (waking) return; setWaking(true); window.setTimeout(onStart, 1500); };
   if (menu) {
     return (
       <main className="nk-page nk-in nk-admin">
@@ -292,19 +293,18 @@ function Idle({ ev, onStart, onLeave }: { ev: Ev; onStart: () => void; onLeave: 
     );
   }
   return (
-    <div className={`nk-idle${leaving ? " leaving" : ""}`} role="button" aria-label="タップではじめる" onClick={start}>
+    <div className={`nk-idle${waking ? " waking" : ""}`} role="button" aria-label="ネコをタップして はじめる" onClick={start}>
       <div className="nk-sky"><span className="nk-cloud a" /><span className="nk-cloud b" /></div>
       <div className="nk-floor" />
       <div className="nk-title">
         <div className="nk-club">{ev.host}　{ev.kind}</div>
-        <div className="nk-tapme">タップではじめる</div>
+        <div className="nk-tapme">{waking ? "おはよう！" : "ネコを タップして おこしてね"}</div>
       </div>
-      <div className="nk-hero"><Svg html={Cats.sitting("tora", "idle")} /></div>
       <Svg className="nk-fly" html={Cats.butterfly()} />
-      <Svg className="nk-sleeper" html={Cats.sleeping("tora")} />
-      <Svg className="nk-yawner" html={Cats.sitting("shiro", "yawn")} />
-      <Svg className="nk-walker a" html={Cats.walking("sabi")} />
-      <Svg className="nk-walker b" html={Cats.walking("shiro")} />
+      <div className="nk-bed">
+        <Svg key={waking ? "awake" : "sleep"} className={waking ? "nk-wake" : ""} html={Cats.lying("tora", waking ? "happy" : "sleep")} />
+        {waking && <span className="nk-nya">にゃっ！</span>}
+      </div>
       <button
         className="nk-op"
         onClick={(e) => e.stopPropagation()}
@@ -379,7 +379,7 @@ function Trivia({ onNext, onBack }: { onNext: () => void; onBack: () => void }) 
   return (
     <>
       <h1 className="nk-q nk-c">ネコの豆知識</h1>
-      <div className="nk-trivia-cat"><Svg html={Cats.sitting("tora", "idle")} /><span className="nk-think">!</span></div>
+      <div className="nk-trivia-cat"><Svg html={Cats.lying("tora", "awake")} /><span className="nk-think">!</span></div>
       <div className="nk-trivia">{t}</div>
       <Row><Back onClick={onBack} /><button className="nk-btn nk-primary" onClick={onNext}>すすむ</button></Row>
     </>
@@ -478,7 +478,7 @@ function IdShow({ code, onNext }: { code: string; onNext: () => void }) {
       <h1 className="nk-q nk-c">あなたの ID は</h1>
       <div className="nk-card">
         <div className="nk-card-digits">{code.split("").map((c, i) => <span key={i} style={{ animationDelay: `${300 + i * 220}ms` }}>{c}</span>)}</div>
-        <Svg className="nk-card-cat" html={Cats.sitting("tora", "happy")} />
+        <Svg className="nk-card-cat" html={Cats.lying("tora", "happy")} />
       </div>
       <p className="nk-hint nk-c">次から この番号で 入れます。<br />運営の人に メモを もらってね。</p>
       <Row><button className="nk-btn nk-primary" onClick={onNext}>おぼえた！</button></Row>
@@ -504,7 +504,7 @@ function Bye({ kind, who, onEnd }: { kind: "new" | "in" | "already" | "out"; who
       </div>
       <p className="nk-byeline">{line}</p>
       <div className="nk-bubble">また 会いにきてね</div>
-      <div className="nk-jump"><Svg html={Cats.byeCat("tora")} /></div>
+      <div className="nk-jump"><Svg html={Cats.lying("tora", "happy")} /></div>
       <Row><button className="nk-btn nk-primary" onClick={onEnd}>おわる</button></Row>
     </div>
   );
