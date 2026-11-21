@@ -1,4 +1,4 @@
-// 受付の計算部分（登録・出席・集計）のテスト。実行: node --test reception/
+// 受付の計算部分（登録・出席・集計）のテスト。実行: node --test reception/core.test.js
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const Core = require("./core.js");
