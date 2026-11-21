@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>受付アプリ 詳細設計</title>
+<meta name="description" content="朝ご飯会 受付アプリの詳細設計（補足）。ネコ受付の画面遷移、報告書の指標の定義、API と認証、インフラ/デプロイ、注意点と未定事項。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f7f6f2; --surface:#ffffff; --surface2:#f0eee8; --text:#1f2328; --muted:#5b6169; --border:#d9d6cd;
+  --accent:#2b4c7e; --hub-bg:#eef2f8; --labor:#C25A00; --none:#C0292B; --ok:#1d6b46;
+  --badge-bg:#ece9df; --badge-text:#4a4f56; --snip-bg:#fff3d6; --snip-text:#7a5300; --tbd-bg:#fde4e4; --tbd-text:#8a1c1c;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#15171a; --surface:#1e2125; --surface2:#262a2f; --text:#e6e6e3; --muted:#a3a8ae; --border:#3a3f45;
+    --accent:#8fb0e0; --hub-bg:#22304a; --labor:#F0A040; --none:#FF6B6B; --ok:#6fd3a0;
+    --badge-bg:#2c3036; --badge-text:#c9ccd0; --snip-bg:#3d3215; --snip-text:#f2cf7a; --tbd-bg:#4a2222; --tbd-text:#ffb3b3;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#15171a; --surface:#1e2125; --surface2:#262a2f; --text:#e6e6e3; --muted:#a3a8ae; --border:#3a3f45;
+  --accent:#8fb0e0; --hub-bg:#22304a; --labor:#F0A040; --none:#FF6B6B; --ok:#6fd3a0;
+  --badge-bg:#2c3036; --badge-text:#c9ccd0; --snip-bg:#3d3215; --snip-text:#f2cf7a; --tbd-bg:#4a2222; --tbd-text:#ffb3b3;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font-family:"Noto Sans JP","Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;line-height:1.75;font-size:16px;overflow-x:hidden}
+a{color:var(--accent);word-break:break-all}
+.wrap{max-width:1040px;margin:0 auto;padding:0 16px}
+header.hero{padding:32px 0 20px;border-bottom:1px solid var(--border)}
+.hero h1{font-size:clamp(1.4rem,4.5vw,2rem);line-height:1.35;margin:0 0 6px}
+.hero .sub{color:var(--muted);margin:0 0 14px}
+.back{display:inline-block;font-size:.88rem;margin-bottom:10px}
+.lead{background:var(--surface);border-left:4px solid var(--accent);padding:12px 14px;margin:0;border-radius:4px}
+nav.toc{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+nav.toc a{font-size:.85rem;padding:3px 10px;border-radius:999px;border:1px solid var(--border);background:var(--surface);color:var(--text);text-decoration:none;word-break:normal;white-space:nowrap}
+section{padding:28px 0;border-bottom:1px solid var(--border);scroll-margin-top:8px}
+h2{font-size:1.3rem;margin:0 0 12px}
+h3{font-size:1.05rem;margin:20px 0 6px}
+p{margin:0 0 10px}
+ul,ol{padding-left:1.3em;margin:0 0 10px}
+li{margin-bottom:3px}
+.muted{color:var(--muted)}
+.small{font-size:.88rem}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86em;background:var(--surface2);padding:1px 5px;border-radius:4px;word-break:break-all}
+.badge{display:inline-block;font-size:.72rem;line-height:1.5;padding:0 7px;border-radius:3px;margin-right:4px;vertical-align:1px;white-space:nowrap}
+.b-tbd{background:var(--tbd-bg);color:var(--tbd-text)}
+.b-wip{background:var(--snip-bg);color:var(--snip-text)}
+.b-ok{background:var(--badge-bg);color:var(--badge-text)}
+.who{display:grid;gap:12px;grid-template-columns:1fr}
+@media (min-width:760px){.who{grid-template-columns:repeat(3,1fr)}}
+.box{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 14px;min-width:0}
+.box h3{margin-top:0}
+.warn{background:var(--tbd-bg);color:var(--tbd-text);border-radius:8px;padding:12px 14px;margin:0 0 14px}
+.warn b{color:inherit}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%}
+.t td,.t th{border-bottom:1px solid var(--border);padding:7px 6px;vertical-align:top;text-align:left;font-size:.9rem}
+.t th{color:var(--muted);font-weight:500}
+@media (max-width:640px){
+  .t thead{display:none}
+  .t tr{display:block;border-bottom:1px solid var(--border);padding:8px 0}
+  .t td{display:block;border:0;padding:2px 0}
+  .t td[data-l]::before{content:attr(data-l)"：";color:var(--muted);font-size:.8rem}
+}
+.diagram{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px;margin:8px 0 6px;min-width:0}
+.diagram .mermaid{margin:0;text-align:center;font-family:inherit;white-space:pre-wrap;font-size:.8rem;color:var(--muted)}
+.diagram .mermaid svg{max-width:100%;height:auto}
+.note{font-size:.84rem;color:var(--muted)}
+.arch{display:flex;flex-direction:column;gap:8px}
+.arch .row{display:flex;flex-wrap:wrap;gap:8px;align-items:stretch}
+.arch .n{flex:1 1 200px;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:8px 10px;font-size:.9rem;line-height:1.5}
+.arch .n.hub{background:var(--hub-bg);border-color:var(--accent)}
+.arch .arrow{text-align:center;color:var(--muted);font-size:.85rem}
+footer{padding:24px 0 48px;color:var(--muted);font-size:.85rem}
+.themebtn{float:right;font:inherit;font-size:.8rem;padding:3px 10px;border-radius:999px;border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <button class="themebtn" id="themebtn" type="button">表示切替</button>
+    <a class="back" href="../#design">← 設計ノート（サービス設計タブ）に戻る</a>
+    <h1>受付アプリ 詳細設計（補足）</h1>
+    <p class="sub">朝ご飯会 受付アプリ（<code>app/</code>）/ 2026-11-22 時点の main のコードに基づく</p>
+    <p class="lead">構成・標準の受付と管理画面の画面遷移・データ設計・ダッシュボードの指標・試用モードは、設計ノートの <a href="../#design">サービス設計タブ</a> が正。このページはそこに無い・薄い部分だけを補う。コードから分からないことは <span class="badge b-tbd">未定</span> と書く。</p>
+    <nav class="toc" aria-label="目次">
+      <a href="#neko">1. ネコ受付の画面遷移</a><a href="#report">2. 報告書</a><a href="#api">3. API と認証</a><a href="#infra">4. インフラ/デプロイ</a><a href="#notes">5. 注意点と未定事項</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+<!-- 1. ネコ受付 -->
+<section id="neko">
+  <div class="wrap">
+    <h2>1. ネコ受付（<code>/neko</code>）の画面遷移</h2>
+    <p class="small">ひし形は分岐、点線は自動で戻る動き。操作がないまま 90 秒たつと待ち受けに戻る（待ち受けと最後の画面を除く）。ID は 4桁目を押すと自動で送る。</p>
+    <div class="diagram"><pre class="mermaid">
+flowchart TD
+  A["/neko を開く"] --> M{"試用モード？"}
+  M -- はい --> S["運営: 老人会の名前と、何の会か<br>（自由入力・候補ボタンあり）"]
+  M -- いいえ --> D{"この iPad は登録済み？"}
+  D -- いいえ --> P["受付の合言葉"] --> C
+  D -- はい --> C["老人会を選ぶ"] --> E["開く会を選ぶ"]
+  S --> I
+  E --> I
+  I["待ち受け（寝ているネコ）"] -->|ネコをタップ| F{"ここに来たのは はじめて？"}
+  I -->|運営ボタンを長押し| OP["運営メニュー<br>管理画面へ / 会を変える / 受付にもどる"]
+  F -- はい --> MO1["今日の気分（3択）"] --> CO{"お名前や生まれ年を<br>記録してもいい？"}
+  CO -- はい --> N["名前（ニックネーム可）"] --> G["性別（女 / 男 / こたえない）"] --> T1["ネコの豆知識"] --> B["昭和何年生まれ？<br>（こたえない も可）"] --> R["登録"]
+  CO -- いいえ --> T2["ネコの豆知識"] --> R2["登録（属性は保存しない）"]
+  R --> IDS["あなたの ID は（4桁）"]
+  R2 --> IDS
+  IDS --> BY1["ようこそ！ また会いにきてね"]
+  F -- 来たことある --> MO2["今日の気分（3択）"] --> IDI["ID を押す"]
+  IDI -->|見つからない| IDI
+  IDI -->|今日はもう受付済み| BY2["今日はもう受付ずみだよ"]
+  IDI -->|OK| T3["ネコの豆知識"] --> BY3["おかえりなさい！"]
+  F -- かえる（退出） --> IDO["ID を押す"]
+  IDO -->|見つからない / まだ入室していない| IDO
+  IDO -->|OK| BY4["おつかれさま！"]
+  BY1 -.9秒で自動 / おわる.-> I
+  BY2 -.9秒で自動 / おわる.-> I
+  BY3 -.9秒で自動 / おわる.-> I
+  BY4 -.9秒で自動 / おわる.-> I
+</pre></div>
+    <p class="note">気分は 5（るんるん）・3（ふつう）・1（ゆううつ）の3択で、標準の受付の5段階と同じ列に入る。ネコ受付の退出では帰るときの気分を聞かない（帰るときの気持ちは空になる）。ネコ受付の質問は名前・性別・生まれ年だけで、老人会・市町村・年代などは聞かない。</p>
+    <div class="tw"><table class="t">
+      <thead><tr><th>場面</th><th>分岐と結果</th><th>使う API</th></tr></thead>
+      <tbody>
+        <tr><td data-l="場面"><b>はじめて・同意はい</b></td><td data-l="結果">気分 → 名前 → 性別 → 豆知識 → 生まれ年（昭和の10年刻み → 年。こたえない可）→ 登録 → ID 表示 → 「ようこそ！」</td><td data-l="API"><code>register</code>（consent=true, name, gender, birthYear, mood）</td></tr>
+        <tr><td data-l="場面"><b>はじめて・同意いいえ</b></td><td data-l="結果">気分 → 豆知識 → 登録 → ID 表示 → 「ようこそ！」。名前・性別・生まれ年は消してから送る</td><td data-l="API"><code>register</code>（consent=false, mood）</td></tr>
+        <tr><td data-l="場面"><b>来たことある</b></td><td data-l="結果">気分 → ID。見つからない →「その ID は 見つかりませんでした」で入力し直し / 受付済み →「今日はもう 受付ずみだよ」/ OK → 豆知識 →「おかえりなさい！」</td><td data-l="API"><code>checkin</code>（code, mood）</td></tr>
+        <tr><td data-l="場面"><b>かえる（退出）</b></td><td data-l="結果">ID。見つからない / 今日まだ入室していない（「運営の人に 声をかけてね」）→ 入力し直し / OK →「おつかれさま！」</td><td data-l="API"><code>checkout</code>（code のみ）</td></tr>
+        <tr><td data-l="場面"><b>運営</b></td><td data-l="結果">試用モード: 老人会名と会の種類を自由入力して開始（同じ日・老人会・種類なら同じ会）。通常: 合言葉 → 老人会 → 会を選ぶ。待ち受けの「運営」ボタン長押し（1.5秒）で運営メニュー</td><td data-l="API"><code>POST /api/kiosk/events</code> ほか</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<!-- 2. 報告書 -->
+<section id="report">
+  <div class="wrap">
+    <h2>2. 報告書タブ（<code>/admin/report</code>）</h2>
+    <p class="small">行政・協賛企業に渡す A4 縦の印刷・PDF 用。画面: <code>app/web/src/admin/Report.tsx</code>、集計: <code>app/server/src/domain/report.ts</code>（ダッシュボードの集計 <code>metrics.ts</code> と一緒に <code>GET /api/admin/report</code> で返す）。</p>
+
+    <h3>操作</h3>
+    <ul class="small">
+      <li>期間: 全期間 / 今年度（4月始まり）/ 直近6か月 / 直近3か月</li>
+      <li>外部共有モード（5人未満を隠す）: <b>既定でオン</b>。オフにすると画面に「外に出す資料ではオンに」の注意が出て、印刷の定義欄も「内部用」の文言になる</li>
+      <li>題名・団体名・運営からのひとことは、その端末のブラウザに覚えておく（サーバーには保存しない）</li>
+      <li>「印刷・PDF に保存」でブラウザの印刷。ページごとに改ページする</li>
+    </ul>
+
+    <h3>構成（印刷のページ順）</h3>
+    <ol class="small">
+      <li><b>表紙と要約:</b> 題名・団体名・対象期間・作成日、主要な数字8つ（開催した回数・延べ参加・実人数・はじめて来た人・もう一度来た人の割合・1人あたりの参加回数・1回あたりの参加・滞在時間の中央値）、自動で作る「まとめ」の文章、運営からのひとこと</li>
+      <li><b>参加の推移（月ごと）:</b> 延べ参加（はじめて / 2回目以上）の積み上げ棒と実人数の線、月ごとの表。<b>会の種類・主催（老人会）ごと</b>の開催回数・延べ参加・1回あたり</li>
+      <li><b>どんな人が来ているか:</b> 年齢層・性別、非会員・一人暮らし・杖や手押し車などで来た人の割合、担い手の人数。<b>気分の変化</b>（良くなった / 変わらない / 下がった人の割合、平均の変化、来たとき・帰るときの分布）</li>
+      <li><b>どこから来ているか:</b> 大阪府の市町村地図（実人数）。市町村が分かる人がいないときはこのページを出さない</li>
+      <li><b>数字の出し方と個人情報の扱い</b></li>
+    </ol>
+
+    <h3>報告書だけの指標の定義（コードから）</h3>
+    <div class="tw"><table class="t">
+      <thead><tr><th>指標</th><th>計算</th></tr></thead>
+      <tbody>
+        <tr><td data-l="指標"><b>月ごとの推移</b></td><td data-l="計算">期間内の会がある月ごとに、開催回数・延べ参加・実人数・はじめて来た人（全期間で最初の出席がその会の人）</td></tr>
+        <tr><td data-l="指標"><b>もう一度来た人の割合（再来率）</b></td><td data-l="計算">期間中にはじめて来た人のうち、その後の日付の会にも来た人の割合。後の会は期間外でも数える。期間の終わりごろに初めて来た人は低めに出る</td></tr>
+        <tr><td data-l="指標"><b>滞在時間</b></td><td data-l="計算">受付時刻〜退出時刻（分）。退出を記録した出席だけで、<b>5分未満（押し間違い）と12時間超（退出の押し忘れ）を除く</b>。平均と中央値を出し、表紙には中央値を載せる</td></tr>
+        <tr><td data-l="指標"><b>年齢層</b></td><td data-l="計算">同意した人（実人数）だけ。生まれ年があれば「作成日の年 − 生まれ年」で 65歳未満 / 65〜74歳（前期高齢者）/ 75〜84歳 / 85歳以上 に分ける（誕生日前の人は1歳多くなりうる）。生まれ年がなければ標準の受付で選んだ年代、どちらもなければ未回答</td></tr>
+        <tr><td data-l="指標"><b>会の種類・主催ごと</b></td><td data-l="計算">会の <code>kind</code> / <code>host</code> ごとの開催回数・延べ参加・1回あたり（小数1桁）。主催が空なら「（未設定）」</td></tr>
+        <tr><td data-l="指標"><b>まとめの文章</b></td><td data-l="計算">数字から自動で作る。来たときの気分で「いい」「すごくいい」の割合、両方答えた人の気分の平均（来たとき → 帰るとき）を含む</td></tr>
+      </tbody>
+    </table></div>
+    <p class="note">そのほかの数字（実人数・はじめて・非会員・一人暮らし・担い手・気分の変化・市町村）はダッシュボードと同じ計算（定義はサービス設計タブの「ダッシュボードの指標」）。</p>
+
+    <h3>5人未満を隠す範囲</h3>
+    <p class="small">隠すのは、年齢層・性別の内訳と市町村地図のうち 5人未満の区分（「—」・斜線）。主要な数字、月ごとの表、会の種類・主催ごとの表、気分の分布は人数が少なくても隠さない。</p>
+  </div>
+</section>
+
+<section id="api">
+  <div class="wrap">
+    <h2>3. API 一覧と認証</h2>
+    <p class="small">定義: <code>app/server/src/http/app.ts</code>（受付・管理）、<code>auth.ts</code>（ログイン）。すべて JSON。</p>
+
+    <h3>認証のしくみ</h3>
+    <div class="tw"><table class="t">
+      <thead><tr><th>方式</th><th>誰が使う</th><th>中身</th></tr></thead>
+      <tbody>
+        <tr><td data-l="方式"><b>端末 Cookie</b></td><td data-l="誰が">受付の iPad</td><td data-l="中身">受付の合言葉を一度入れると、署名付き Cookie（180日）を渡す。合言葉を変えると古い端末は使えなくなる。5回まちがえるとその接続元は5分待ち</td></tr>
+        <tr><td data-l="方式"><b>受付トークン</b></td><td data-l="誰が">QR から開いた端末</td><td data-l="中身">会ごとのランダムな文字列。管理画面「開催」の QR（<code>/kiosk?e=会ID&amp;t=トークン</code>）で開くと、その会だけ受付できる（<code>x-kiosk-token</code> ヘッダー）</td></tr>
+        <tr><td data-l="方式"><b>試用モード</b></td><td data-l="誰が">全員</td><td data-l="中身">環境変数 <code>ADMIN_AUTH=none</code>。管理画面がログインなしになり、受付も端末登録なしで使え、受付画面からその日の会を作れる</td></tr>
+        <tr><td data-l="方式"><b>Google ログイン</b></td><td data-l="誰が">運営</td><td data-l="中身">Google の ID トークンを検証し、許可リスト（<code>ADMIN_EMAILS</code>）のメールだけ署名付き Cookie（8時間）を渡す。OAuth クライアント ID は <code>GOOGLE_CLIENT_ID</code></td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>受付用（<code>/api/kiosk/…</code>）</h3>
+    <div class="tw"><table class="t">
+      <thead><tr><th>メソッドとパス</th><th>何をする</th><th>必要な認証</th></tr></thead>
+      <tbody>
+        <tr><td data-l="パス"><code>POST /api/kiosk/device</code></td><td data-l="何を">合言葉を確かめて端末を登録</td><td data-l="認証">合言葉</td></tr>
+        <tr><td data-l="パス"><code>GET /api/kiosk/clubs</code></td><td data-l="何を">老人会の一覧</td><td data-l="認証">端末 Cookie（試用モードは不要）</td></tr>
+        <tr><td data-l="パス"><code>GET /api/kiosk/events?club=</code></td><td data-l="何を">その老人会の直近60日の会</td><td data-l="認証">端末 Cookie（試用モードは不要）</td></tr>
+        <tr><td data-l="パス"><code>POST /api/kiosk/events</code></td><td data-l="何を">今日の会を始める（同じ日・老人会・種類なら同じ会を返す）</td><td data-l="認証">試用モードのときだけ使える</td></tr>
+        <tr><td data-l="パス"><code>GET /api/kiosk/events/:id/session</code></td><td data-l="何を">会の情報と選択肢</td><td data-l="認証">端末 Cookie か受付トークン</td></tr>
+        <tr><td data-l="パス"><code>POST /api/kiosk/events/:id/register</code></td><td data-l="何を">はじめての人を登録して出席にする（ID を返す）</td><td data-l="認証">同上</td></tr>
+        <tr><td data-l="パス"><code>POST /api/kiosk/events/:id/checkin</code></td><td data-l="何を">ID で受付（結果: ok / already / unknown）</td><td data-l="認証">同上</td></tr>
+        <tr><td data-l="パス"><code>POST /api/kiosk/events/:id/checkout</code></td><td data-l="何を">ID で退出（結果: ok / not-checked-in / unknown）</td><td data-l="認証">同上</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>管理用（<code>/api/admin/…</code>・すべて管理者の認証が必要）</h3>
+    <div class="tw"><table class="t">
+      <thead><tr><th>メソッドとパス</th><th>何をする</th></tr></thead>
+      <tbody>
+        <tr><td data-l="パス"><code>GET /me</code></td><td data-l="何を">ログイン中のメール（試用モードは「認証なし」）</td></tr>
+        <tr><td data-l="パス"><code>GET / PUT /kiosk-passcode</code></td><td data-l="何を">受付の合言葉が設定済みか / 設定（4文字以上）</td></tr>
+        <tr><td data-l="パス"><code>GET / POST /events</code>、<code>GET / PATCH /events/:id</code></td><td data-l="何を">会の一覧（出席数つき）・作成・詳細（出席者）・変更</td></tr>
+        <tr><td data-l="パス"><code>PATCH / DELETE /attendances/:id</code></td><td data-l="何を">出席者の役割の変更・出席の取り消し</td></tr>
+        <tr><td data-l="パス"><code>GET /participants</code></td><td data-l="何を">参加者の一覧（名前を含む）</td></tr>
+        <tr><td data-l="パス"><code>GET / PUT /options</code></td><td data-l="何を">市町村・老人会の選択肢（PUT は全件入れ替え）</td></tr>
+        <tr><td data-l="パス"><code>GET /report?from=&amp;to=&amp;kind=&amp;suppress=</code></td><td data-l="何を">報告書用の集計（ダッシュボードの集計＋報告書だけの指標）。<b>既定で5人未満を隠す</b>（<code>suppress=0</code> のときだけ隠さない）</td></tr>
+        <tr><td data-l="パス"><code>GET /dashboard?from=&amp;to=&amp;kind=&amp;suppress=</code></td><td data-l="何を">集計（主要指標・開催ごとの推移・市町村×月・属性の内訳・気持ちの変化）。<code>suppress=1</code> で5人未満を隠す</td></tr>
+        <tr><td data-l="パス"><code>GET /export/participants.csv</code> ほか <code>attendances.csv</code>・<code>events.csv</code></td><td data-l="何を">CSV（名前は含めない）</td></tr>
+        <tr><td data-l="パス"><code>GET / POST / DELETE /demo</code></td><td data-l="何を">デモデータの有無・投入・削除（会場「（デモデータ）」、名前が「デモ 」で始まるものを入れる・消す）</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>その他</h3>
+    <ul class="small">
+      <li><code>GET /api/health</code>: 動作確認（デプロイ後に CI が叩く）</li>
+      <li><code>GET /api/auth/config</code>: Google のクライアント ID と試用モードかどうか（受付・ネコ受付も試用モードの判定に使う）</li>
+      <li><code>POST /api/auth/google</code>・<code>POST /api/auth/logout</code>: ログイン・ログアウト</li>
+    </ul>
+  </div>
+</section>
+
+<!-- 4. インフラ -->
+<section id="infra">
+  <div class="wrap">
+    <h2>4. インフラとデプロイ（詳細）</h2>
+    <p class="small">構成図はサービス設計タブの「システム構成」。ここではコードに書かれた設定値と手順を補う。</p>
+    <div class="tw"><table class="t">
+      <thead><tr><th>項目</th><th>中身</th><th>出どころ</th></tr></thead>
+      <tbody>
+        <tr><td data-l="項目"><b>コンテナ</b></td><td data-l="中身">Node.js 24。1段目で画面（web）とサーバー（server）をビルドし、2段目に成果物とマイグレーションだけ入れる。<code>node</code> ユーザーで実行</td><td data-l="出どころ"><code>app/Dockerfile</code></td></tr>
+        <tr><td data-l="項目"><b>Cloud Run</b></td><td data-l="中身">サービス名 <code>choko-checkin</code>、asia-northeast1、インスタンス 0〜2、メモリ 512MiB、誰でもアクセスできる設定（認証はアプリ側）</td><td data-l="出どころ"><code>app/deploy/gcp.sh</code></td></tr>
+        <tr><td data-l="項目"><b>Cloud SQL</b></td><td data-l="中身">インスタンス <code>choko-db</code>、PostgreSQL 16、db-f1-micro、10GB（自動で増える）、DB 名 <code>choko</code></td><td data-l="出どころ">同上</td></tr>
+        <tr><td data-l="項目"><b>秘密情報</b></td><td data-l="中身">Secret Manager の <code>database-url</code>・<code>session-secret</code> を環境変数 <code>DATABASE_URL</code>・<code>SESSION_SECRET</code> として渡す。本番では SESSION_SECRET が32文字未満だと起動しない</td><td data-l="出どころ"><code>gcp.sh</code>・<code>server/src/index.ts</code></td></tr>
+        <tr><td data-l="項目"><b>環境変数</b></td><td data-l="中身"><code>ADMIN_AUTH</code>（<code>none</code> で試用モード）、<code>ADMIN_EMAILS</code>、<code>GOOGLE_CLIENT_ID</code>、<code>AUTH_DEV_BYPASS=1</code>（本番以外で管理者ログインを省く・開発用）、<code>PGLITE_DIR</code>、<code>PORT</code>（既定 8080）</td><td data-l="出どころ"><code>server/src/index.ts</code></td></tr>
+        <tr><td data-l="項目"><b>手元の DB</b></td><td data-l="中身"><code>DATABASE_URL</code> がなければ PGlite（既定 <code>.data/pglite</code>、テストはメモリ）。本番と同じマイグレーションを起動時に当てる</td><td data-l="出どころ"><code>server/src/db/client.ts</code></td></tr>
+        <tr><td data-l="項目"><b>CI/CD</b></td><td data-l="中身">main への push（<code>app/**</code>・<code>reception/**</code>・ワークフロー自身が変わったとき）か手動実行で起動。push に含まれる全コミットの差分で、アプリと旧試作のどちらをデプロイするか決める。テスト（<code>npm test</code>・ビルド・<code>reception/core.test.js</code>）が通ったものだけ <code>gcloud run deploy --source</code> し、最後に <code>/api/health</code> を確認。環境変数・秘密情報・DB 接続は既存の設定を引き継ぐ</td><td data-l="出どころ"><code>.github/workflows/deploy.yml</code></td></tr>
+        <tr><td data-l="項目"><b>GCP 認証（CI）</b></td><td data-l="中身">鍵なしの Workload Identity 連携。このリポジトリの main ブランチからだけ許可。デプロイ用サービスアカウント <code>github-deployer</code>。リポジトリ変数 <code>GCP_PROJECT_ID</code>・<code>GCP_REGION</code>・<code>GCP_DEPLOY_SA</code>・<code>GCP_WIF_PROVIDER</code></td><td data-l="出どころ"><code>gcp.sh setup-cd</code></td></tr>
+        <tr><td data-l="項目"><b>手で行う操作</b></td><td data-l="中身"><code>gcp.sh</code> の setup（プロジェクト・DB・秘密情報の作成）/ deploy / deploy-reception / setup-cd / set-client-id / set-admins。課金が発生するため人が実行する</td><td data-l="出どころ"><code>gcp.sh</code></td></tr>
+        <tr><td data-l="項目"><b>セキュリティヘッダー</b></td><td data-l="中身">全応答に <code>X-Robots-Tag: noindex, nofollow</code>。CSP は自サイトと Google ログイン（accounts.google.com）・Google Fonts だけ許可</td><td data-l="出どころ"><code>server/src/index.ts</code></td></tr>
+        <tr><td data-l="項目"><b>GitHub Pages</b></td><td data-l="中身">このサイト（index.html・design/・checkin/・reception/・neko/）。静的ファイルだけで本番 DB にはつながらない。reception/・neko/ の試作はその端末のブラウザにだけ保存</td><td data-l="出どころ">リポジトリ</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<!-- 5. 注意点 -->
+<section id="notes">
+  <div class="wrap">
+    <h2>5. 注意点と未定事項</h2>
+    <h3>コードを読んで分かった注意点</h3>
+    <ul class="small">
+      <li><b>ID が 5桁になる問題:</b> ID は「今ある最大の番号 + 1」を 4桁にゼロ埋めして作る（同時登録でぶつかったら最大5回取り直す）。9999人を超えると 10000 のような 5桁になるが、受付の ID 入力は 1〜4桁しか受け付けないため、その人は ID で受付・退出できない。また番号の最大値を文字列として比べているため、5桁が混ざると次の番号が正しく作れないおそれがある</li>
+      <li><b>ネコ受付の退出では帰りの気分を取らない:</b> 退出の API に気分を送らないため、帰るときの気分は空になる。気分の変化（来たとき → 帰るとき）は標準の受付で退出した人だけで計算される</li>
+      <li><b>試用モードでは受付も端末登録が要らない:</b> <code>ADMIN_AUTH=none</code> にすると管理画面だけでなく受付も合言葉なしで使え、<code>POST /api/kiosk/events</code> で誰でもその日の会を作れる（入力した老人会名は選択肢にも加わる）</li>
+      <li><b>参加者 CSV に生まれ年が入る:</b> CSV に名前は含めないが、生まれ年は含む（年代・性別・市町村・老人会なども入る）。外に渡すときは注意</li>
+      <li><b>報告書で隠さない数字がある:</b> 月ごとの表・会の種類/主催ごとの表・気分の分布は、外部共有モードでも5人未満を隠さない（<a href="#report">2.</a>）</li>
+      <li><b>合言葉の入力失敗の制限はサーバーのメモリ上:</b> 5回まちがえると5分待ちになるが、記録はインスタンスごとのメモリにあり、再起動や別インスタンスでは数え直しになる</li>
+    </ul>
+    <h3>未定事項（コードからは分からない・決まっていない）</h3>
+    <ul class="small">
+      <li><span class="badge b-tbd">未定</span> 9999人を超えたときの ID の扱い</li>
+      <li><span class="badge b-tbd">未定</span> ネコ受付でも帰りの気分を取るか</li>
+      <li><span class="badge b-tbd">未定</span> 個人情報の保存期間と、本人からの削除の依頼への対応（参加者を1人だけ消す画面・API は今はない。出席の取り消しはできる）</li>
+      <li><span class="badge b-tbd">未定</span> DB のバックアップの方針、月々の費用</li>
+      <li><span class="badge b-tbd">未定</span> 旧試作（<code>choko-reception</code>）の公開 URL と、今も使うかどうか</li>
+      <li>認証方式・受付の種類・年代と生まれ年の扱いなどは、サービス設計タブの「決めていないこと」を参照</li>
+    </ul>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>読んだコード: <code>app/server/src/</code>（index.ts・http/app.ts・http/auth.ts・db/・domain/metrics.ts・domain/report.ts）、<code>app/server/drizzle/</code>、<code>app/web/src/</code>（main.tsx・kiosk/・neko/・admin/Report.tsx ほか）、<code>app/Dockerfile</code>、<code>app/deploy/gcp.sh</code>、<code>.github/workflows/deploy.yml</code>。コードが変わったらこのページも直す。</p>
+    <p><a href="../#design">サービス設計タブへ戻る</a></p>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<script>
+(function(){
+  var root=document.documentElement,btn=document.getElementById("themebtn");
+  try{var saved=localStorage.getItem("theme");if(saved)root.setAttribute("data-theme",saved);}catch(e){}
+  var blocks=[].slice.call(document.querySelectorAll(".mermaid"));
+  var sources=blocks.map(function(b){return b.textContent;});
+  function v(n){return getComputedStyle(root).getPropertyValue(n).trim();}
+  function render(){
+    if(!window.mermaid)return;
+    blocks.forEach(function(b,i){b.removeAttribute("data-processed");b.textContent=sources[i];});
+    window.mermaid.initialize({startOnLoad:false,securityLevel:"strict",theme:"base",
+      flowchart:{useMaxWidth:true,htmlLabels:true,curve:"basis"},
+      themeVariables:{fontFamily:"Noto Sans JP, Hiragino Sans, sans-serif",fontSize:"14px",
+        primaryColor:v("--surface"),primaryTextColor:v("--text"),primaryBorderColor:v("--accent"),
+        lineColor:v("--muted"),secondaryColor:v("--hub-bg"),tertiaryColor:v("--surface2"),
+        background:v("--surface"),mainBkg:v("--surface"),nodeBorder:v("--accent"),
+        edgeLabelBackground:v("--surface2"),textColor:v("--text")}});
+    window.mermaid.run({nodes:blocks}).catch(function(){});
+  }
+  render();
+  btn.addEventListener("click",function(){
+    var cur=root.getAttribute("data-theme");
+    var dark=cur?cur==="dark":window.matchMedia("(prefers-color-scheme: dark)").matches;
+    var next=dark?"light":"dark";root.setAttribute("data-theme",next);
+    try{localStorage.setItem("theme",next);}catch(e){}
+    render();
+  });
+})();
+</script>
+</body>
+</html>
