@@ -129,6 +129,12 @@ main section.panel{border-bottom:0}
 .flow{display:flex;flex-wrap:wrap;gap:8px;align-items:stretch}
 .flow span{flex:1 1 120px;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:8px 10px;text-align:center;font-size:.92rem;line-height:1.4;position:relative}
 .flow small{color:var(--muted)}
+
+.shots{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));margin-top:10px}
+.shot{margin:0;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:6px;min-width:0}
+.shot.wide{grid-column:1/-1}
+.shot img{display:block;width:100%;height:auto;border-radius:4px}
+.shot figcaption{font-size:.82rem;color:var(--muted);padding:6px 2px 2px;line-height:1.5}
 .kpi td,.kpi th{white-space:nowrap}
 @media (max-width:600px){.kpi td,.kpi th{white-space:normal}}
 </style>
@@ -154,6 +160,8 @@ main section.panel{border-bottom:0}
 
 <div class="layout">
 <nav class="sidenav" id="sidenav" aria-label="ページ内タブ">
+  <div class="grp">受付アプリ</div>
+  <a href="#appguide">使い方</a>
   <div class="grp">プロジェクト設計</div>
   <a href="#breakfast">朝ご飯会</a>
   <a href="#plan">検証計画</a>
@@ -174,6 +182,70 @@ main section.panel{border-bottom:0}
   <a href="#sources">出典一覧</a>
 </nav>
 <main>
+<section id="appguide" class="panel">
+  <div class="wrap">
+    <h2>受付アプリの使い方</h2>
+    <p class="lead2">朝ご飯会の受付アプリ（試用版）の画面の流れと、どこで何を入力・確認できるかのまとめ。iPad で受付し、記録は管理画面のダッシュボードで見る。</p>
+    <p class="small"><span class="badge b-tbd">試用モード</span> ログインなしで使える。URL を知っている人は誰でも管理画面（名前など）を見られるので、URL は運営の中だけで共有する。画面の写真は架空のサンプルデータ。</p>
+
+    <h3 style="margin-top:20px">URL</h3>
+    <div class="tw"><table class="types-table">
+      <thead><tr><th>使う場面</th><th>URL</th><th>使う人</th></tr></thead>
+      <tbody>
+        <tr><td data-l="場面"><b>受付（iPad）</b></td><td data-l="URL"><a href="checkin/">checkin/</a>（このサイト内の入口。https://choko-checkin-r4inbionxq-an.a.run.app/kiosk に移動）</td><td data-l="使う人">運営のシニア・参加者</td></tr>
+        <tr><td data-l="場面"><b>管理画面</b></td><td data-l="URL">https://choko-checkin-r4inbionxq-an.a.run.app/admin</td><td data-l="使う人">運営（学生インターン など）</td></tr>
+      </tbody>
+    </table></div>
+    <p class="small muted" style="margin-top:6px">iPad では Safari で受付の URL を開き、共有ボタン →「ホーム画面に追加」にすると、アプリのように全画面で使える。</p>
+
+    <h3 style="margin-top:20px">全体の流れ</h3>
+    <div class="flow"><span>① 運営が会を始める<br><small>老人会 → 会の種類 → 次回の日付</small></span><span>② ようこそ<br><small>今の気持ち</small></span><span>③ 受付<br><small>はじめての方 / 2回目からの方</small></span><span>④ 退出<br><small>帰るときの気持ち</small></span><span>⑤ 管理画面で見る<br><small>ダッシュボード・開催・参加者</small></span></div>
+
+    <h3 style="margin-top:24px">① 運営が会を始める（受付の最初）</h3>
+    <p class="small">iPad で受付を開くと、まず運営の人が3つ入れる。同じ日・同じ老人会・同じ種類なら、新しく作らずに同じ会を開く（iPad を2台使っても同じ会にまとまる）。</p>
+    <div class="shots"><figure class="shot"><img src="guide/img/k1_club.jpg" alt="1/3 どの老人会の会か。一覧から選ぶか「＋ 老人会の名前を入れる」" loading="lazy"><figcaption>1/3 どの老人会の会か。一覧から選ぶか「＋ 老人会の名前を入れる」</figcaption></figure><figure class="shot"><img src="guide/img/k2_kind.jpg" alt="2/3 何の会か（朝ご飯会・映画会・ご飯会・その他）" loading="lazy"><figcaption>2/3 何の会か（朝ご飯会・映画会・ご飯会・その他）</figcaption></figure><figure class="shot"><img src="guide/img/k3_next.jpg" alt="3/3 次回の日付。参加カードに書かれる。未定なら「まだ決まっていない」" loading="lazy"><figcaption>3/3 次回の日付。参加カードに書かれる。未定なら「まだ決まっていない」</figcaption></figure></div>
+
+    <h3 style="margin-top:24px">② ようこそ・今の気持ち</h3>
+    <p class="small">ようこその画面が受付の待ち受けになる。参加者が画面を押すと、今の気持ちを5つの表情から選ぶ（来たときの気持ちとして記録）。右上の「読み上げ」をオンにすると質問を声で読む。左下は退出、右下は運営用の「会を選び直す」。</p>
+    <div class="shots"><figure class="shot"><img src="guide/img/k4_welcome.jpg" alt="ようこそ（待ち受け）" loading="lazy"><figcaption>ようこそ（待ち受け）</figcaption></figure><figure class="shot"><img src="guide/img/k5_mood.jpg" alt="今の気持ち（表情がゆっくり揺れる。選ぶと弾む）" loading="lazy"><figcaption>今の気持ち（表情がゆっくり揺れる。選ぶと弾む）</figcaption></figure><figure class="shot"><img src="guide/img/k6_choose.jpg" alt="はじめての方 / 2回目からの方" loading="lazy"><figcaption>はじめての方 / 2回目からの方</figcaption></figure></div>
+
+    <h3 style="margin-top:24px">③ 受付：はじめての方</h3>
+    <p class="small">1画面に1問。答えると自動で次へ進み、「戻る」はいつでも押せる。質問は順に、記録の同意 → 名前 → 老人会 → 町 → きっかけ → 年代 → 性別 → 一人暮らし → 来た手段（最後の2つは「とばす」可）。同意しない人は名前も含めて何も保存しない。最後に ID（4桁）と参加カード（QR・次回の日付）が出る。</p>
+    <div class="shots"><figure class="shot"><img src="guide/img/k7_consent.jpg" alt="記録の同意" loading="lazy"><figcaption>記録の同意</figcaption></figure><figure class="shot"><img src="guide/img/k8_name.jpg" alt="名前（ニックネームでも可）" loading="lazy"><figcaption>名前（ニックネームでも可）</figcaption></figure><figure class="shot"><img src="guide/img/k9_club_q.jpg" alt="老人会（入っていない も選べる）" loading="lazy"><figcaption>老人会（入っていない も選べる）</figcaption></figure><figure class="shot"><img src="guide/img/k10_done.jpg" alt="完了：ID と参加カード" loading="lazy"><figcaption>完了：ID と参加カード</figcaption></figure></div>
+
+    <h3 style="margin-top:24px">③ 受付：2回目からの方</h3>
+    <p class="small">ID を数字のボタンで押す（参加カードの QR をカメラで読むこともできる）→「おかえりなさい、○○さん！」。同じ会で2回受付しても二重には記録されない。</p>
+    <div class="shots"><figure class="shot"><img src="guide/img/k11_id.jpg" alt="ID を押す" loading="lazy"><figcaption>ID を押す</figcaption></figure><figure class="shot"><img src="guide/img/k12_back.jpg" alt="受付完了" loading="lazy"><figcaption>受付完了</figcaption></figure></div>
+
+    <h3 style="margin-top:24px">④ 退出</h3>
+    <p class="small">ようこその画面の「お帰りの方（退出）」→ ID → 帰るときの気持ち → 次回の日付を表示。来たときと帰るときの気持ちの変化がダッシュボードに出る。完了画面は12〜15秒で自動でようこその画面に戻る。</p>
+    <div class="shots"><figure class="shot"><img src="guide/img/k13_outmood.jpg" alt="今日はどうでしたか？" loading="lazy"><figcaption>今日はどうでしたか？</figcaption></figure><figure class="shot"><img src="guide/img/k14_bye.jpg" alt="退出完了・次回の日付" loading="lazy"><figcaption>退出完了・次回の日付</figcaption></figure></div>
+
+    <h3 style="margin-top:24px">⑤ 管理画面</h3>
+    <div class="tw"><table class="types-table">
+      <thead><tr><th>タブ</th><th>できること</th></tr></thead>
+      <tbody>
+        <tr><td data-l="タブ"><b>ダッシュボード</b></td><td data-l="できること">期間（全期間・3か月・6か月・1年）と会の種類で絞り込み。主要な数字（参加した人数・はじめて来た人・リピート率・担い手・非会員・一人暮らし・杖や手押し車など）、開催ごとの新規/リピート、<b>気持ちの変化</b>、<b>地域ごとの活性度ヒートマップ</b>（町×月。延べ参加回数・人数・はじめて・1人あたり回数・担い手を切り替え）、属性の内訳。「外部共有モード」で5人未満の値を隠し、「印刷・PDF」で企業や行政への資料にできる</td></tr>
+        <tr><td data-l="タブ"><b>開催</b></td><td data-l="できること">会の一覧と出席者（ID・名前・気持ち・退出時刻）。出席者の役割を「参加 / 準備を手伝った / 担当」に変える（担い手の数に反映）、間違えた出席の取り消し。日付を指定して会を作ることもできる</td></tr>
+        <tr><td data-l="タブ"><b>参加者</b></td><td data-l="できること">登録した人の一覧（名前・属性）。参加者・出席・開催の CSV ダウンロード（CSV には名前を含めない）</td></tr>
+        <tr><td data-l="タブ"><b>設定</b></td><td data-l="できること">受付で選ぶ「町名」と「老人会」の一覧（1行に1つ。並び順＝受付の表示順）。老人会は受付で新しく入力した名前も自動で加わる。「受付の合言葉」は試用モードでは使わない</td></tr>
+      </tbody>
+    </table></div>
+    <div class="shots"><figure class="shot wide"><img src="guide/img/a1b_heat.jpg" alt="地域ごとの活性度ヒートマップ（軸を切り替え）" loading="lazy"><figcaption>地域ごとの活性度ヒートマップ（軸を切り替え）</figcaption></figure></div>
+    <div class="shots"><figure class="shot"><img src="guide/img/a2_events.jpg" alt="開催：出席者と役割" loading="lazy"><figcaption>開催：出席者と役割</figcaption></figure><figure class="shot"><img src="guide/img/a3_participants.jpg" alt="参加者：一覧と CSV" loading="lazy"><figcaption>参加者：一覧と CSV</figcaption></figure><figure class="shot"><img src="guide/img/a4_settings.jpg" alt="設定：町名・老人会" loading="lazy"><figcaption>設定：町名・老人会</figcaption></figure></div>
+    <div class="shots"><figure class="shot wide"><img src="guide/img/a1_dashboard.jpg" alt="ダッシュボード全体（スクロールした全体）" loading="lazy"><figcaption>ダッシュボード全体（スクロールした全体）</figcaption></figure></div>
+
+    <h3 style="margin-top:24px">運営の段取り（例）</h3>
+    <ol class="small">
+      <li>事前に管理画面の「設定」で町名と老人会を登録する（老人会は当日入力してもよい）</li>
+      <li>当日、iPad で受付を開き、老人会 → 会の種類 → 次回の日付 を入れる</li>
+      <li>ようこその画面のまま入口に置く。迷う人には担当が代わりに押す</li>
+      <li>帰りに「お帰りの方（退出）」で ID と気持ちを入れてもらう</li>
+      <li>会のあと、管理画面の「開催」で準備・担当をした人の役割を付ける</li>
+    </ol>
+  </div>
+</section>
+
 <section id="breakfast" class="panel">
   <div class="wrap">
     <h2>朝ご飯会</h2>
