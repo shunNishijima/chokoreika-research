@@ -155,6 +155,7 @@ main section.panel{border-bottom:0}
 <div class="layout">
 <nav class="sidenav" id="sidenav" aria-label="ページ内タブ">
   <div class="grp">プロジェクト設計</div>
+  <a href="#breakfast">朝ご飯会</a>
   <a href="#overview">サービス概要</a>
   <a href="#vision">ビジョン・ミッション</a>
   <a href="#current">現状分析</a>
@@ -170,6 +171,43 @@ main section.panel{border-bottom:0}
   <a href="#sources">出典一覧</a>
 </nav>
 <main>
+<section id="breakfast" class="panel">
+  <div class="wrap">
+    <h2>朝ご飯会</h2>
+    <p class="lead2"><b>絞り込んだ1つのプロダクト。</b> 老人会のシニアと大学生が一緒に朝ご飯を食べる会。学生インターンが運営する。</p>
+    <p class="small"><span class="badge b-hyp">草案</span> 役割の分け方は叩き台です。<span class="badge b-snip">要確認</span>「大学生」と「学生インターン」の違いは、参加する側と運営する側として整理しています。</p>
+
+    <h3 style="margin-top:16px">関わる3者</h3>
+    <div class="tw"><table class="types-table">
+      <thead><tr><th>誰</th><th>当日の役割</th><th>事前・事後の役割</th><th>得るもの</th></tr></thead>
+      <tbody>
+        <tr><td data-l="誰"><b>老人会</b></td><td data-l="当日">一緒に食べる。慣れてきたら当番・語り手</td><td data-l="事前・事後">会員への声かけ、会場の確保（<span class="badge b-tbd">TBD</span>）</td><td data-l="得るもの">非会員との接点と新規会員、事務負担の軽減、出席の記録</td></tr>
+        <tr><td data-l="誰"><b>大学生</b></td><td data-l="当日">シニアと同じテーブルで食べて話す</td><td data-l="事前・事後">参加申込のみ</td><td data-l="得るもの"><span class="badge b-tbd">TBD</span> 来る理由を決める必要がある（例: 朝ご飯、地域とのつながり）</td></tr>
+        <tr><td data-l="誰"><b>学生インターン</b></td><td data-l="当日">受付・記録・進行</td><td data-l="事前・事後">企画、集客、ダッシュボードへの入力、引き継ぎ資料の更新</td><td data-l="得るもの">実務経験、活動証明、企業との接点（<span class="badge b-tbd">TBD</span>）</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3 style="margin-top:20px">当日の流れ（案）</h3>
+    <div class="flow"><span>受付<br><small>インターンが出席を記録</small></span><span>朝ご飯<br><small>シニアと大学生が同じテーブル</small></span><span>話す<br><small>お題やシニアの語り</small></span><span>片付け・次回案内<br><small>次の日程をその場で伝える</small></span></div>
+    <p class="small muted" style="margin-top:8px">時刻・所要時間は <span class="badge b-tbd">TBD</span>。大学生が授業前に来られる時間帯かどうかを確認する。</p>
+
+    <h3 style="margin-top:20px">最初の1回までに決めること</h3>
+    <div class="tw"><table class="types-table">
+      <thead><tr><th>項目</th><th>決めること</th><th>担当</th></tr></thead>
+      <tbody>
+        <tr><td data-l="項目">日時・頻度</td><td data-l="決めること">曜日・時刻・開催頻度。毎回同じにする</td><td data-l="担当">TBD</td></tr>
+        <tr><td data-l="項目">場所</td><td data-l="決めること">会場（徒歩圏であること）、調理できるかどうか</td><td data-l="担当">TBD</td></tr>
+        <tr><td data-l="項目">食事</td><td data-l="決めること">誰が作るか・買うか、アレルギーの確認、衛生面のルール</td><td data-l="担当">TBD</td></tr>
+        <tr><td data-l="項目">お金</td><td data-l="決めること">参加費（市内相場は1回300円程度）、食材費、会場費の負担</td><td data-l="担当">TBD</td></tr>
+        <tr><td data-l="項目">保険</td><td data-l="決めること">行事保険・ボランティア保険の加入</td><td data-l="担当">TBD</td></tr>
+        <tr><td data-l="項目">集客</td><td data-l="決めること">老人会の声かけ、大学生への告知経路、非会員への案内方法</td><td data-l="担当">TBD</td></tr>
+        <tr><td data-l="項目">記録</td><td data-l="決めること">受付で取る項目（<a href="#dashboard">ダッシュボード</a>参照）、記録への同意の取り方</td><td data-l="担当">TBD</td></tr>
+        <tr><td data-l="項目">引き継ぎ</td><td data-l="決めること">手順書の置き場所と、インターン交代時の引き継ぎ方</td><td data-l="担当">TBD</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
 <section id="overview" class="panel">
   <div class="wrap">
     <h2>サービス概要</h2>
@@ -187,7 +225,8 @@ main section.panel{border-bottom:0}
       <tbody>
         <tr><td data-l="誰"><b>老人会（豊中）</b></td><td data-l="欲しいもの">持続可能な運営、業務負担の軽減、新規会員</td><td data-l="返せるもの">企画・事務の代行、出席データの記録、若い参加者</td><td data-l="状態">接点あり</td></tr>
         <tr><td data-l="誰"><b>シニア・孤独な人</b></td><td data-l="欲しいもの">居場所、誰かと食べるご飯、外出のきっかけ</td><td data-l="返せるもの">ご飯会・映画会、役割（当番・語り手）</td><td data-l="状態">老人会の人は既に元気で、孤立層には届いていない</td></tr>
-        <tr><td data-l="誰"><b>学生</b></td><td data-l="欲しいもの"><span class="badge b-tbd">TBD</span></td><td data-l="返せるもの">活動証明、企業との接点（案）</td><td data-l="状態">集められていない</td></tr>
+        <tr><td data-l="誰"><b>大学生</b>（参加する側）</td><td data-l="欲しいもの"><span class="badge b-tbd">TBD</span></td><td data-l="返せるもの">朝ご飯、地域とのつながり（案）</td><td data-l="状態">集められていない</td></tr>
+        <tr><td data-l="誰"><b>学生インターン</b>（運営する側）</td><td data-l="欲しいもの"><span class="badge b-tbd">TBD</span></td><td data-l="返せるもの">実務経験、活動証明、企業との接点（案）</td><td data-l="状態"><span class="badge b-tbd">TBD</span></td></tr>
         <tr><td data-l="誰"><b>企業</b></td><td data-l="欲しいもの"><span class="badge b-tbd">TBD</span></td><td data-l="返せるもの">社員ボランティアの場、学生との接点、シニアの声（いずれも仮説）</td><td data-l="状態">協賛が取れていない</td></tr>
         <tr><td data-l="誰"><b>豊中市</b></td><td data-l="欲しいもの">介護予防・孤立対策の受け皿</td><td data-l="返せるもの">参加データ、孤立層の受け皿</td><td data-l="状態"><span class="badge b-tbd">TBD</span></td></tr>
         <tr><td data-l="誰"><b>社協CSW・校区福祉委員</b></td><td data-l="欲しいもの">孤立者を紹介できる先</td><td data-l="返せるもの">「網に掛かった人が行く場所」</td><td data-l="状態">未接触（調査からの提案）</td></tr>
@@ -296,7 +335,7 @@ main section.panel{border-bottom:0}
   <div class="wrap">
     <h2>戦略策定（3つだけやるなら）</h2>
     <p class="small"><span class="badge b-hyp">草案</span> 課題1〜3に対応させています。</p>
-    <div class="focus"><b>結論: 1つのプロダクト「朝ご飯会」に絞る。</b> 試作を並行させず、朝ご飯会を磨く。<br><span class="small muted">以下の3つの戦略は、すべて朝ご飯会に当てはめて進める。開催頻度・場所・参加費は <span class="badge b-tbd">TBD</span>。</span></div>
+    <div class="focus"><b>結論: 1つのプロダクト「<a href="#breakfast">朝ご飯会</a>」に絞る。</b> 大学生・老人会・学生インターンで、朝ご飯会だけを磨く。<br><span class="small muted">以下の3つの戦略は、すべて朝ご飯会に当てはめて進める。開催頻度・場所・参加費は <span class="badge b-tbd">TBD</span>。</span></div>
     <div class="proposal">
       <div class="prop"><h3>1. 記録を仕組みにする</h3><ul><li>朝ご飯会の受付で出席・属性・会員/非会員を入力し、ダッシュボードで可視化する（<a href="#dashboard">ダッシュボード</a>）</li><li>老人会の事務負担を減らし、そのまま引き継ぎ資料にする</li><li>1年目は基準値を取る実験と位置づける</li></ul></div>
       <div class="prop"><h3>2. 型を固定し、シニアを担い手に回す</h3><ul><li>朝ご飯会を「同じ曜日・場所・流れ」で開き、手順をマニュアル化（引き継ぎ資料を兼ねる）</li><li>シニアに当番・語り手を任せ、学生が替わっても回るようにする</li><li>学生には活動証明を返す</li><li>CSW・校区福祉委員から孤立層を紹介してもらう経路を作る</li></ul></div>
