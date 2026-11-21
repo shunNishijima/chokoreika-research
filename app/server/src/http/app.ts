@@ -24,6 +24,7 @@ const registerSchema = z.object({
   trigger: opt(CHOICES.trigger),
   livingAlone: opt(CHOICES.livingAlone),
   mobility: opt(CHOICES.mobility),
+  birthYear: z.number().int().min(1900).max(2030).nullish(),
   mood,
 });
 const codeSchema = z.object({ code: z.string().regex(/^\d{1,4}$/), mood });
@@ -128,7 +129,8 @@ export function createApp({ db, sessionSecret, kioskOpen = false, authenticateAd
     if (!kioskOpen) return c.json({ error: "unauthorized" }, 401);
     const body = z.object({
       club: z.string().trim().min(1).max(40),
-      kind: z.enum(CHOICES.kind as unknown as [string, ...string[]]),
+      // ネコ受付では会の種類を自由に入力できる
+      kind: z.string().trim().min(1).max(40),
       nextDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullish(),
     }).safeParse(await c.req.json().catch(() => null));
     if (!body.success) return c.json({ error: "invalid" }, 400);
@@ -157,7 +159,7 @@ export function createApp({ db, sessionSecret, kioskOpen = false, authenticateAd
     if (!parsed.success) return c.json({ error: "invalid" }, 400);
     const a = parsed.data;
     const attrs = a.consent
-      ? { name: a.name || null, ageGroup: a.ageGroup ?? null, gender: a.gender ?? null, town: a.town ?? null, club: a.club ?? null, trigger: a.trigger ?? null, livingAlone: a.livingAlone ?? null, mobility: a.mobility ?? null }
+      ? { name: a.name || null, ageGroup: a.ageGroup ?? null, gender: a.gender ?? null, town: a.town ?? null, club: a.club ?? null, trigger: a.trigger ?? null, livingAlone: a.livingAlone ?? null, mobility: a.mobility ?? null, birthYear: a.birthYear ?? null }
       : {};
     // ID の重複は一意制約で防ぎ、衝突したら取り直す
     for (let i = 0; i < 5; i++) {

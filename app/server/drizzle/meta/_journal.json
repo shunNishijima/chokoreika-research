@@ -15,6 +15,13 @@
       "when": 1795275484068,
       "tag": "0001_nervous_rumiko_fujikawa",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1795279785459,
+      "tag": "0002_neko_birth_year",
+      "breakpoints": true
     }
   ]
 }

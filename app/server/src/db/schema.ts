@@ -13,6 +13,8 @@ export const participants = pgTable("participants", {
   trigger: text("trigger"),
   livingAlone: text("living_alone"),
   mobility: text("mobility"),
+  // 生まれ年（西暦）。ネコ受付で「昭和何年」を聞く
+  birthYear: integer("birth_year"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
