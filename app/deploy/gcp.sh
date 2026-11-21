@@ -33,7 +33,7 @@ deploy() {
     --allow-unauthenticated \
     --add-cloudsql-instances "$conn" \
     --set-secrets "DATABASE_URL=database-url:latest,SESSION_SECRET=session-secret:latest" \
-    --set-env-vars "^@^ADMIN_EMAILS=${ADMIN_EMAILS:-}@GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-}" \
+    --set-env-vars "^;^ADMIN_EMAILS=${ADMIN_EMAILS:-};GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-}" \
     --min-instances 0 --max-instances 2 --memory 512Mi --quiet
   local url
   url=$(gcloud run services describe "$SERVICE" --project "$PROJECT_ID" --region "$REGION" --format 'value(status.url)')
@@ -98,7 +98,7 @@ case "${1:-}" in
     : "${PROJECT_ID:?先に setup を実行してください}"
     ADMIN_EMAILS=${2:?メールをカンマ区切りで指定してください}
     save_config
-    gcloud run services update "$SERVICE" --project "$PROJECT_ID" --region "$REGION" --update-env-vars "^@^ADMIN_EMAILS=$ADMIN_EMAILS" --quiet
+    gcloud run services update "$SERVICE" --project "$PROJECT_ID" --region "$REGION" --update-env-vars "^;^ADMIN_EMAILS=$ADMIN_EMAILS" --quiet
     ;;
   *)
     sed -n '2,12p' "$0"; exit 1 ;;
