@@ -24,6 +24,17 @@ _ADMIN_AUTH_ENV=${ADMIN_AUTH-__unset__}
 [ -f "$CONFIG" ] && source "$CONFIG"
 [ "$_ADMIN_AUTH_ENV" != "__unset__" ] && ADMIN_AUTH=$_ADMIN_AUTH_ENV
 
+# 作成直後のサービスアカウントは数十秒認識されないことがあるため、失敗したら待ってやり直す
+retry() {
+  local n=0
+  until "$@"; do
+    n=$((n + 1))
+    [ "$n" -ge 6 ] && return 1
+    echo "  ...反映待ち（${n}回目、10秒後にやり直します）" >&2
+    sleep 10
+  done
+}
+
 save_config() {
   cat > "$CONFIG" <<CFG
 PROJECT_ID=$PROJECT_ID
@@ -115,10 +126,10 @@ case "${1:-}" in
     gcloud iam service-accounts describe "$DEPLOY_SA" --project "$PROJECT_ID" >/dev/null 2>&1 || \
       gcloud iam service-accounts create github-deployer --project "$PROJECT_ID" --display-name "GitHub Actions deployer"
     for role in roles/run.admin roles/cloudbuild.builds.editor roles/storage.admin roles/artifactregistry.writer roles/serviceusage.serviceUsageConsumer roles/viewer; do
-      gcloud projects add-iam-policy-binding "$PROJECT_ID" --member "serviceAccount:$DEPLOY_SA" --role "$role" --condition None >/dev/null
+      retry gcloud projects add-iam-policy-binding "$PROJECT_ID" --member "serviceAccount:$DEPLOY_SA" --role "$role" --condition None >/dev/null
     done
     # Cloud Run の実行用アカウントとしてデプロイできるようにする
-    gcloud iam service-accounts add-iam-policy-binding "$RUNTIME_SA" --project "$PROJECT_ID" \
+    retry gcloud iam service-accounts add-iam-policy-binding "$RUNTIME_SA" --project "$PROJECT_ID" \
       --member "serviceAccount:$DEPLOY_SA" --role roles/iam.serviceAccountUser >/dev/null
     echo "== Workload Identity 連携（$REPO の main ブランチだけを許可）"
     gcloud iam workload-identity-pools describe github --location global --project "$PROJECT_ID" >/dev/null 2>&1 || \
@@ -128,7 +139,7 @@ case "${1:-}" in
         --issuer-uri "https://token.actions.githubusercontent.com" \
         --attribute-mapping "google.subject=assertion.sub,attribute.repository=assertion.repository,attribute.ref=assertion.ref" \
         --attribute-condition "assertion.repository=='$REPO' && assertion.ref=='refs/heads/main'"
-    gcloud iam service-accounts add-iam-policy-binding "$DEPLOY_SA" --project "$PROJECT_ID" --role roles/iam.workloadIdentityUser \
+    retry gcloud iam service-accounts add-iam-policy-binding "$DEPLOY_SA" --project "$PROJECT_ID" --role roles/iam.workloadIdentityUser \
       --member "principalSet://iam.googleapis.com/projects/$PROJECT_NUMBER/locations/global/workloadIdentityPools/github/attribute.repository/$REPO" >/dev/null
     echo "== GitHub のリポジトリ変数を設定（秘密情報ではない）"
     gh variable set GCP_PROJECT_ID --repo "$REPO" --body "$PROJECT_ID"
