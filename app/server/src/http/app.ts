@@ -302,7 +302,7 @@ export function createApp({ db, sessionSecret, kioskOpen = false, authenticateAd
     const name = c.req.param("name");
     let csv: string;
     if (name === "participants.csv") {
-      csv = toCSV(await db.select().from(participants).orderBy(asc(participants.code)), ["code", "consent", "ageGroup", "gender", "town", "club", "trigger", "livingAlone", "mobility", "createdAt"]);
+      csv = toCSV(await db.select().from(participants).orderBy(asc(participants.code)), ["code", "consent", "ageGroup", "gender", "town", "club", "trigger", "livingAlone", "mobility", "birthYear", "createdAt"]);
     } else if (name === "attendances.csv") {
       const rows = await db.select({ date: events.date, kind: events.kind, code: participants.code, role: attendances.role, checkedInAt: attendances.checkedInAt, checkedOutAt: attendances.checkedOutAt, moodBefore: attendances.moodBefore, moodAfter: attendances.moodAfter })
         .from(attendances).innerJoin(events, eq(attendances.eventId, events.id)).innerJoin(participants, eq(attendances.participantId, participants.id))
