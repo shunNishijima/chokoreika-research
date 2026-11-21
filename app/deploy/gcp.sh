@@ -91,6 +91,10 @@ case "${1:-}" in
   set-client-id)
     : "${PROJECT_ID:?先に setup を実行してください}"
     GOOGLE_CLIENT_ID=${2:?クライアント ID を指定してください}
+    if [[ ! "$GOOGLE_CLIENT_ID" =~ ^[0-9]+-[a-z0-9]+\.apps\.googleusercontent\.com$ ]]; then
+      echo "クライアント ID の形式ではありません（例: 123456789-abc123.apps.googleusercontent.com）。GCP コンソールの「Google Auth Platform > クライアント」で作成した ID を指定してください。" >&2
+      exit 1
+    fi
     save_config
     gcloud run services update "$SERVICE" --project "$PROJECT_ID" --region "$REGION" --update-env-vars "GOOGLE_CLIENT_ID=$GOOGLE_CLIENT_ID" --quiet
     ;;
