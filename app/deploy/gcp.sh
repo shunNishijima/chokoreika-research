@@ -46,7 +46,7 @@ case "${1:-}" in
   setup)
     : "${BILLING_ACCOUNT:?BILLING_ACCOUNT を指定してください（gcloud billing accounts list で確認）}"
     : "${ADMIN_EMAILS:?ADMIN_EMAILS（管理者の Google アカウントのメール、カンマ区切り）を指定してください}"
-    PROJECT_ID=${PROJECT_ID:-chokoreika-app-$(LC_ALL=C tr -dc 'a-z0-9' </dev/urandom | head -c 5)}
+    PROJECT_ID=${PROJECT_ID:-chokoreika-app-$(openssl rand -hex 3)}
     save_config
     echo "== プロジェクト $PROJECT_ID を作成"
     gcloud projects describe "$PROJECT_ID" >/dev/null 2>&1 || gcloud projects create "$PROJECT_ID" --name "chokoreika app"
