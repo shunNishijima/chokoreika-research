@@ -8,6 +8,7 @@
 #   ./deploy/gcp.sh set-client-id <ID>     # Google ログインの OAuth クライアント ID を設定
 #   ./deploy/gcp.sh set-admins a@x,b@y     # 管理者のメールを変更
 #   ADMIN_AUTH=none ./deploy/gcp.sh deploy # 管理画面を認証なしにする（URL を知っていれば誰でも見られる）
+#   ./deploy/gcp.sh deploy-reception       # 旧試作（reception/、データは端末内）を別サービスとして公開
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -93,6 +94,13 @@ case "${1:-}" in
     : "${PROJECT_ID:?先に setup を実行してください}"
     save_config
     deploy
+    ;;
+  deploy-reception)
+    : "${PROJECT_ID:?先に setup を実行してください}"
+    gcloud run deploy choko-reception --project "$PROJECT_ID" --region "$REGION" --source ../reception \
+      --allow-unauthenticated --port 8080 --min-instances 0 --max-instances 2 --memory 256Mi --quiet
+    echo
+    echo "旧試作の公開URL: $(gcloud run services describe choko-reception --project "$PROJECT_ID" --region "$REGION" --format 'value(status.url)')"
     ;;
   set-client-id)
     : "${PROJECT_ID:?先に setup を実行してください}"
