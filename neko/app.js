@@ -22,60 +22,7 @@
   function on(id, fn) { var el = document.getElementById(id); if (el) el.addEventListener("click", fn); }
   function val(id) { var el = document.getElementById(id); return el ? el.value.trim() : ""; }
 
-  // ---------- ネコの絵（SVG） ----------
-  function walkingCat(fill) {
-    return '<svg viewBox="0 0 130 95" aria-hidden="true"><g stroke="var(--line)" stroke-width="3" stroke-linejoin="round">' +
-      '<path class="tail" d="M24 52 Q4 44 10 18" fill="none" stroke-width="14" stroke-linecap="round"/>' +
-      '<path class="tail" d="M24 52 Q4 44 10 18" fill="none" stroke-width="8" stroke-linecap="round" style="stroke:' + fill + '"/>' +
-      '<rect class="leg" x="30" y="60" width="10" height="26" rx="5" fill="' + fill + '"/>' +
-      '<rect class="leg b" x="44" y="60" width="10" height="26" rx="5" fill="' + fill + '"/>' +
-      '<rect class="leg b" x="72" y="60" width="10" height="26" rx="5" fill="' + fill + '"/>' +
-      '<rect class="leg" x="86" y="60" width="10" height="26" rx="5" fill="' + fill + '"/>' +
-      '<ellipse cx="62" cy="56" rx="40" ry="20" fill="' + fill + '"/>' +
-      '<polygon points="88,30 92,8 104,24" fill="' + fill + '"/><polygon points="108,22 122,8 122,32" fill="' + fill + '"/>' +
-      '<circle cx="106" cy="38" r="19" fill="' + fill + '"/></g>' +
-      '<g class="blink"><ellipse cx="101" cy="35" rx="2.6" ry="3.6" fill="var(--line)"/><ellipse cx="114" cy="35" rx="2.6" ry="3.6" fill="var(--line)"/></g>' +
-      '<polygon points="106,43 110,43 108,46" fill="var(--pink)"/></svg>';
-  }
-
-  function sleepingCat(fill) {
-    return '<svg viewBox="0 0 170 100" aria-hidden="true"><g class="breath" stroke="var(--line)" stroke-width="3" stroke-linejoin="round">' +
-      '<ellipse cx="80" cy="70" rx="58" ry="26" fill="' + fill + '"/>' +
-      '<path d="M26 74 Q40 98 100 94 Q130 92 136 80" fill="none" stroke-width="10" stroke-linecap="round" style="stroke:' + fill + '"/>' +
-      '<polygon points="114,48 118,26 130,42" fill="' + fill + '"/><polygon points="134,42 148,28 148,52" fill="' + fill + '"/>' +
-      '<circle cx="132" cy="62" r="20" fill="' + fill + '"/>' +
-      '<path d="M122 61 q4 4 8 0 M136 61 q4 4 8 0" fill="none" stroke-width="2.5"/></g>' +
-      '<polygon points="132,68 136,68 134,71" fill="var(--pink)"/></svg>';
-  }
-
-  // 正面を向いて座るネコ。mode: "yawn"（あくび）/ "wave"（手をふる）/ "blink"
-  function sittingCat(fill, mode) {
-    var eyes = '<ellipse cx="38" cy="48" rx="4" ry="5.5" fill="var(--line)"/><ellipse cx="62" cy="48" rx="4" ry="5.5" fill="var(--line)"/>';
-    var eyeClass = mode === "yawn" ? "yawneyes" : "blink";
-    return '<svg viewBox="0 0 100 130" aria-hidden="true"><g stroke="var(--line)" stroke-width="3" stroke-linejoin="round">' +
-      '<path class="tail" d="M74 116 Q100 112 94 84" fill="none" stroke-width="9" stroke-linecap="round" style="stroke:' + fill + '"/>' +
-      '<ellipse cx="50" cy="96" rx="30" ry="30" fill="' + fill + '"/>' +
-      (mode === "wave" ? '<ellipse class="wave" cx="82" cy="62" rx="8" ry="16" fill="' + fill + '"/>' : '') +
-      '<polygon points="24,34 26,6 46,24" fill="' + fill + '"/><polygon points="76,34 74,6 54,24" fill="' + fill + '"/>' +
-      '<circle cx="50" cy="48" r="27" fill="' + fill + '"/>' +
-      '<ellipse cx="38" cy="122" rx="9" ry="6" fill="' + fill + '"/><ellipse cx="62" cy="122" rx="9" ry="6" fill="' + fill + '"/></g>' +
-      '<g class="' + eyeClass + '">' + eyes + '</g>' +
-      '<polygon points="47,56 53,56 50,60" fill="var(--pink)"/>' +
-      (mode === "yawn" ? '<ellipse class="yawn" cx="50" cy="64" rx="7" ry="8" fill="#8a2f3a" stroke="var(--line)" stroke-width="2"/>'
-        : '<path d="M44 62 q3 4 6 0 q3 4 6 0" fill="none" stroke="var(--line)" stroke-width="2.2"/>') +
-      '<path d="M20 52 h-12 M20 58 h-12 M80 52 h12 M80 58 h12" stroke="var(--line)" stroke-width="1.6"/></svg>';
-  }
-
-  function face(kind) {
-    var mouth = kind === "good" ? '<path d="M18 38 q14 14 28 0" fill="none" stroke="var(--line)" stroke-width="4" stroke-linecap="round"/>'
-      : kind === "bad" ? '<path d="M20 44 q12 -10 24 0" fill="none" stroke="var(--line)" stroke-width="4" stroke-linecap="round"/>'
-        : '<path d="M20 40 h24" stroke="var(--line)" stroke-width="4" stroke-linecap="round"/>';
-    var bg = kind === "good" ? "#ffd166" : kind === "bad" ? "#a8c5e6" : "#f4e3b2";
-    var extra = kind === "good" ? '<circle cx="32" cy="6" r="0" /><ellipse cx="32" cy="5" rx="14" ry="4" fill="none" stroke="#d9a400" stroke-width="3"/>' : "";
-    return '<svg viewBox="0 0 64 64" aria-hidden="true">' + extra + '<circle cx="32" cy="34" r="26" fill="' + bg + '" stroke="var(--line)" stroke-width="3"/>' +
-      '<circle cx="23" cy="28" r="3.5" fill="var(--line)"/><circle cx="41" cy="28" r="3.5" fill="var(--line)"/>' + mouth + '</svg>';
-  }
-
+  // ネコの絵は cats.js（Cats.*）
   function person(g) {
     var col = g === "女" ? "#e07a8a" : "#5b8bd0";
     var bodyShape = g === "女" ? '<polygon points="50,52 24,104 76,104" fill="' + col + '" stroke="var(--line)" stroke-width="3"/>'
@@ -113,12 +60,11 @@
       '<div id="idle" role="button" aria-label="タップではじめる">' +
       '<div class="floor"></div>' +
       '<div class="title"><div class="club">' + esc(ev.club + "　" + ev.kind) + '</div><div class="tap">タップではじめる</div></div>' +
-      '<div class="hero"><div class="bob">' + sittingCat("var(--cat1)", "blink") + "</div></div>" +
-      '<div class="walker" style="bottom:12vh;animation-duration:22s">' + walkingCat("var(--cat2)") + "</div>" +
-      '<div class="walker" style="bottom:3vh;animation-duration:31s;animation-delay:-12s">' + walkingCat("var(--cat3)") + "</div>" +
-      '<div class="sleeper" style="left:' + (w < 600 ? 4 : 8) + 'vw;bottom:14vh">' + sleepingCat("var(--cat3)") +
-      '<span class="zzz" style="left:120px;top:0">z</span><span class="zzz b" style="left:130px;top:-6px">Z</span><span class="zzz c" style="left:118px;top:-2px">z</span></div>' +
-      '<div class="sitter" style="right:' + (w < 600 ? 4 : 10) + 'vw;bottom:13vh">' + sittingCat("var(--cat2)", "yawn") + "</div>" +
+      '<div class="hero"><div class="bob">' + Cats.sitting("tora", "idle") + "</div></div>" +
+      '<div class="walker" style="bottom:7vh;animation-duration:26s;z-index:2">' + Cats.walking("sabi") + "</div>" +
+      '<div class="walker" style="bottom:0;animation-duration:31s;animation-delay:-12s;z-index:3">' + Cats.walking("shiro") + "</div>" +
+      '<div class="sleeper" style="left:' + (w < 600 ? 4 : 8) + 'vw;bottom:17vh">' + Cats.sleeping("tora") + "</div>" +
+      '<div class="sitter" style="right:' + (w < 600 ? 4 : 10) + 'vw;bottom:17vh">' + Cats.sitting("shiro", "yawn") + "</div>" +
       "</div>" +
       '<button id="op" aria-label="運営メニュー（長押し）">運営（長押し）<span class="fill"></span></button>';
     document.getElementById("idle").addEventListener("click", q1);
@@ -164,7 +110,7 @@
     var moods = [["るんるん", "good"], ["ふつう", "mid"], ["ゆううつ…", "bad"]];
     screen(
       '<div class="q">' + esc(Core.greeting(new Date().getHours())) + "！<br>今日の気分は…？</div>" +
-      '<div class="btns">' + moods.map(function (m, i) { return '<button class="mood" data-i="' + i + '">' + face(m[1]) + "<span>" + m[0] + "</span></button>"; }).join("") + "</div>" +
+      '<div class="btns">' + moods.map(function (m, i) { return '<button class="mood" data-i="' + i + '">' + Cats.face("tora", m[1]) + "<span>" + m[0] + "</span></button>"; }).join("") + "</div>" +
       '<div class="row"><button class="sub" id="b-back">もどる</button></div>'
     );
     app.querySelectorAll("button[data-i]").forEach(function (b) {
@@ -224,7 +170,7 @@
     var t = Core.trivia(Math.floor(Math.random() * Core.TRIVIA.length));
     screen(
       '<div class="q center">ネコの豆知識</div>' +
-      '<div class="center" style="width:150px;margin:0 auto">' + sittingCat("var(--cat1)", "blink") + "</div>" +
+      '<div class="center" style="width:150px;margin:0 auto">' + Cats.sitting("tora", "idle") + "</div>" +
       '<div class="trivia">' + esc(t) + "</div>" +
       '<div class="row"><button class="sub" id="b-back">もどる</button><button class="primary" id="b-next">すすむ</button></div>'
     );
@@ -270,7 +216,7 @@
   function bye(already) {
     screen(
       '<div class="bye"><div class="bubble">また会いにきてね</div>' +
-      '<div class="jump">' + sittingCat("var(--cat1)", "wave") + "</div>" +
+      '<div class="jump">' + Cats.byeCat("tora") + "</div>" +
       (already ? '<p class="hint">今日の受付は もう済んでいます</p>' : '<p class="hint">受付できました</p>') + "</div>" +
       '<div class="row"><button class="primary" id="b-end">おわる</button></div>', { timer: false }
     );
