@@ -596,32 +596,120 @@ main section.panel{border-bottom:0}
 
 <section id="dashboard" class="panel">
   <div class="wrap">
-    <h2>ダッシュボード（可視化・計測）</h2>
-    <p>やることは2つ: <b>データを入力する</b> → <b>データを可視化する</b>。</p>
-    <h3 style="margin-top:12px">目的</h3>
-    <ul class="small">
-      <li><b>老人会</b>: 業務負担を減らす / 新規会員を増やす（マーケティング施策の効果を見る）</li>
-      <li><b>営業</b>: 企業・行政に、参加することのメリットを数字で示す</li>
-      <li><b>引き継ぎ</b>: 伝えるべき情報を人ではなくデータに残す</li>
-      <li class="muted">「豊中市の実証実験のために数値が必要」→ 目的としては不要と判断（メモより）</li>
-    </ul>
-    <h3 style="margin-top:12px">計測項目</h3>
+    <h2>ダッシュボード 要件定義 v0.1</h2>
+    <p class="lead2"><b>ゴール:</b> シニアでも受付で入力でき、出席と属性を集計して、地域ごとの広がりや継続をグラフで見せ、そのまま企業に提案できるダッシュボードを作る。</p>
+    <p class="small"><span class="badge b-hyp">草案</span> チームで確認して確定する。<span class="badge b-tbd">TBD</span> は未決定の項目。</p>
+
+    <h3 style="margin-top:20px">1. 目的と使う人</h3>
     <div class="tw"><table class="types-table">
-      <thead><tr><th>項目</th><th>定義・取り方</th><th>誰の役に立つか</th></tr></thead>
+      <thead><tr><th>使う人</th><th>やること</th><th>見られる範囲</th><th>目的</th></tr></thead>
       <tbody>
-        <tr><td data-l="項目"><b>出席</b></td><td data-l="定義">回ごとの参加者（受付で記録）</td><td data-l="誰に">老人会・営業</td></tr>
-        <tr><td data-l="項目"><b>来たきっかけ</b></td><td data-l="定義">チラシ / 口コミ / 老人会の声かけ / その他（初回に記録）。チラシは配った場所も</td><td data-l="誰に">老人会（集客）・検証計画（口コミの判定）</td></tr>
-        <tr><td data-l="項目"><b>性別</b></td><td data-l="定義">初回に記録</td><td data-l="誰に">老人会（誰に届いていないかを見る）</td></tr>
-        <tr><td data-l="項目"><b>年齢</b></td><td data-l="定義">初回に年代で記録</td><td data-l="誰に">老人会・行政</td></tr>
-        <tr><td data-l="項目"><b>来てる度合い</b></td><td data-l="定義">参加回数・最終参加日・3か月継続</td><td data-l="誰に">老人会（離脱しそうな人への声かけ）</td></tr>
-        <tr><td data-l="項目"><b>非会員の参加率と入会</b></td><td data-l="定義">非会員の参加者 ÷ 参加者、入会した人 ÷ 非会員の参加者</td><td data-l="誰に">老人会（新規会員）</td></tr>
-        <tr><td data-l="項目"><b>企業の人へのメリット</b></td><td data-l="定義"><span class="badge b-tbd">TBD</span> 何を測るか未定義（例: 社員の参加回数、接点数）</td><td data-l="誰に">企業営業</td></tr>
-        <tr><td data-l="項目"><b>市に対して何回参加したか</b></td><td data-l="定義"><span class="badge b-tbd">要確認</span> 「市の事業への参加回数」か「市内の延べ参加回数」か</td><td data-l="誰に">行政営業</td></tr>
+        <tr><td data-l="使う人"><b>入力する人</b>（シニアの担当、例: 映画会担当）</td><td data-l="やること">受付で出席を入力、初めての人の登録</td><td data-l="見られる範囲">入力画面のみ</td><td data-l="目的">老人会の事務負担を減らす</td></tr>
+        <tr><td data-l="使う人"><b>運営</b>（学生インターン）</td><td data-l="やること">開催の登録、データの確認・修正、集計を見る</td><td data-l="見られる範囲">全データ</td><td data-l="目的">改善・引き継ぎ</td></tr>
+        <tr><td data-l="使う人"><b>老人会</b></td><td data-l="やること">自分の会の数字を見る</td><td data-l="見られる範囲">自分の会の集計</td><td data-l="目的">新規会員を増やす</td></tr>
+        <tr><td data-l="使う人"><b>企業・市</b></td><td data-l="やること">提案資料として見る</td><td data-l="見られる範囲">集計値のみ（個人は見えない）</td><td data-l="目的">協賛・委託の判断材料</td></tr>
       </tbody>
     </table></div>
-    <h3 style="margin-top:12px">データの流れ（案）</h3>
-    <div class="flow"><span>受付で入力<br><small>フォーム</small></span><span>蓄積<br><small>スプレッドシート</small></span><span>可視化<br><small>ダッシュボード</small></span><span>活用<br><small>老人会・営業・引き継ぎ</small></span></div>
-    <p class="small muted" style="margin-top:10px">個人情報: 氏名の代わりに参加者IDで集計し、記録への同意を取る。保存場所と閲覧権限は <span class="badge b-tbd">TBD</span>。</p>
+    <p class="small muted" style="margin-top:6px">「豊中市の実証実験のために数値が必要」は目的としない（以前のメモで不要と判断）。</p>
+
+    <h3 style="margin-top:20px">2. 入力: シニアでも使える画面</h3>
+    <p class="small">入力の場面は3つ。</p>
+    <div class="flow"><span>開催の登録<br><small>運営が事前に。日付・種類・会場</small></span><span>受付（出席）<br><small>参加者カードを読む or 番号を押す</small></span><span>初めての人の登録<br><small>選択式で5〜7問</small></span></div>
+    <h3 style="margin-top:14px;font-size:.95rem">画面の要件</h3>
+    <ul class="small">
+      <li>1画面に1問。答えは大きなボタンから選ぶだけ（文字の入力をさせない）</li>
+      <li>文字は大きく、ボタンは指で押しやすい大きさ。色だけで区別しない</li>
+      <li>ログインのためのID・パスワード入力をさせない（会ごとのQRコードや合言葉で開く。方式は TBD）</li>
+      <li>「戻る」「やり直す」がいつでも押せる。入力が終わったら大きく「受付しました」と出す</li>
+      <li>本人がうまく入力できないときは、担当や運営が代わりに入力できる</li>
+    </ul>
+    <h3 style="margin-top:14px;font-size:.95rem">参加者の見分け方: 参加者カード</h3>
+    <p class="small">名前ではなく番号（QRコード付き）のカードを渡す。シニアから出た「チケットを作ってほしい」という声に合わせ、<b>次回の日付を書けるチケット</b>を兼ねる。カードを忘れた人の扱いは TBD。</p>
+
+    <h3 style="margin-top:20px">3. 記録する項目</h3>
+    <div class="tw"><table class="types-table">
+      <thead><tr><th>項目</th><th>選択肢</th><th>いつ取る</th><th>必須/任意</th><th>使う指標</th></tr></thead>
+      <tbody>
+        <tr><td data-l="項目"><b>記録への同意</b></td><td data-l="選択肢">はい / いいえ</td><td data-l="いつ">初回</td><td data-l="必須">必須</td><td data-l="指標">いいえの人は人数だけ数える</td></tr>
+        <tr><td data-l="項目"><b>年代</b></td><td data-l="選択肢">60代 / 70代 / 80代 / 90代以上 / 学生 / その他</td><td data-l="いつ">初回</td><td data-l="必須">必須</td><td data-l="指標">年代の内訳、世代の混ざり具合</td></tr>
+        <tr><td data-l="項目"><b>性別</b></td><td data-l="選択肢">男性 / 女性 / 答えない</td><td data-l="いつ">初回</td><td data-l="必須">必須</td><td data-l="指標">男女比（「男の人は来やすい」の確認）</td></tr>
+        <tr><td data-l="項目"><b>住んでいる地域</b></td><td data-l="選択肢">小学校区（または町名。単位は TBD）</td><td data-l="いつ">初回</td><td data-l="必須">必須</td><td data-l="指標">地域ヒートマップ</td></tr>
+        <tr><td data-l="項目"><b>老人会</b></td><td data-l="選択肢">所属している会の名前 / 入っていない</td><td data-l="いつ">初回（入会したら更新）</td><td data-l="必須">必須</td><td data-l="指標">非会員の参加率、入会率、他の会からの参加</td></tr>
+        <tr><td data-l="項目"><b>来たきっかけ</b></td><td data-l="選択肢">チラシ / 知り合いに誘われた / 老人会の声かけ / その他</td><td data-l="いつ">初回</td><td data-l="必須">必須</td><td data-l="指標">集客経路、口コミの判定</td></tr>
+        <tr><td data-l="項目"><b>一人暮らし</b></td><td data-l="選択肢">はい / いいえ / 答えない</td><td data-l="いつ">初回</td><td data-l="必須">任意</td><td data-l="指標">孤立しがちな人に届いているか</td></tr>
+        <tr><td data-l="項目"><b>来る手段</b></td><td data-l="選択肢">歩き / 杖 / 手押し車 / 車いす / 送迎 / その他</td><td data-l="いつ">初回</td><td data-l="必須">任意</td><td data-l="指標">足腰が悪い人に届いているか</td></tr>
+        <tr><td data-l="項目"><b>出席</b></td><td data-l="選択肢">（カードを読むだけ）</td><td data-l="いつ">毎回</td><td data-l="必須">必須</td><td data-l="指標">参加人数、継続率</td></tr>
+        <tr><td data-l="項目"><b>今日の役割</b></td><td data-l="選択肢">参加 / 準備を手伝った / 担当</td><td data-l="いつ">毎回（運営か担当が入力）</td><td data-l="必須">任意</td><td data-l="指標">担い手化率</td></tr>
+        <tr><td data-l="項目"><b>開催の情報</b></td><td data-l="選択肢">日付 / 種類（朝ご飯会・映画会など）/ 会場 / 主催の老人会</td><td data-l="いつ">開催ごと（運営）</td><td data-l="必須">必須</td><td data-l="指標">すべての集計の軸</td></tr>
+      </tbody>
+    </table></div>
+    <p class="small muted" style="margin-top:6px">氏名・住所・電話番号は記録しない。</p>
+
+    <h3 style="margin-top:20px">4. 判定する指標</h3>
+    <div class="tw"><table class="types-table">
+      <thead><tr><th>指標</th><th>計算</th></tr></thead>
+      <tbody>
+        <tr><td data-l="指標">参加実人数 / 延べ人数</td><td data-l="計算">期間中に1回以上来た人数 / 出席の合計</td></tr>
+        <tr><td data-l="指標">新規 / リピート</td><td data-l="計算">その回が初参加の人 / 2回目以上の人</td></tr>
+        <tr><td data-l="指標">3か月継続率</td><td data-l="計算">初参加から3か月以内にもう一度来た人 ÷ 初参加の人</td></tr>
+        <tr><td data-l="指標">非会員の参加率</td><td data-l="計算">老人会に入っていない参加者 ÷ 参加実人数</td></tr>
+        <tr><td data-l="指標">入会率</td><td data-l="計算">参加後に入会した人 ÷ 非会員の参加者</td></tr>
+        <tr><td data-l="指標">担い手化率</td><td data-l="計算">「準備」「担当」を1回以上した人 ÷ 参加実人数（目安3%）</td></tr>
+        <tr><td data-l="指標">孤立層比率</td><td data-l="計算">一人暮らし「はい」の人 ÷ 回答した人</td></tr>
+        <tr><td data-l="指標">口コミ比率</td><td data-l="計算">きっかけが「知り合いに誘われた」の人 ÷ 新規の人</td></tr>
+        <tr><td data-l="指標">世代の混ざり具合</td><td data-l="計算">回ごとのシニア：学生の人数比</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3 style="margin-top:20px">5. 表示する画面</h3>
+    <div class="proposal">
+      <div class="prop"><h3>運営用</h3><ul><li>主要な数字のタイル（参加実人数、継続率、担い手化率など）</li><li>月ごとの参加人数の推移グラフ</li><li><b>地域ヒートマップ</b>（校区ごとの参加実人数）</li><li>属性の内訳（年代・性別・会員/非会員・来たきっかけ）</li><li>継続の段階（初参加 → 2回目 → 3か月 → 担い手）</li></ul></div>
+      <div class="prop"><h3>老人会用</h3><ul><li>自分の会の開催回数と参加人数</li><li>会員以外の参加者と入会者</li><li>担当・協力者の人数</li></ul></div>
+      <div class="prop"><h3>企業提案用</h3><ul><li>1画面で印刷・PDFにできる</li><li>期間を選べる。集計値のみ</li><li>「誰に届いたか・続いたか・担い手が生まれたか」の流れで見せる</li><li>匿名の声（「話す人いないのよ〜」など）を添える</li><li>企業が見たい数字は TBD（ヒアリングで確認）</li></ul></div>
+    </div>
+
+    <h3 style="margin-top:20px">6. 守ること（非機能要件）</h3>
+    <ul class="small">
+      <li><b>個人情報</b>: 氏名・住所を取らない。地域は校区（または町名）まで。外部に見せるのは集計値だけ。人数が少なすぎて個人が分かるマス（例: 5人未満）は地図やグラフに出さない</li>
+      <li><b>同意</b>: 初回に、何のために記録するかを伝えて同意を取る（文面は TBD）</li>
+      <li><b>使いやすさ</b>: シニアが手伝いなしで受付を終えられる</li>
+      <li><b>引き継ぎ</b>: 管理者のアカウントを個人ではなく団体で持ち、運営者が替わっても使い続けられる</li>
+      <li><b>費用</b>: TBD（上限を決める）</li>
+    </ul>
+
+    <h3 style="margin-top:20px">7. 作り方の選択肢</h3>
+    <div class="tw"><table class="types-table">
+      <thead><tr><th>案</th><th>良い点</th><th>弱い点</th></tr></thead>
+      <tbody>
+        <tr><td data-l="案"><b>A. Googleフォーム＋スプレッドシート＋Looker Studio</b></td><td data-l="良い点">すぐ作れる。費用がほぼかからない</td><td data-l="弱い点">フォームの画面はシニアに使いにくい。校区単位のヒートマップは作りにくい</td></tr>
+        <tr><td data-l="案"><b>B. 自作のWebアプリ（おすすめ）</b></td><td data-l="良い点">シニア向けの大きなボタン画面、参加者カードのQR、校区の地図を自由に作れる</td><td data-l="弱い点">開発と保守が必要。担い手を決めておく必要がある</td></tr>
+        <tr><td data-l="案"><b>C. ノーコードツール（AppSheet など）</b></td><td data-l="良い点">AとBの中間。プログラムなしで画面を作れる</td><td data-l="弱い点">画面の自由度に限界。料金体系の確認が必要</td></tr>
+      </tbody>
+    </table></div>
+    <p class="small muted" style="margin-top:6px">Bをおすすめする理由: 要件の中心が「シニアでも入力できる」と「地域のヒートマップ」で、どちらもAでは満たしにくいため。</p>
+
+    <h3 style="margin-top:20px">8. 段階的に作る</h3>
+    <div class="flow"><span>Step 1<br><small>受付と初回登録の入力だけ。朝ご飯会で使ってみる</small></span><span>Step 2<br><small>運営用ダッシュボード（数字・グラフ）</small></span><span>Step 3<br><small>地域ヒートマップと企業提案用の画面</small></span></div>
+
+    <h3 style="margin-top:20px">9. 完了条件（Step 1）</h3>
+    <ul class="small">
+      <li><b>Given</b> 初めて来たシニア / <b>When</b> 受付の端末で質問に答える / <b>Then</b> 手伝いなしで登録が終わり、参加者カードの番号が出る</li>
+      <li><b>Given</b> 2回目以降のシニア / <b>When</b> カードを読ませる / <b>Then</b> 3タップ以内で出席が記録される</li>
+      <li><b>Given</b> 1回分の開催が終わった / <b>When</b> 運営が集計を見る / <b>Then</b> 参加人数・新規/リピート・男女・年代がその場で分かる</li>
+    </ul>
+
+    <h3 style="margin-top:20px">10. 決めること</h3>
+    <div class="tw"><table class="types-table">
+      <thead><tr><th>論点</th><th>選択肢</th></tr></thead>
+      <tbody>
+        <tr><td data-l="論点">入力するのは誰か</td><td data-l="選択肢">シニア本人 / 老人会の担当 / 運営（学生）</td></tr>
+        <tr><td data-l="論点">端末</td><td data-l="選択肢">受付に置くタブレット1台 / 各自のスマートフォン</td></tr>
+        <tr><td data-l="論点">地域の単位</td><td data-l="選択肢">小学校区 / 町名。地図の境界データが手に入るかを確認する</td></tr>
+        <tr><td data-l="論点">企業が見たい数字</td><td data-l="選択肢">企業へのヒアリングで決める</td></tr>
+        <tr><td data-l="論点">データの保存場所と管理者</td><td data-l="選択肢">TBD</td></tr>
+        <tr><td data-l="論点">同意の取り方と文面</td><td data-l="選択肢">TBD</td></tr>
+      </tbody>
+    </table></div>
   </div>
 </section>
 
