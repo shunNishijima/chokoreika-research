@@ -6,6 +6,7 @@ import { api, ApiError } from "../lib/api";
 import { Dashboard } from "./Dashboard";
 import { Events } from "./Events";
 import { Participants } from "./Participants";
+import { Report } from "./Report";
 import { Settings } from "./Settings";
 
 declare global {
@@ -65,7 +66,7 @@ function Login() {
   );
 }
 
-const tabs = [["", "ダッシュボード"], ["events", "開催"], ["participants", "参加者"], ["settings", "設定"]] as const;
+const tabs = [["", "ダッシュボード"], ["report", "報告書"], ["events", "開催"], ["participants", "参加者"], ["settings", "設定"]] as const;
 
 function Shell({ email }: { email: string }) {
   const qc = useQueryClient();
@@ -95,6 +96,7 @@ function Shell({ email }: { email: string }) {
       <div className="max-w-7xl mx-auto px-6 py-8">
         <Routes>
           <Route index element={<Dashboard />} />
+          <Route path="report" element={<Report />} />
           <Route path="events" element={<Events />} />
           <Route path="participants" element={<Participants />} />
           <Route path="settings" element={<Settings />} />
