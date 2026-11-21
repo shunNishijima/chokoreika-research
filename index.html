@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>高齢者×三方よし 事業モデル事例集</title>
+<title>超幸齢化プロジェクト設計ノート</title>
 <meta name="description" content="受益者・負担者・運営者の全員に見返りがある高齢者関連事業の事例を、お金・労力・価値の流れ図で整理した調査（超幸齢化プロジェクト向け、2026-11-21）。">
 <meta property="og:title" content="高齢者×三方よし 事業モデル事例集">
 <meta property="og:description" content="受益者・負担者・運営者の全員に見返りがある高齢者関連事業の事例を、お金・労力・価値の流れ図で整理した調査（超幸齢化プロジェクト向け、2026-11-21）。">
@@ -103,6 +103,34 @@ ol.src li{margin-bottom:4px}
 footer{padding:24px 0 48px;color:var(--muted);font-size:.85rem}
 .themebtn{float:right;font:inherit;font-size:.8rem;padding:3px 10px;border-radius:999px;border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer}
 svg text{font-family:inherit}
+/* ---------- タブ（左サイドバー） ---------- */
+.layout{max-width:1280px;margin:0 auto;display:grid;grid-template-columns:220px minmax(0,1fr);gap:0}
+.sidenav{position:sticky;top:0;align-self:start;max-height:100vh;overflow-y:auto;padding:20px 12px 20px 16px;border-right:1px solid var(--border)}
+.sidenav .grp{font-size:.75rem;color:var(--muted);margin:14px 8px 4px;letter-spacing:.04em}
+.sidenav .grp:first-child{margin-top:0}
+.sidenav a{display:block;padding:6px 10px;border-radius:6px;color:var(--text);text-decoration:none;font-size:.92rem;line-height:1.4;word-break:normal}
+.sidenav a:hover{background:var(--surface2)}
+.sidenav a[aria-current="page"]{background:var(--accent);color:var(--bg);font-weight:500}
+.panel[hidden]{display:none}
+.sidenav,.layout>main{min-width:0}
+.panel,.card{scroll-margin-top:8px}
+main section.panel{border-bottom:0}
+@media (max-width:860px){
+  .layout{grid-template-columns:minmax(0,1fr)}
+  .sidenav{position:sticky;top:0;z-index:5;max-height:none;display:flex;gap:4px;overflow-x:auto;padding:8px 16px;border-right:0;border-bottom:1px solid var(--border);background:var(--bg)}
+  .sidenav .grp{display:none}
+  .sidenav a{white-space:nowrap;flex:0 0 auto}
+  .panel,.card{scroll-margin-top:56px}
+}
+.lead2{background:var(--surface);border-left:4px solid var(--accent);padding:12px 14px;border-radius:4px}
+.qa .q{font-weight:700;margin-top:14px}
+.qa .a{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:10px 12px;margin-top:4px;font-size:.95rem}
+.focus{background:var(--surface);border:2px solid var(--accent);border-radius:8px;padding:12px 14px;margin:0 0 16px}
+.flow{display:flex;flex-wrap:wrap;gap:8px;align-items:stretch}
+.flow span{flex:1 1 120px;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:8px 10px;text-align:center;font-size:.92rem;line-height:1.4;position:relative}
+.flow small{color:var(--muted)}
+.kpi td,.kpi th{white-space:nowrap}
+@media (max-width:600px){.kpi td,.kpi th{white-space:normal}}
 </style>
 </head>
 <body>
@@ -118,14 +146,196 @@ svg text{font-family:inherit}
 <header class="hero">
   <div class="wrap">
     <button class="themebtn" id="themebtn" type="button">表示切替</button>
-    <h1>高齢者×三方よし 事業モデル事例集</h1>
-    <p class="sub">超幸齢化プロジェクト向け調査 / 調査日 2026-11-21</p>
+    <h1>超幸齢化プロジェクト 設計ノート</h1>
+    <p class="sub">サービス設計（草案）＋ 高齢者×三方よし 事業モデル事例集 / 更新日 2026-11-21</p>
     <p class="lead">続いている事例は、担い手(運営者)に現金・住まい・単位/時間証明・採用接点・役割のどれかが返り、負担者に“自分の利益として払う理由”がある。</p>
   </div>
 </header>
 
+<div class="layout">
+<nav class="sidenav" id="sidenav" aria-label="ページ内タブ">
+  <div class="grp">プロジェクト設計</div>
+  <a href="#overview">サービス概要</a>
+  <a href="#vision">ビジョン・ミッション</a>
+  <a href="#current">現状分析</a>
+  <a href="#goals">目標・方向性</a>
+  <a href="#issues">課題特定</a>
+  <a href="#strategy">戦略策定</a>
+  <a href="#dashboard">ダッシュボード</a>
+  <div class="grp">事例調査</div>
+  <a href="#howto">読み方</a>
+  <a href="#types">「型」一覧</a>
+  <a href="#cases">事例カード</a>
+  <a href="#implications">示唆</a>
+  <a href="#sources">出典一覧</a>
+</nav>
 <main>
-<section id="howto">
+<section id="overview" class="panel">
+  <div class="wrap">
+    <h2>サービス概要</h2>
+    <p class="lead2"><b>シニアに社会参加のきっかけと他世代交流の機会を届ける</b> → 健康寿命の延伸と社会保障費の軽減</p>
+    <div class="defs">
+      <div><h3>受益者</h3><p class="small">シニア（65歳以上）。特に、ご飯を1人で食べている人、足腰が悪く外出しにくい人、孤独な人。</p></div>
+      <div><h3>負担者</h3><p class="small">企業・自治体の協賛（想定）。<span class="badge b-tbd">TBD</span> 現時点で企業協賛は取れていない。</p></div>
+      <div><h3>運営者</h3><p class="small">学生（豊中の学生運営NPO）。</p></div>
+    </div>
+    <p class="small muted" style="margin-top:8px">対象人口のメモ「200万人→3000万人」<span class="badge b-snip">要確認</span> 何の人数か（全国の65歳以上か、対象層か）と出典を確認してから使う。</p>
+
+    <h3 style="margin-top:20px">ステークホルダー</h3>
+    <div class="tw"><table class="types-table">
+      <thead><tr><th>誰</th><th>欲しいもの</th><th>この事業が返せるもの</th><th>状態</th></tr></thead>
+      <tbody>
+        <tr><td data-l="誰"><b>老人会（豊中）</b></td><td data-l="欲しいもの">持続可能な運営、業務負担の軽減、新規会員</td><td data-l="返せるもの">企画・事務の代行、出席データの記録、若い参加者</td><td data-l="状態">接点あり</td></tr>
+        <tr><td data-l="誰"><b>シニア・孤独な人</b></td><td data-l="欲しいもの">居場所、誰かと食べるご飯、外出のきっかけ</td><td data-l="返せるもの">ご飯会・映画会、役割（当番・語り手）</td><td data-l="状態">老人会の人は既に元気で、孤立層には届いていない</td></tr>
+        <tr><td data-l="誰"><b>学生</b></td><td data-l="欲しいもの"><span class="badge b-tbd">TBD</span></td><td data-l="返せるもの">活動証明、企業との接点（案）</td><td data-l="状態">集められていない</td></tr>
+        <tr><td data-l="誰"><b>企業</b></td><td data-l="欲しいもの"><span class="badge b-tbd">TBD</span></td><td data-l="返せるもの">社員ボランティアの場、学生との接点、シニアの声（いずれも仮説）</td><td data-l="状態">協賛が取れていない</td></tr>
+        <tr><td data-l="誰"><b>豊中市</b></td><td data-l="欲しいもの">介護予防・孤立対策の受け皿</td><td data-l="返せるもの">参加データ、孤立層の受け皿</td><td data-l="状態"><span class="badge b-tbd">TBD</span></td></tr>
+        <tr><td data-l="誰"><b>社協CSW・校区福祉委員</b></td><td data-l="欲しいもの">孤立者を紹介できる先</td><td data-l="返せるもの">「網に掛かった人が行く場所」</td><td data-l="状態">未接触（調査からの提案）</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3 style="margin-top:20px">価値定義</h3>
+    <ul class="small">
+      <li><b>社会保障費・介護費</b>: 小規模NPOが「○円削減」を自前で示すことはできない。示せるのは参加者の孤独感・外出・共食の変化まで。その先は既存研究で説明する（例: 武豊町の住民主体サロンで要介護発生ハザード比 0.49）。</li>
+      <li><b>社会的処方</b>: 医療・福祉の窓口が孤立した人を地域活動に「紹介」する仕組み。豊中では社協CSW・校区福祉委員会・地域包括支援センターが紹介元になりうる。</li>
+      <li><b>老人会にとっての価値</b>: 持続可能な運営（業務負担の軽減・新規会員）。</li>
+    </ul>
+
+    <h3 style="margin-top:20px">どう届けるか</h3>
+    <div class="tw"><table class="types-table">
+      <thead><tr><th>相手の困りごと</th><th>届け方</th><th>設計上の工夫（調査より）</th></tr></thead>
+      <tbody>
+        <tr><td data-l="困りごと">ご飯を1人で食べる</td><td data-l="届け方"><b>朝ご飯会</b>（絞り込んだプロダクト）</td><td data-l="工夫">毎月同じ曜日・同じ場所・同じ流れにする</td></tr>
+        <tr><td data-l="困りごと">外に出る理由がない</td><td data-l="届け方">映画会（試作。今は絞り込みの対象外）</td><td data-l="工夫">鑑賞だけでなく会食・感想会とセットにして交流を生む</td></tr>
+        <tr><td data-l="困りごと">足腰が悪い</td><td data-l="届け方"><span class="badge b-tbd">TBD</span></td><td data-l="工夫">小学校区（徒歩圏）単位で開く、送迎</td></tr>
+        <tr><td data-l="困りごと">そもそも誘われない（孤立層）</td><td data-l="届け方">紹介経路</td><td data-l="工夫">CSW・民生委員・包括・薬局からの紹介。「孤独な人向け」とは打ち出さない</td></tr>
+      </tbody>
+    </table></div>
+    <p class="small muted" style="margin-top:8px">参考モデル: 「ドリシティー」がやっているコミュニティモデル <span class="badge b-tbd">要確認</span> 正式名称を確認する（事例カードのドリームタウンと同じかどうか）。</p>
+  </div>
+</section>
+
+<section id="vision" class="panel">
+  <div class="wrap">
+    <h2>ビジョン・ミッション</h2>
+    <p class="small"><span class="badge b-hyp">草案</span> 以下の回答は調査結果から組み立てた叩き台です。チームで議論して確定してください。</p>
+    <div class="qa">
+      <div class="q">この事業を進めた20年後、世界はどう変わる？</div>
+      <div class="a">どの小学校区にも、歩いて行ける距離に「多世代で食べて、観て、話す場」がある。孤立した高齢者は医療・福祉の窓口から紹介されてそこにつながり、元気な高齢者は迎える側に回っている。</div>
+      <div class="q">この事業が果たし続ける使命は何か？</div>
+      <div class="a">シニアに社会参加のきっかけと他世代交流の機会を届け続けること。担い手が入れ替わっても回る型と、効果を示すデータを地域に残すこと。</div>
+      <div class="q">この価値を最大限続けた先には何がある？</div>
+      <div class="a">社会的処方の受け皿として自治体の制度に組み込まれ、豊中の型が他の地域・海外に移植される（世界展開）。</div>
+    </div>
+  </div>
+</section>
+
+<section id="current" class="panel">
+  <div class="wrap">
+    <h2>現状分析</h2>
+    <h3>揃えた前提</h3>
+    <ul class="small">
+      <li>企業協賛が取れない</li>
+      <li>学生をアトラクトできない</li>
+      <li>この事業を世界展開したい</li>
+      <li>今は試作がたくさん並行している → <b>1つのプロダクトに絞る。結論は「朝ご飯会」</b></li>
+    </ul>
+    <h3 style="margin-top:16px">理想に対して、現在地は？</h3>
+    <div class="tw"><table class="types-table">
+      <thead><tr><th>観点</th><th>理想</th><th>現在地</th></tr></thead>
+      <tbody>
+        <tr><td data-l="観点"><b>届く相手</b></td><td data-l="理想">孤立した人・1人でご飯を食べる人</td><td data-l="現在地">来るのは老人会の元気な人が中心</td></tr>
+        <tr><td data-l="観点"><b>担い手</b></td><td data-l="理想">学生が入れ替わっても回る。シニアも担い手になる</td><td data-l="現在地">学生を集められない。引き継ぎが雑で、伝えるべき情報が伝わっていない</td></tr>
+        <tr><td data-l="観点"><b>財源</b></td><td data-l="理想">参加費・補助金・助成金・協賛に分散</td><td data-l="現在地">企業協賛が取れない</td></tr>
+        <tr><td data-l="観点"><b>メリットの説明</b></td><td data-l="理想">参加者・老人会・企業・市それぞれのメリットを言える</td><td data-l="現在地">参加することでどんなメリットがあるのか伝わっていない</td></tr>
+        <tr><td data-l="観点"><b>計測</b></td><td data-l="理想">出席・属性・入会を記録し、可視化できる</td><td data-l="現在地">計測・可視化の仕組みがない</td></tr>
+        <tr><td data-l="観点"><b>集中</b></td><td data-l="理想">1つのプロダクト（朝ご飯会）に絞って磨く</td><td data-l="現在地">試作がたくさん並行している</td></tr>
+        <tr><td data-l="観点"><b>展開</b></td><td data-l="理想">世界展開</td><td data-l="現在地">豊中（拠点数 <span class="badge b-tbd">TBD</span>）</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<section id="goals" class="panel">
+  <div class="wrap">
+    <h2>目標・方向性</h2>
+    <p class="small"><span class="badge b-hyp">草案</span></p>
+    <p class="lead2"><b>一言で:</b> 朝ご飯会1本に絞り、豊中の1校区で「学生が替わっても続く型」と「それを証明するデータ」を作って、横に広げる。</p>
+    <h3 style="margin-top:16px">これから5年の成果指標の推移</h3>
+    <p class="small muted">数値目標は創作せず TBD にしています。1年目の前半を基準値の測定期間にし、2年目以降の目標は「基準値×改善幅」で決めます。</p>
+    <div class="tw"><table class="types-table kpi">
+      <thead><tr><th>指標</th><th>算出式</th><th>1年目</th><th>2年目</th><th>3年目</th><th>4年目</th><th>5年目</th></tr></thead>
+      <tbody>
+        <tr><td data-l="指標">開催校区数</td><td data-l="算出式">開催している小学校区の数</td><td data-l="1年目">1（案）</td><td data-l="2年目">TBD</td><td data-l="3年目">TBD</td><td data-l="4年目">TBD</td><td data-l="5年目">TBD</td></tr>
+        <tr><td data-l="指標">参加実人数</td><td data-l="算出式">期間中に1回以上来た人数</td><td data-l="1年目">基準値測定</td><td data-l="2年目">TBD</td><td data-l="3年目">TBD</td><td data-l="4年目">TBD</td><td data-l="5年目">TBD</td></tr>
+        <tr><td data-l="指標">非会員参加率</td><td data-l="算出式">老人会非会員の参加者 ÷ 参加実人数</td><td data-l="1年目">基準値測定</td><td data-l="2年目">TBD</td><td data-l="3年目">TBD</td><td data-l="4年目">TBD</td><td data-l="5年目">TBD</td></tr>
+        <tr><td data-l="指標">非会員→入会率</td><td data-l="算出式">入会した非会員 ÷ 非会員の参加者</td><td data-l="1年目">基準値測定</td><td data-l="2年目">TBD</td><td data-l="3年目">TBD</td><td data-l="4年目">TBD</td><td data-l="5年目">TBD</td></tr>
+        <tr><td data-l="指標">3か月継続率</td><td data-l="算出式">3か月後も来ている人 ÷ 初回参加者</td><td data-l="1年目">基準値測定</td><td data-l="2年目">TBD</td><td data-l="3年目">TBD</td><td data-l="4年目">TBD</td><td data-l="5年目">TBD</td></tr>
+        <tr><td data-l="指標">孤立層比率</td><td data-l="算出式">紹介経由などの孤立層 ÷ 参加実人数</td><td data-l="1年目">基準値測定</td><td data-l="2年目">TBD</td><td data-l="3年目">TBD</td><td data-l="4年目">TBD</td><td data-l="5年目">TBD</td></tr>
+        <tr><td data-l="指標">担い手化率</td><td data-l="算出式">当番・語り手を担ったシニア ÷ 参加実人数</td><td data-l="1年目">基準値測定</td><td data-l="2年目">TBD</td><td data-l="3年目">TBD</td><td data-l="4年目">TBD</td><td data-l="5年目">TBD</td></tr>
+        <tr><td data-l="指標">自主財源比率</td><td data-l="算出式">（参加費＋事業収入）÷ 総収入</td><td data-l="1年目">10%以上（大阪府基金の要件）</td><td data-l="2年目">TBD</td><td data-l="3年目">TBD</td><td data-l="4年目">TBD</td><td data-l="5年目">TBD</td></tr>
+        <tr><td data-l="指標">協賛・助成の件数</td><td data-l="算出式">協賛企業数＋採択された助成の数</td><td data-l="1年目">TBD</td><td data-l="2年目">TBD</td><td data-l="3年目">TBD</td><td data-l="4年目">TBD</td><td data-l="5年目">TBD</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<section id="issues" class="panel">
+  <div class="wrap">
+    <h2>課題特定（3つ）</h2>
+    <p class="small"><span class="badge b-hyp">草案</span></p>
+    <div class="proposal">
+      <div class="prop"><h3>1. 払う人がいない</h3><ul><li>企業協賛が取れない</li><li>企業・市にとってのメリットを言語化できていない</li><li>単一の財源に頼ると続かない（The Cares Family は2023年に閉鎖）</li></ul></div>
+      <div class="prop"><h3>2. 担い手が続かない</h3><ul><li>学生を集められない（運営者に返るものがない）</li><li>引き継ぎが雑で、伝えるべき情報が伝わっていない</li></ul></div>
+      <div class="prop"><h3>3. 届けたい人に届いておらず、測れてもいない</h3><ul><li>来るのは元気な老人会員が中心</li><li>出席・属性・入会のデータがなく、効果もメリットも示せない</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<section id="strategy" class="panel">
+  <div class="wrap">
+    <h2>戦略策定（3つだけやるなら）</h2>
+    <p class="small"><span class="badge b-hyp">草案</span> 課題1〜3に対応させています。</p>
+    <div class="focus"><b>結論: 1つのプロダクト「朝ご飯会」に絞る。</b> 試作を並行させず、朝ご飯会を磨く。<br><span class="small muted">以下の3つの戦略は、すべて朝ご飯会に当てはめて進める。開催頻度・場所・参加費は <span class="badge b-tbd">TBD</span>。</span></div>
+    <div class="proposal">
+      <div class="prop"><h3>1. 記録を仕組みにする</h3><ul><li>朝ご飯会の受付で出席・属性・会員/非会員を入力し、ダッシュボードで可視化する（<a href="#dashboard">ダッシュボード</a>）</li><li>老人会の事務負担を減らし、そのまま引き継ぎ資料にする</li><li>1年目は基準値を取る実験と位置づける</li></ul></div>
+      <div class="prop"><h3>2. 型を固定し、シニアを担い手に回す</h3><ul><li>朝ご飯会を「同じ曜日・場所・流れ」で開き、手順をマニュアル化（引き継ぎ資料を兼ねる）</li><li>シニアに当番・語り手を任せ、学生が替わっても回るようにする</li><li>学生には活動証明を返す</li><li>CSW・校区福祉委員から孤立層を紹介してもらう経路を作る</li></ul></div>
+      <div class="prop"><h3>3. お金を三層に分ける</h3><ul><li>変動費（食材・上映）は参加費（市内相場は1回300円程度）</li><li>会場・保険は補助金（老人会が代表者になる形）</li><li>企画・運営・測定は助成金（内閣府モデル調査、ニッセイ財団、コープ共済など）</li><li>企業協賛はデータが溜まってから。メリット仮説（社員ボランティア・学生接点・シニアの声）をヒアリングで検証する</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<section id="dashboard" class="panel">
+  <div class="wrap">
+    <h2>ダッシュボード（可視化・計測）</h2>
+    <p>やることは2つ: <b>データを入力する</b> → <b>データを可視化する</b>。</p>
+    <h3 style="margin-top:12px">目的</h3>
+    <ul class="small">
+      <li><b>老人会</b>: 業務負担を減らす / 新規会員を増やす（マーケティング施策の効果を見る）</li>
+      <li><b>営業</b>: 企業・行政に、参加することのメリットを数字で示す</li>
+      <li><b>引き継ぎ</b>: 伝えるべき情報を人ではなくデータに残す</li>
+      <li class="muted">「豊中市の実証実験のために数値が必要」→ 目的としては不要と判断（メモより）</li>
+    </ul>
+    <h3 style="margin-top:12px">計測項目</h3>
+    <div class="tw"><table class="types-table">
+      <thead><tr><th>項目</th><th>定義・取り方</th><th>誰の役に立つか</th></tr></thead>
+      <tbody>
+        <tr><td data-l="項目"><b>出席</b></td><td data-l="定義">回ごとの参加者（受付で記録）</td><td data-l="誰に">老人会・営業</td></tr>
+        <tr><td data-l="項目"><b>性別</b></td><td data-l="定義">初回に記録</td><td data-l="誰に">老人会（誰に届いていないかを見る）</td></tr>
+        <tr><td data-l="項目"><b>年齢</b></td><td data-l="定義">初回に年代で記録</td><td data-l="誰に">老人会・行政</td></tr>
+        <tr><td data-l="項目"><b>来てる度合い</b></td><td data-l="定義">参加回数・最終参加日・3か月継続</td><td data-l="誰に">老人会（離脱しそうな人への声かけ）</td></tr>
+        <tr><td data-l="項目"><b>非会員の参加率と入会</b></td><td data-l="定義">非会員の参加者 ÷ 参加者、入会した人 ÷ 非会員の参加者</td><td data-l="誰に">老人会（新規会員）</td></tr>
+        <tr><td data-l="項目"><b>企業の人へのメリット</b></td><td data-l="定義"><span class="badge b-tbd">TBD</span> 何を測るか未定義（例: 社員の参加回数、接点数）</td><td data-l="誰に">企業営業</td></tr>
+        <tr><td data-l="項目"><b>市に対して何回参加したか</b></td><td data-l="定義"><span class="badge b-tbd">要確認</span> 「市の事業への参加回数」か「市内の延べ参加回数」か</td><td data-l="誰に">行政営業</td></tr>
+      </tbody>
+    </table></div>
+    <h3 style="margin-top:12px">データの流れ（案）</h3>
+    <div class="flow"><span>受付で入力<br><small>フォーム</small></span><span>蓄積<br><small>スプレッドシート</small></span><span>可視化<br><small>ダッシュボード</small></span><span>活用<br><small>老人会・営業・引き継ぎ</small></span></div>
+    <p class="small muted" style="margin-top:10px">個人情報: 氏名の代わりに参加者IDで集計し、記録への同意を取る。保存場所と閲覧権限は <span class="badge b-tbd">TBD</span>。</p>
+  </div>
+</section>
+
+<section id="howto" class="panel">
   <div class="wrap">
     <h2>読み方</h2>
     <div class="defs">
@@ -143,7 +353,7 @@ svg text{font-family:inherit}
   </div>
 </section>
 
-<section id="types">
+<section id="types" class="panel">
   <div class="wrap">
     <h2>「型」一覧</h2>
     <p class="small muted">担い手と負担者に何が返るかで分類しています。1つの事例が複数の型に入ることがあります。</p>
@@ -154,7 +364,7 @@ svg text{font-family:inherit}
   </div>
 </section>
 
-<section id="cases">
+<section id="cases" class="panel">
   <div class="wrap">
     <h2>事例カード</h2>
     <div class="filters">
@@ -166,7 +376,7 @@ svg text{font-family:inherit}
   </div>
 </section>
 
-<section id="implications">
+<section id="implications" class="panel">
   <div class="wrap">
     <h2>超幸齢化プロジェクトへの示唆</h2>
     <p>豊中の学生運営NPO（シニア向け食事会・映画上映）では「学生の動機が続かない」ことが課題になっています。事例と並べると、現状は運営者（学生）に何も返っていない点が構造上の破綻点です。</p>
@@ -175,7 +385,7 @@ svg text{font-family:inherit}
   </div>
 </section>
 
-<section id="sources">
+<section id="sources" class="panel">
   <div class="wrap">
     <h2>出典一覧</h2>
     <ol class="src" id="srcList"></ol>
@@ -190,8 +400,9 @@ svg text{font-family:inherit}
   </div>
 </section>
 </main>
+</div>
 
-<footer><div class="wrap">高齢者×三方よし 事業モデル事例集 / 調査日 2026-11-21 / 数値は各出典の記載時点のもの</div></footer>
+<footer><div class="wrap">超幸齢化プロジェクト 設計ノート / 事例調査日 2026-11-21 / 数値は各出典の記載時点のもの</div></footer>
 
 <script>
 "use strict";
@@ -681,6 +892,27 @@ applyFilter();
  var first=null;ol.querySelectorAll("li").forEach(function(li){if(!first&&/AgeWellJapan/.test(li.textContent))first=li;});
  if(first&&!document.getElementById("awj-src"))first.id="awj-src";
  else if(first){var old=document.getElementById("awj-src");if(old!==first){old.removeAttribute("id");first.id="awj-src";}}
+})();
+
+/* ---------- タブ切替（ハッシュで開く。#case-xxx は事例カード、#awj-src は出典へ） ---------- */
+(function(){
+ var panels=[].slice.call(document.querySelectorAll("section.panel"));
+ var links=[].slice.call(document.querySelectorAll("#sidenav a"));
+ function show(){
+  var h=decodeURIComponent(location.hash.slice(1)),target=null,panel=null;
+  if(h){target=document.getElementById(h);}
+  if(target){panel=target.classList.contains("panel")?target:target.closest("section.panel");}
+  if(!panel)panel=panels[0];
+  panels.forEach(function(p){p.hidden=(p!==panel);});
+  links.forEach(function(a){if(a.getAttribute("href")==="#"+panel.id)a.setAttribute("aria-current","page");else a.removeAttribute("aria-current");});
+  if(target&&target!==panel){
+   if(target.classList.contains("hidden")){state.type="all";state.region="all";document.querySelectorAll(".fbtn").forEach(function(b){b.setAttribute("aria-pressed",b.dataset.v==="all"?"true":"false");});applyFilter();}
+   target.scrollIntoView();
+  }else if(h){panel.scrollIntoView();}else{window.scrollTo(0,0);}
+  var cur=document.querySelector('#sidenav a[aria-current]');if(cur&&cur.scrollIntoView&&window.innerWidth<=860){cur.scrollIntoView({block:"nearest",inline:"center"});}
+ }
+ window.addEventListener("hashchange",show);
+ show();
 })();
 
 /* ---------- テーマ切替 ---------- */
