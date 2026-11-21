@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+/* 受付はシニアが使う前提: UDフォント・大きな文字・高いコントラスト（文字は 4.5:1 以上） */
+@theme {
+  --font-sans: "BIZ UDPGothic", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+  --color-paper: #fbf7f0;
+  --color-card: #ffffff;
+  --color-ink: #1b1b1b;
+  --color-ink-soft: #4a4740;
+  --color-line: #d9d2c5;
+  --color-navy: #1d4e89;
+  --color-navy-deep: #163b68;
+  --color-sun: #e8692b;
+  --color-sun-soft: #fde7d9;
+  --color-leaf: #1d6b46;
+  --color-leaf-soft: #e1f2e8;
+  --color-alert: #9b1c1c;
+  --color-alert-soft: #fbe5e5;
+  /* グラフ用（dataviz 参照パレット: 系列1 青 / 系列2 オレンジ、連続量は青の単色階調） */
+  --color-series-1: #2a78d6;
+  --color-series-2: #eb6834;
+}
+
+html, body, #root { height: 100%; }
+body {
+  margin: 0;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+button { touch-action: manipulation; }
+
+/* 画面切り替え: ゆっくり・小さく動く。動きを減らす設定なら動かさない */
+@keyframes screen-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+.screen-in { animation: screen-in 280ms ease-out both; }
+@keyframes pop { 0% { transform: scale(.6); opacity: 0 } 70% { transform: scale(1.06); opacity: 1 } 100% { transform: scale(1) } }
+.pop { animation: pop 420ms ease-out both; }
+@media (prefers-reduced-motion: reduce) {
+  .screen-in, .pop { animation: none; }
+}
+
+@media print {
+  .no-print { display: none !important; }
+  body { background: #fff; }
+}
+
+.inp { width: 100%; border: 2px solid var(--color-line); border-radius: .75rem; background: var(--color-card); padding: .6rem .75rem; font-size: 1rem; }
+.inp:focus { outline: 3px solid var(--color-navy); outline-offset: 1px; }
