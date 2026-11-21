@@ -5,7 +5,7 @@ import QRCode from "qrcode";
 import { api, jpDate } from "../lib/api";
 
 type Ev = { id: number; date: string; kind: string; place: string; host: string; nextDate: string | null; kioskToken: string; attendanceCount: number };
-type Att = { id: number; role: string; checkedInAt: string; code: string; ageGroup: string | null; gender: string | null; town: string | null; club: string | null };
+type Att = { id: number; role: string; checkedInAt: string; checkedOutAt: string | null; moodBefore: number | null; moodAfter: number | null; code: string; name: string | null; ageGroup: string | null; gender: string | null; town: string | null; club: string | null };
 const today = () => new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
 
 export function Events() {
@@ -60,7 +60,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 function EventDetail({ ev }: { ev: Ev }) {
   const qc = useQueryClient();
-  const url = `${location.origin}/kiosk?t=${ev.kioskToken}`;
+  const url = `${location.origin}/kiosk?e=${ev.id}&t=${ev.kioskToken}`;
   const [qr, setQr] = useState("");
   const [copied, setCopied] = useState(false);
   useEffect(() => { QRCode.toDataURL(url, { margin: 1, width: 220 }).then(setQr); }, [url]);
@@ -82,7 +82,7 @@ function EventDetail({ ev }: { ev: Ev }) {
         <div className="flex-1 min-w-64">
           <h2 className="text-2xl font-bold">{jpDate(ev.date)} {ev.kind}</h2>
           <p className="text-ink-soft">{[ev.place, ev.host].filter(Boolean).join("・")}{ev.nextDate ? `　次回 ${jpDate(ev.nextDate)}` : ""}</p>
-          <p className="mt-3 font-bold">iPad のカメラでこの QR を読むと、この会の受付画面が開きます。</p>
+          <p className="mt-3 font-bold">ふだんは iPad の受付画面で「老人会 → この会」を選んで開きます。合言葉を登録していない端末では、この QR からも開けます。</p>
           <div className="flex gap-2 mt-3">
             <button onClick={() => { navigator.clipboard.writeText(url); setCopied(true); }} className="rounded-xl border-2 border-line px-3 py-2 font-bold">{copied ? "コピーしました" : "リンクをコピー"}</button>
             <a href={url} target="_blank" rel="noreferrer" className="rounded-xl border-2 border-line px-3 py-2 font-bold">この端末で開く</a>
@@ -94,11 +94,11 @@ function EventDetail({ ev }: { ev: Ev }) {
         <h3 className="text-xl font-bold mb-3">出席した人（{detail.data?.attendances.length ?? 0}人）</h3>
         <div className="overflow-x-auto">
           <table className="w-full text-left">
-            <thead className="text-sm text-ink-soft"><tr><th className="py-2">番号</th><th>年代</th><th>性別</th><th>町</th><th>老人会</th><th>役割</th><th /></tr></thead>
+            <thead className="text-sm text-ink-soft"><tr><th className="py-2">ID</th><th>名前</th><th>年代</th><th>町</th><th>老人会</th><th>気持ち（来た→帰る）</th><th>退出</th><th>役割</th><th /></tr></thead>
             <tbody>
               {detail.data?.attendances.map((a) => (
                 <tr key={a.id} className="border-t border-line">
-                  <td className="py-2 font-bold tabular-nums">{a.code}</td><td>{a.ageGroup ?? "—"}</td><td>{a.gender ?? "—"}</td><td>{a.town ?? "—"}</td><td>{a.club ?? "—"}</td>
+                  <td className="py-2 font-bold tabular-nums">{a.code}</td><td className="font-bold">{a.name ?? "—"}</td><td>{a.ageGroup ?? "—"}</td><td>{a.town ?? "—"}</td><td>{a.club ?? "—"}</td><td className="tabular-nums">{a.moodBefore ?? "—"} → {a.moodAfter ?? "—"}</td><td className="tabular-nums">{a.checkedOutAt ? new Date(a.checkedOutAt).toTimeString().slice(0, 5) : "—"}</td>
                   <td>
                     <select value={a.role} onChange={(e) => role.mutate({ id: a.id, role: e.target.value })} className="rounded-lg border-2 border-line px-2 py-1">
                       {["参加", "準備を手伝った", "担当"].map((r) => <option key={r}>{r}</option>)}

@@ -11,6 +11,7 @@ type Dash = {
   townHeat: { months: string[]; towns: string[]; cells: (Cell & { town: string; month: string })[]; totals: (Cell & { town: string })[] };
   breakdowns: Record<"gender" | "ageGroup" | "club" | "trigger" | "livingAlone" | "mobility", { label: string; count: number | null }[]>;
   noConsent: number;
+  mood: { pairs: number; avgBefore: number | null; avgAfter: number | null; avgChange: number | null; improved: number; same: number; worse: number; beforeDist: number[]; afterDist: number[] };
 };
 
 const METRICS = [
@@ -99,6 +100,8 @@ export function Dashboard() {
               </ResponsiveContainer>
             </div>
           </Panel>
+
+          <MoodPanel m={d.mood} />
 
           <TownHeat d={d} metric={metric} setMetric={setMetric} />
 
@@ -233,5 +236,38 @@ function Seg({ value, onChange, items }: { value: string; onChange: (v: string) 
         <button key={k} onClick={() => onChange(k)} aria-pressed={value === k} className={`px-3 py-1.5 rounded-lg font-bold ${value === k ? "bg-navy text-white" : ""}`}>{l}</button>
       ))}
     </div>
+  );
+}
+
+const MOOD_LABELS = ["しんどい", "ちょっと元気ない", "ふつう", "いい", "すごくいい"];
+
+function MoodPanel({ m }: { m: Dash["mood"] }) {
+  const rows = MOOD_LABELS.map((label, i) => ({ label, before: m.beforeDist[i], after: m.afterDist[i] })).reverse();
+  return (
+    <Panel title="今の気持ちの変化（来たとき → 帰るとき）" note="1=しんどい〜5=すごくいい。両方答えた人だけで平均の変化を出しています">
+      {m.pairs === 0 ? <p className="text-ink-soft">来たときと帰るときの両方に答えた人がまだいません（退出の受付で記録されます）。</p> : (
+        <div className="grid gap-6 md:grid-cols-[16rem_1fr] items-center">
+          <div>
+            <p className="text-sm font-bold text-ink-soft">平均の変化</p>
+            <p className="text-5xl font-bold tabular-nums">{(m.avgChange ?? 0) > 0 ? "+" : ""}{m.avgChange?.toFixed(2)}</p>
+            <p className="text-sm text-ink-soft">{m.avgBefore?.toFixed(1)} → {m.avgAfter?.toFixed(1)}（{m.pairs}人）</p>
+            <p className="mt-3 font-bold">良くなった {m.improved}人・同じ {m.same}人・下がった {m.worse}人</p>
+          </div>
+          <div className="h-56">
+            <ResponsiveContainer>
+              <BarChart data={rows} layout="vertical" margin={{ left: 24, right: 16 }} barCategoryGap="25%">
+                <CartesianGrid horizontal={false} stroke="#ece7dc" />
+                <XAxis type="number" allowDecimals={false} tick={{ fontSize: 12, fill: "#4a4740" }} axisLine={false} tickLine={false} />
+                <YAxis type="category" dataKey="label" width={110} tick={{ fontSize: 13, fill: "#1b1b1b" }} axisLine={false} tickLine={false} />
+                <Tooltip cursor={{ fill: "#f3eee4" }} contentStyle={{ borderRadius: 12, border: "1px solid #d9d2c5", fontSize: 14 }} formatter={(v, n) => [`${v}人`, n]} />
+                <Legend wrapperStyle={{ fontSize: 14 }} formatter={(v) => <span style={{ color: "#1b1b1b" }}>{v}</span>} />
+                <Bar dataKey="before" name="来たとき" fill="var(--color-series-1)" radius={[0, 4, 4, 0]} maxBarSize={18} />
+                <Bar dataKey="after" name="帰るとき" fill="var(--color-series-2)" radius={[0, 4, 4, 0]} maxBarSize={18} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      )}
+    </Panel>
   );
 }

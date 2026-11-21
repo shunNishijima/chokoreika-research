@@ -105,3 +105,21 @@ test("given 発行済みの最大番号 / when 次の番号 / then 4桁で1つ�
   assert.equal(nextCode(null), "0001");
   assert.equal(nextCode("0041"), "0042");
 });
+
+test("given 来たときと帰るときの気持ち / when 集計 / then 両方ある人だけで平均の変化を出す", () => {
+  const d = buildDashboard({
+    events: [{ id: 1, date: "2026-11-01", kind: "朝ご飯会" }],
+    participants: people(3),
+    attendances: [
+      { eventId: 1, participantId: 1, role: "参加", moodBefore: 2, moodAfter: 4 },
+      { eventId: 1, participantId: 2, role: "参加", moodBefore: 3, moodAfter: 4 },
+      { eventId: 1, participantId: 3, role: "参加", moodBefore: 5, moodAfter: null },
+    ],
+  }, {});
+  assert.equal(d.mood.pairs, 2);
+  assert.equal(d.mood.avgBefore, 2.5);
+  assert.equal(d.mood.avgAfter, 4);
+  assert.equal(d.mood.avgChange, 1.5);
+  assert.equal(d.mood.improved, 2);
+  assert.deepEqual(d.mood.beforeDist, [0, 1, 1, 0, 1]);
+});

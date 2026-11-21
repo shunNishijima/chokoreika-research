@@ -37,8 +37,25 @@ button { touch-action: manipulation; }
 .screen-in { animation: screen-in 280ms ease-out both; }
 @keyframes pop { 0% { transform: scale(.6); opacity: 0 } 70% { transform: scale(1.06); opacity: 1 } 100% { transform: scale(1) } }
 .pop { animation: pop 420ms ease-out both; }
+/* 今の気持ち: ゆっくり上下に揺れる → 選ぶと弾む */
+@keyframes bob { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-8px) } }
+.mood-bob { display: inline-block; animation: bob 2.4s ease-in-out infinite; }
+@keyframes chosen { 0% { transform: scale(1) rotate(0) } 35% { transform: scale(1.25) rotate(-8deg) } 65% { transform: scale(1.18) rotate(6deg) } 100% { transform: scale(1.15) rotate(0) } }
+.mood-chosen { display: inline-block; animation: chosen 700ms ease-out both; }
+.burst { position: absolute; left: 50%; top: 40%; pointer-events: none; }
+.burst i { position: absolute; width: 12px; height: 12px; border-radius: 999px; animation: burst 800ms ease-out both; transform: rotate(var(--a)) translateY(0); }
+@keyframes burst { from { opacity: 1; transform: rotate(var(--a)) translateY(0) scale(1) } to { opacity: 0; transform: rotate(var(--a)) translateY(-120px) scale(.4) } }
+
+/* ようこそ: 朝日がのぼる */
+@keyframes sunrise { from { transform: translateY(60px); opacity: 0 } to { transform: translateY(0); opacity: 1 } }
+.sunrise { animation: sunrise 1400ms cubic-bezier(.2,.7,.2,1) both; }
+@keyframes rays { from { transform: rotate(0) } to { transform: rotate(360deg) } }
+.rays { animation: rays 60s linear infinite; transform-origin: center; }
+@keyframes rise-text { from { opacity: 0; transform: translateY(16px) } to { opacity: 1; transform: none } }
+.rise-text { animation: rise-text 900ms 500ms ease-out both; }
+
 @media (prefers-reduced-motion: reduce) {
-  .screen-in, .pop { animation: none; }
+  .screen-in, .pop, .mood-bob, .mood-chosen, .burst i, .sunrise, .rays, .rise-text { animation: none; }
 }
 
 @media print {

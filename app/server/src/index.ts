@@ -41,7 +41,7 @@ app.use("*", secureHeaders({
   crossOriginOpenerPolicy: "same-origin-allow-popups",
 }));
 app.route("/api/auth", authRoutes(cfg, googleVerifier(cfg.clientId)));
-app.route("/", createApp({ db, authenticateAdmin: makeAdminAuthenticator(cfg) }));
+app.route("/", createApp({ db, sessionSecret: cfg.sessionSecret, authenticateAdmin: makeAdminAuthenticator(cfg) }));
 
 // 画面（SPA）
 const webDist = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../web/dist");

@@ -6,7 +6,7 @@ export type Participant = {
   trigger: string | null; livingAlone: string | null; mobility: string | null;
 };
 export type EventRow = { id: number; date: string; kind: string };
-export type Attendance = { eventId: number; participantId: number; role: string };
+export type Attendance = { eventId: number; participantId: number; role: string; moodBefore?: number | null; moodAfter?: number | null };
 export type Dataset = { events: EventRow[]; participants: Participant[]; attendances: Attendance[] };
 export type Range = { from?: string; to?: string; kind?: string; suppressBelow?: number };
 
@@ -116,8 +116,27 @@ export function buildDashboard(data: Dataset, range: Range) {
     return [...m.entries()].map(([label, count]) => ({ label, count: below && count < below ? null : count })).sort((a, b) => (b.count ?? 0) - (a.count ?? 0));
   };
 
+  // 気持ちの変化（来たとき→帰るとき）。両方答えた出席だけで比べる
+  const dist = (vals: number[]) => [1, 2, 3, 4, 5].map((k) => vals.filter((v) => v === k).length);
+  const before = rows.map((r) => r.moodBefore).filter((v): v is number => typeof v === "number");
+  const after = rows.map((r) => r.moodAfter).filter((v): v is number => typeof v === "number");
+  const pairs = rows.filter((r) => typeof r.moodBefore === "number" && typeof r.moodAfter === "number") as ((typeof rows)[number] & { moodBefore: number; moodAfter: number })[];
+  const avg = (xs: number[]) => (xs.length ? Math.round((xs.reduce((a, b) => a + b, 0) / xs.length) * 100) / 100 : null);
+  const mood = {
+    pairs: pairs.length,
+    avgBefore: avg(pairs.map((p) => p.moodBefore)),
+    avgAfter: avg(pairs.map((p) => p.moodAfter)),
+    avgChange: avg(pairs.map((p) => p.moodAfter - p.moodBefore)),
+    improved: pairs.filter((p) => p.moodAfter > p.moodBefore).length,
+    same: pairs.filter((p) => p.moodAfter === p.moodBefore).length,
+    worse: pairs.filter((p) => p.moodAfter < p.moodBefore).length,
+    beforeDist: dist(before),
+    afterDist: dist(after),
+  };
+
   return {
     kpis,
+    mood,
     series,
     townHeat: { months, towns, cells, totals },
     breakdowns: {

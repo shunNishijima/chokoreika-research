@@ -1,18 +1,21 @@
 // HTTP API。受付（iPad）用と管理者用に分ける。
 import { Hono, type Context } from "hono";
-import { randomBytes } from "node:crypto";
+import { getSignedCookie, setSignedCookie } from "hono/cookie";
+import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 import { z } from "zod";
-import { asc, desc, eq, max } from "drizzle-orm";
+import { and, asc, desc, eq, gte, max } from "drizzle-orm";
 import type { Db } from "../db/client.js";
-import { attendances, events, options, participants } from "../db/schema.js";
+import { attendances, events, options, participants, settings } from "../db/schema.js";
 import { buildDashboard, nextCode } from "../domain/metrics.js";
 import { CHOICES } from "../domain/choices.js";
 
-type Deps = { db: Db; authenticateAdmin: (c: Context) => Promise<string | null> };
+type Deps = { db: Db; sessionSecret: string; authenticateAdmin: (c: Context) => Promise<string | null> };
 
 const opt = (values: readonly string[]) => z.enum(values as [string, ...string[]]).nullish();
+const mood = z.number().int().min(1).max(5).nullish();
 const registerSchema = z.object({
   consent: z.boolean(),
+  name: z.string().trim().max(40).nullish(),
   ageGroup: opt(CHOICES.ageGroup),
   gender: opt(CHOICES.gender),
   town: z.string().max(40).nullish(),
@@ -20,7 +23,9 @@ const registerSchema = z.object({
   trigger: opt(CHOICES.trigger),
   livingAlone: opt(CHOICES.livingAlone),
   mobility: opt(CHOICES.mobility),
+  mood,
 });
+const codeSchema = z.object({ code: z.string().regex(/^\d{1,4}$/), mood });
 const eventSchema = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   kind: opt(CHOICES.kind).transform((v) => v ?? "朝ご飯会"),
@@ -34,69 +39,146 @@ function csvCell(v: unknown) {
   return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 }
 function toCSV(rows: Record<string, unknown>[], cols: string[]) {
-  return "﻿" + [cols.join(","), ...rows.map((r) => cols.map((c) => csvCell(r[c])).join(","))].join("\n");
+  return "\uFEFF" + [cols.join(","), ...rows.map((r) => cols.map((c) => csvCell(r[c])).join(","))].join("\n");
 }
 
-export function createApp({ db, authenticateAdmin }: Deps) {
+// 合言葉は scrypt でハッシュ化して保存する
+function hashPasscode(pass: string) {
+  const salt = randomBytes(16).toString("hex");
+  return `${salt}:${scryptSync(pass, salt, 32).toString("hex")}`;
+}
+function checkPasscode(pass: string, stored: string) {
+  const [salt, hash] = stored.split(":");
+  const a = scryptSync(pass, salt, 32);
+  const b = Buffer.from(hash, "hex");
+  return a.length === b.length && timingSafeEqual(a, b);
+}
+
+const DEVICE_COOKIE = "kiosk_device";
+const DEVICE_TTL_SEC = 180 * 24 * 60 * 60;
+const failures = new Map<string, { n: number; until: number }>();
+
+export function createApp({ db, sessionSecret, authenticateAdmin }: Deps) {
   const app = new Hono();
 
   app.get("/api/health", (c) => c.json({ ok: true }));
 
-  // ---------- 受付（iPad） ----------
-  const kioskEvent = async (c: Context) => {
-    const token = c.req.header("x-kiosk-token");
-    if (!token) return null;
-    const [ev] = await db.select().from(events).where(eq(events.kioskToken, token));
-    return ev ?? null;
-  };
-
+  async function getSetting(key: string) {
+    const [row] = await db.select().from(settings).where(eq(settings.key, key));
+    return row?.value ?? null;
+  }
   async function optionLists() {
     const rows = await db.select().from(options).orderBy(asc(options.sort), asc(options.id));
     return { town: rows.filter((r) => r.kind === "town").map((r) => r.label), club: rows.filter((r) => r.kind === "club").map((r) => r.label) };
   }
 
-  app.get("/api/kiosk/session", async (c) => {
+  // ---------- 受付（iPad） ----------
+  // 端末の登録: 運営の合言葉を一度入れると、その iPad に署名付き Cookie（180日）を渡す
+  app.post("/api/kiosk/device", async (c) => {
+    const ip = c.req.header("x-forwarded-for")?.split(",")[0]?.trim() ?? "local";
+    const f = failures.get(ip);
+    if (f && f.until > Date.now()) return c.json({ error: "too many attempts" }, 429);
+    const body = z.object({ passcode: z.string().min(1).max(100) }).safeParse(await c.req.json().catch(() => null));
+    const stored = await getSetting("kioskPasscode");
+    if (!body.success || !stored || !checkPasscode(body.data.passcode, stored)) {
+      const n = (f?.n ?? 0) + 1;
+      failures.set(ip, { n, until: n >= 5 ? Date.now() + 5 * 60_000 : 0 });
+      return c.json({ error: "unauthorized" }, 401);
+    }
+    failures.delete(ip);
+    await setSignedCookie(c, DEVICE_COOKIE, `device|${stored.slice(0, 16)}`, sessionSecret, { httpOnly: true, secure: true, sameSite: "Lax", path: "/", maxAge: DEVICE_TTL_SEC });
+    return c.json({ ok: true });
+  });
+
+  // 合言葉を変えると、古い合言葉で登録した端末は使えなくなる
+  async function isDevice(c: Context) {
+    const v = await getSignedCookie(c, sessionSecret, DEVICE_COOKIE);
+    const stored = await getSetting("kioskPasscode");
+    return !!v && !!stored && v === `device|${stored.slice(0, 16)}`;
+  }
+
+  // イベント単位の受付は「登録済み端末」か「そのイベントの受付トークン」で許可する
+  async function kioskEvent(c: Context) {
+    const id = Number(c.req.param("id"));
+    if (!Number.isInteger(id)) return null;
+    const [ev] = await db.select().from(events).where(eq(events.id, id));
+    if (!ev) return null;
+    if (await isDevice(c)) return ev;
+    return c.req.header("x-kiosk-token") === ev.kioskToken ? ev : null;
+  }
+
+  app.get("/api/kiosk/clubs", async (c) => {
+    if (!(await isDevice(c))) return c.json({ error: "unauthorized" }, 401);
+    return c.json((await optionLists()).club);
+  });
+
+  app.get("/api/kiosk/events", async (c) => {
+    if (!(await isDevice(c))) return c.json({ error: "unauthorized" }, 401);
+    const club = c.req.query("club") ?? "";
+    const since = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    const rows = await db.select({ id: events.id, date: events.date, kind: events.kind, place: events.place, host: events.host })
+      .from(events).where(and(eq(events.host, club), gte(events.date, since))).orderBy(desc(events.date), desc(events.id));
+    return c.json(rows);
+  });
+
+  app.get("/api/kiosk/events/:id/session", async (c) => {
     const ev = await kioskEvent(c);
     if (!ev) return c.json({ error: "unauthorized" }, 401);
     return c.json({ event: { id: ev.id, date: ev.date, kind: ev.kind, place: ev.place, host: ev.host, nextDate: ev.nextDate }, options: await optionLists(), choices: CHOICES });
   });
 
-  app.post("/api/kiosk/register", async (c) => {
+  app.post("/api/kiosk/events/:id/register", async (c) => {
     const ev = await kioskEvent(c);
     if (!ev) return c.json({ error: "unauthorized" }, 401);
     const parsed = registerSchema.safeParse(await c.req.json().catch(() => null));
     if (!parsed.success) return c.json({ error: "invalid" }, 400);
     const a = parsed.data;
     const attrs = a.consent
-      ? { ageGroup: a.ageGroup ?? null, gender: a.gender ?? null, town: a.town ?? null, club: a.club ?? null, trigger: a.trigger ?? null, livingAlone: a.livingAlone ?? null, mobility: a.mobility ?? null }
+      ? { name: a.name || null, ageGroup: a.ageGroup ?? null, gender: a.gender ?? null, town: a.town ?? null, club: a.club ?? null, trigger: a.trigger ?? null, livingAlone: a.livingAlone ?? null, mobility: a.mobility ?? null }
       : {};
-    // 番号の重複は一意制約で防ぎ、衝突したら取り直す
+    // ID の重複は一意制約で防ぎ、衝突したら取り直す
     for (let i = 0; i < 5; i++) {
       try {
-        const code = await db.transaction(async (tx) => {
+        const p = await db.transaction(async (tx) => {
           const [{ m }] = await tx.select({ m: max(participants.code) }).from(participants);
-          const code = nextCode(m ?? null);
-          const [p] = await tx.insert(participants).values({ code, consent: a.consent, ...attrs }).returning();
-          await tx.insert(attendances).values({ eventId: ev.id, participantId: p.id });
-          return code;
+          const [p] = await tx.insert(participants).values({ code: nextCode(m ?? null), consent: a.consent, ...attrs }).returning();
+          await tx.insert(attendances).values({ eventId: ev.id, participantId: p.id, moodBefore: a.mood ?? null });
+          return p;
         });
-        return c.json({ code, nextDate: ev.nextDate }, 201);
+        return c.json({ code: p.code, name: p.name ?? null, nextDate: ev.nextDate }, 201);
       } catch (e) {
         if (i === 4) throw e;
       }
     }
   });
 
-  app.post("/api/kiosk/checkin", async (c) => {
+  async function findByCode(code: string) {
+    const [p] = await db.select().from(participants).where(eq(participants.code, code.padStart(4, "0")));
+    return p ?? null;
+  }
+
+  app.post("/api/kiosk/events/:id/checkin", async (c) => {
     const ev = await kioskEvent(c);
     if (!ev) return c.json({ error: "unauthorized" }, 401);
-    const body = z.object({ code: z.string().regex(/^\d{1,4}$/) }).safeParse(await c.req.json().catch(() => null));
+    const body = codeSchema.safeParse(await c.req.json().catch(() => null));
     if (!body.success) return c.json({ error: "invalid" }, 400);
-    const code = body.data.code.padStart(4, "0");
-    const [p] = await db.select().from(participants).where(eq(participants.code, code));
-    if (!p) return c.json({ status: "unknown", code });
-    const inserted = await db.insert(attendances).values({ eventId: ev.id, participantId: p.id }).onConflictDoNothing().returning();
-    return c.json({ status: inserted.length ? "ok" : "already", code, nextDate: ev.nextDate });
+    const p = await findByCode(body.data.code);
+    if (!p) return c.json({ status: "unknown", code: body.data.code.padStart(4, "0") });
+    const inserted = await db.insert(attendances).values({ eventId: ev.id, participantId: p.id, moodBefore: body.data.mood ?? null }).onConflictDoNothing().returning();
+    return c.json({ status: inserted.length ? "ok" : "already", code: p.code, name: p.name ?? null, nextDate: ev.nextDate });
+  });
+
+  app.post("/api/kiosk/events/:id/checkout", async (c) => {
+    const ev = await kioskEvent(c);
+    if (!ev) return c.json({ error: "unauthorized" }, 401);
+    const body = codeSchema.safeParse(await c.req.json().catch(() => null));
+    if (!body.success) return c.json({ error: "invalid" }, 400);
+    const p = await findByCode(body.data.code);
+    if (!p) return c.json({ status: "unknown", code: body.data.code.padStart(4, "0") });
+    const updated = await db.update(attendances).set({ checkedOutAt: new Date(), moodAfter: body.data.mood ?? null })
+      .where(and(eq(attendances.eventId, ev.id), eq(attendances.participantId, p.id))).returning();
+    if (!updated.length) return c.json({ status: "not-checked-in", code: p.code, name: p.name ?? null });
+    return c.json({ status: "ok", code: p.code, name: p.name ?? null, nextDate: ev.nextDate });
   });
 
   // ---------- 管理者 ----------
@@ -109,6 +191,15 @@ export function createApp({ db, authenticateAdmin }: Deps) {
   });
 
   adminApi.get("/me", (c) => c.json({ email: c.get("admin") }));
+
+  adminApi.get("/kiosk-passcode", async (c) => c.json({ isSet: !!(await getSetting("kioskPasscode")) }));
+  adminApi.put("/kiosk-passcode", async (c) => {
+    const body = z.object({ passcode: z.string().trim().min(4).max(100) }).safeParse(await c.req.json().catch(() => null));
+    if (!body.success) return c.json({ error: "4文字以上で入力してください" }, 400);
+    await db.insert(settings).values({ key: "kioskPasscode", value: hashPasscode(body.data.passcode) })
+      .onConflictDoUpdate({ target: settings.key, set: { value: hashPasscode(body.data.passcode) } });
+    return c.json({ isSet: true });
+  });
 
   adminApi.get("/events", async (c) => {
     const evs = await db.select().from(events).orderBy(desc(events.date), desc(events.id));
@@ -137,7 +228,7 @@ export function createApp({ db, authenticateAdmin }: Deps) {
     const [ev] = await db.select().from(events).where(eq(events.id, id));
     if (!ev) return c.json({ error: "not found" }, 404);
     const rows = await db
-      .select({ id: attendances.id, role: attendances.role, checkedInAt: attendances.checkedInAt, code: participants.code, ageGroup: participants.ageGroup, gender: participants.gender, town: participants.town, club: participants.club })
+      .select({ id: attendances.id, role: attendances.role, checkedInAt: attendances.checkedInAt, checkedOutAt: attendances.checkedOutAt, moodBefore: attendances.moodBefore, moodAfter: attendances.moodAfter, code: participants.code, name: participants.name, ageGroup: participants.ageGroup, gender: participants.gender, town: participants.town, club: participants.club })
       .from(attendances).innerJoin(participants, eq(attendances.participantId, participants.id))
       .where(eq(attendances.eventId, id)).orderBy(asc(attendances.checkedInAt));
     return c.json({ event: ev, attendances: rows });
@@ -177,7 +268,7 @@ export function createApp({ db, authenticateAdmin }: Deps) {
     const [evs, ps, as] = await Promise.all([
       db.select({ id: events.id, date: events.date, kind: events.kind }).from(events),
       db.select().from(participants),
-      db.select({ eventId: attendances.eventId, participantId: attendances.participantId, role: attendances.role }).from(attendances),
+      db.select({ eventId: attendances.eventId, participantId: attendances.participantId, role: attendances.role, moodBefore: attendances.moodBefore, moodAfter: attendances.moodAfter }).from(attendances),
     ]);
     return c.json(buildDashboard({ events: evs, participants: ps, attendances: as }, { from: q.from || undefined, to: q.to || undefined, kind: q.kind || undefined, suppressBelow: q.suppress === "1" ? 5 : undefined }));
   });
@@ -188,10 +279,10 @@ export function createApp({ db, authenticateAdmin }: Deps) {
     if (name === "participants.csv") {
       csv = toCSV(await db.select().from(participants).orderBy(asc(participants.code)), ["code", "consent", "ageGroup", "gender", "town", "club", "trigger", "livingAlone", "mobility", "createdAt"]);
     } else if (name === "attendances.csv") {
-      const rows = await db.select({ date: events.date, kind: events.kind, code: participants.code, role: attendances.role, checkedInAt: attendances.checkedInAt })
+      const rows = await db.select({ date: events.date, kind: events.kind, code: participants.code, role: attendances.role, checkedInAt: attendances.checkedInAt, checkedOutAt: attendances.checkedOutAt, moodBefore: attendances.moodBefore, moodAfter: attendances.moodAfter })
         .from(attendances).innerJoin(events, eq(attendances.eventId, events.id)).innerJoin(participants, eq(attendances.participantId, participants.id))
         .orderBy(asc(events.date), asc(participants.code));
-      csv = toCSV(rows, ["date", "kind", "code", "role", "checkedInAt"]);
+      csv = toCSV(rows, ["date", "kind", "code", "role", "checkedInAt", "checkedOutAt", "moodBefore", "moodAfter"]);
     } else if (name === "events.csv") {
       csv = toCSV(await db.select().from(events).orderBy(asc(events.date)), ["id", "date", "kind", "place", "host", "nextDate"]);
     } else return c.json({ error: "not found" }, 404);
