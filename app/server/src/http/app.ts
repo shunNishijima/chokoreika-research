@@ -7,6 +7,7 @@ import { and, asc, desc, eq, gte, like, max } from "drizzle-orm";
 import type { Db } from "../db/client.js";
 import { attendances, events, options, participants, settings } from "../db/schema.js";
 import { buildDashboard, nextCode } from "../domain/metrics.js";
+import { buildReport } from "../domain/report.js";
 import { CHOICES } from "../domain/choices.js";
 import { DEMO_NAME_PREFIX, DEMO_PLACE, generateDemo } from "../domain/demo.js";
 
@@ -337,6 +338,22 @@ export function createApp({ db, sessionSecret, kioskOpen = false, authenticateAd
       db.select({ eventId: attendances.eventId, participantId: attendances.participantId, role: attendances.role, moodBefore: attendances.moodBefore, moodAfter: attendances.moodAfter }).from(attendances),
     ]);
     return c.json(buildDashboard({ events: evs, participants: ps, attendances: as }, { from: q.from || undefined, to: q.to || undefined, kind: q.kind || undefined, suppressBelow: q.suppress === "1" ? 5 : undefined }));
+  });
+
+  // 報告書（行政・協賛企業向け）。既定は外部共有（5人未満を隠す）
+  adminApi.get("/report", async (c) => {
+    const q = c.req.query();
+    const [evs, ps, as] = await Promise.all([
+      db.select({ id: events.id, date: events.date, kind: events.kind, host: events.host }).from(events),
+      db.select().from(participants),
+      db.select({ eventId: attendances.eventId, participantId: attendances.participantId, role: attendances.role, moodBefore: attendances.moodBefore, moodAfter: attendances.moodAfter, checkedInAt: attendances.checkedInAt, checkedOutAt: attendances.checkedOutAt }).from(attendances),
+    ]);
+    const range = { from: q.from || undefined, to: q.to || undefined, kind: q.kind || undefined, suppressBelow: q.suppress === "0" ? undefined : 5 };
+    const asOf = new Date().toLocaleDateString("sv-SE", { timeZone: "Asia/Tokyo" });
+    return c.json({
+      dashboard: buildDashboard({ events: evs, participants: ps, attendances: as }, range),
+      report: buildReport({ events: evs, participants: ps, attendances: as }, { ...range, asOf }),
+    });
   });
 
   adminApi.get("/export/:name", async (c) => {
