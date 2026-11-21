@@ -26,7 +26,8 @@ test("given 受付の記録 / when 報告書 / then ダッシュボードの数�
   assert.equal(body.dashboard.kpis.visits, 1);
   assert.equal(body.report.monthly.length, 1);
   assert.equal(body.report.ageBands[0].label, "75〜84歳");
-  assert.equal(body.report.stay.count, 1);
+  // 入室してすぐの退出は押し間違いとして滞在時間に数えない
+  assert.equal(body.report.stay.count, 0);
   assert.equal(body.report.hosts[0].label, "みゆき会");
 });
 

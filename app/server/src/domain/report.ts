@@ -11,6 +11,7 @@ export type ReportRange = { asOf: string; from?: string; to?: string; kind?: str
 export const AGE_BANDS = ["65歳未満", "65〜74歳", "75〜84歳", "85歳以上"] as const;
 const NO_ANSWER = "未回答";
 const MAX_STAY_MIN = 12 * 60; // これより長いのは退出の押し忘れとみなす
+const MIN_STAY_MIN = 5; // これより短いのは押し間違いとみなす
 
 // 生まれ年だけから年齢を出すので、誕生日前の人は1歳多くなることがある
 export function ageBand(birthYear: number, asOfYear: number): string {
@@ -75,7 +76,7 @@ export function buildReport(data: ReportData, range: ReportRange) {
   const minutes = rows
     .filter((r) => r.checkedOutAt)
     .map((r) => (new Date(r.checkedOutAt!).getTime() - new Date(r.checkedInAt).getTime()) / 60000)
-    .filter((m) => m > 0 && m <= MAX_STAY_MIN)
+    .filter((m) => m >= MIN_STAY_MIN && m <= MAX_STAY_MIN)
     .sort((a, b) => a - b);
   const mid = minutes.length >> 1;
   const stay = {

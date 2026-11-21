@@ -83,3 +83,9 @@ test("given 期間の指定 / when 9月だけ / then 10月は含まれず、期�
   assert.equal(r.monthly.length, 1);
   assert.deepEqual(r.period, { first: "2026-09-05", last: "2026-09-19" });
 });
+
+test("given 入室してすぐ退出（5分未満・押し間違い） / when 滞在時間 / then 数えない", () => {
+  const d = data();
+  d.attendances[2].checkedOutAt = t("2026-09-19", "13:02");
+  assert.equal(buildReport(d, { asOf: "2026-11-22" }).stay.count, 3);
+});
