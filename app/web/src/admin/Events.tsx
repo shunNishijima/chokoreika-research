@@ -94,7 +94,7 @@ function EventDetail({ ev }: { ev: Ev }) {
         <h3 className="text-xl font-bold mb-3">出席した人（{detail.data?.attendances.length ?? 0}人）</h3>
         <div className="overflow-x-auto">
           <table className="w-full text-left [&_td]:pr-4 [&_th]:pr-4 [&_td]:whitespace-nowrap">
-            <thead className="text-sm text-ink-soft"><tr><th className="py-2">ID</th><th>名前</th><th>年代</th><th>町</th><th>老人会</th><th>気持ち（来た→帰る）</th><th>退出</th><th>役割</th><th /></tr></thead>
+            <thead className="text-sm text-ink-soft"><tr><th className="py-2">ID</th><th>名前</th><th>年代</th><th>市町村</th><th>老人会</th><th>気持ち（来た→帰る）</th><th>退出</th><th>役割</th><th /></tr></thead>
             <tbody>
               {detail.data?.attendances.map((a) => (
                 <tr key={a.id} className="border-t border-line">

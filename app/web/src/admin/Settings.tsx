@@ -28,6 +28,7 @@ export function Settings() {
   return (
     <div className="space-y-6 max-w-3xl">
       <h1 className="text-2xl font-bold">設定</h1>
+      <DemoData />
       <section className="rounded-2xl bg-card border border-line p-5">
         <h2 className="text-xl font-bold mb-1">受付の合言葉</h2>
         <p className="text-ink-soft mb-3">iPad で受付を始めるときに、はじめの1回だけ入れる合言葉です。変えると、登録済みの iPad でも入れ直しが必要になります。今の状態: <b>{pass.data?.isSet ? "設定済み" : "未設定"}</b></p>
@@ -37,12 +38,38 @@ export function Settings() {
         </div>
         {setPass.isSuccess && <p className="mt-2 font-bold text-leaf">設定しました</p>}
       </section>
-      <p className="text-ink-soft">受付の「お住まいの町」「老人会」の選択肢です。iPad では最初にこの老人会から選びます。1行に1つ書いてください。並び順がそのまま受付の画面の順番になります。地図に色を付けるには、町名を地図の町名（「豊中市の町名を読み込む」で入る名前）にそろえてください。読み込んだあとは「保存する」を押します。</p>
+      <p className="text-ink-soft">受付の「お住まいの市町村」「老人会」の選択肢です。iPad では最初にこの老人会から選びます。1行に1つ書いてください。並び順がそのまま受付の画面の順番になります。地図に色を付けるには、市町村名を地図の名前（「大阪府の市町村を読み込む」で入る名前）にそろえてください。読み込んだあとは「保存する」を押します。</p>
       <div className="grid gap-6 md:grid-cols-2">
-        <div><div className="flex items-center justify-between gap-2"><label htmlFor="towns" className="font-bold">町名</label><button type="button" onClick={loadTowns} disabled={!geo.data} className="text-sm rounded-lg border-2 border-line px-2 py-1 font-bold">豊中市の町名（{geo.data?.features.length ?? "…"}）を読み込む</button></div><textarea id="towns" value={town} onChange={(e) => setTown(e.target.value)} rows={12} className="inp mt-1 font-normal" /></div>
+        <div><div className="flex items-center justify-between gap-2"><label htmlFor="towns" className="font-bold">市町村</label><button type="button" onClick={loadTowns} disabled={!geo.data} className="text-sm rounded-lg border-2 border-line px-2 py-1 font-bold">大阪府の市町村（{geo.data?.features.length ?? "…"}）を読み込む</button></div><textarea id="towns" value={town} onChange={(e) => setTown(e.target.value)} rows={12} className="inp mt-1 font-normal" /></div>
         <label className="block"><span className="font-bold">老人会</span><textarea value={club} onChange={(e) => setClub(e.target.value)} rows={12} className="inp mt-1 font-normal" /></label>
       </div>
       <button onClick={() => save.mutate()} disabled={save.isPending} className="rounded-xl bg-navy text-white font-bold px-6 py-3">{save.isSuccess ? "保存しました" : "保存する"}</button>
     </div>
+  );
+}
+
+// ダッシュボードの見た目を確かめるためのデモデータ（目印付きで入り、まとめて消せる）
+function DemoData() {
+  const qc = useQueryClient();
+  const q = useQuery({ queryKey: ["demo"], queryFn: () => api<{ present: boolean }>("/api/admin/demo") });
+  const done = () => { qc.invalidateQueries(); };
+  const add = useMutation({ mutationFn: () => api("/api/admin/demo", { method: "POST" }), onSuccess: done });
+  const del = useMutation({ mutationFn: () => api("/api/admin/demo", { method: "DELETE" }), onSuccess: done });
+  const [confirm, setConfirm] = useState(false);
+  return (
+    <section className="rounded-2xl bg-card border border-line p-5">
+      <h2 className="text-xl font-bold mb-1">デモデータ</h2>
+      <p className="text-ink-soft mb-3">ダッシュボードの見え方を確かめるための架空のデータです（過去6か月・約90人・大阪府内の市町村）。会場が「（デモデータ）」、名前が「デモ 」で始まるので、本物の記録と区別でき、まとめて消せます。今の状態: <b>{q.data?.present ? "入っている" : "入っていない"}</b></p>
+      <div className="flex gap-2 flex-wrap items-center">
+        <button onClick={() => add.mutate()} disabled={q.data?.present || add.isPending} className="rounded-xl bg-navy text-white font-bold px-5 py-2 disabled:opacity-40">{add.isPending ? "入れています…" : "デモデータを入れる"}</button>
+        {confirm ? (
+          <>
+            <span className="font-bold">デモデータだけを消します。よろしいですか？</span>
+            <button onClick={() => { del.mutate(); setConfirm(false); }} className="rounded-xl bg-alert text-white font-bold px-4 py-2">消す</button>
+            <button onClick={() => setConfirm(false)} className="rounded-xl border-2 border-line font-bold px-4 py-2">やめる</button>
+          </>
+        ) : <button onClick={() => setConfirm(true)} disabled={!q.data?.present || del.isPending} className="rounded-xl border-2 border-line font-bold px-5 py-2 disabled:opacity-40">デモデータを消す</button>}
+      </div>
+    </section>
   );
 }

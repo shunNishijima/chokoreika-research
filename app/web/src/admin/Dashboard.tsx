@@ -16,7 +16,7 @@ type Dash = {
 };
 
 const METRICS = [
-  { key: "visits", label: "延べ参加回数", unit: "回", help: "その町の人が参加した回数の合計" },
+  { key: "visits", label: "延べ参加回数", unit: "回", help: "その市町村の人が参加した回数の合計" },
   { key: "uniques", label: "参加した人数", unit: "人", help: "1回以上参加した人の数（実人数）" },
   { key: "newcomers", label: "はじめて来た人", unit: "人", help: "その月に初めて参加した人の数" },
   { key: "avgVisits", label: "1人あたりの参加回数", unit: "回", help: "延べ参加回数 ÷ 参加した人数" },
@@ -114,7 +114,7 @@ export function Dashboard() {
             <Breakdown title="一人暮らし" rows={d.breakdowns.livingAlone} />
             <Breakdown title="来た手段" rows={d.breakdowns.mobility} />
           </section>
-          <p className="text-sm text-ink-soft">属性の内訳は、記録に同意した人だけで数えています。外部共有モードでは、5人未満の項目と町を「—」で隠します。</p>
+          <p className="text-sm text-ink-soft">属性の内訳は、記録に同意した人だけで数えています。外部共有モードでは、5人未満の項目と市町村を「—」で隠します。</p>
         </>
       )}
     </div>
@@ -141,12 +141,12 @@ function TownHeat({ d, metric, setMetric }: { d: Dash; metric: MetricKey; setMet
       </div>
       <TownMap label={m.label} unit={m.unit} fmt={fmt} ramp={RAMP} colorOf={(v) => rampColor(v, totalMax)}
         values={new Map<string, TownValue>(totals.map((t) => [t.town, { value: t[metric], suppressed: t.suppressed, detail: `参加 ${t.uniques ?? 0}人・延べ ${t.visits ?? 0}回・はじめて ${t.newcomers ?? 0}人` }]))} />
-      <h3 className="text-lg font-bold mt-6 mb-2">月ごとの変化（町 × 月）</h3>
+      <h3 className="text-lg font-bold mt-6 mb-2">月ごとの変化（市町村 × 月）</h3>
       <div className="overflow-x-auto">
         <table className="border-separate" style={{ borderSpacing: 2 }}>
           <thead>
             <tr>
-              <th className="text-left text-sm text-ink-soft font-bold pr-3 sticky left-0 bg-card">町</th>
+              <th className="text-left text-sm text-ink-soft font-bold pr-3 sticky left-0 bg-card">市町村</th>
               {months.map((mo) => <th key={mo} className="text-sm text-ink-soft font-bold px-1 min-w-16">{monthLabel(mo)}</th>)}
               <th className="text-sm text-ink-soft font-bold pl-4 text-left min-w-48">期間合計</th>
             </tr>
@@ -189,7 +189,7 @@ function TownHeat({ d, metric, setMetric }: { d: Dash; metric: MetricKey; setMet
         <span className="flex items-center gap-2"><span className="w-6 h-4 inline-block" style={{ background: "repeating-linear-gradient(45deg,#ece7dc 0 4px,#f6f3ec 4px 8px)" }} /> 5人未満で非表示</span>
         <span className="min-h-5 font-bold text-ink" aria-live="polite">{hover}</span>
       </div>
-      <p className="text-sm text-ink-soft mt-2">「不明」は記録に同意しなかった人や町を答えなかった人です（地図には出ません）。</p>
+      <p className="text-sm text-ink-soft mt-2">「不明」は記録に同意しなかった人や市町村を答えなかった人です（地図には出ません）。</p>
     </Panel>
   );
 }

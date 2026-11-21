@@ -384,7 +384,7 @@ function questions(s: Session): Q[] {
     { key: "consent", title: "受付の記録をとってもよいですか？", hint: "お名前や住んでいる町などを、会の運営のためだけに使います。外に出すときは人数だけにします。", options: ["はい", "いいえ"] },
     { key: "name", title: "お名前を教えてください", hint: "ニックネームでも大丈夫です。", text: true },
     { key: "club", title: "どの老人会に入っていますか？", options: [...clubs, "ほかの老人会", "入っていない"] },
-    { key: "town", title: "お住まいの町はどちらですか？", options: s.options.town.length ? [...s.options.town, "それ以外の町"] : [], optional: true },
+    { key: "town", title: "お住まいの市町村はどちらですか？", options: s.options.town.length ? [...s.options.town, "それ以外"] : [], optional: true },
     { key: "trigger", title: "今日は何がきっかけで来ましたか？", options: c.trigger },
     { key: "ageGroup", title: "年代を教えてください", options: c.ageGroup },
     { key: "gender", title: "性別を教えてください", options: c.gender },
@@ -463,7 +463,7 @@ function NewFlow({ step, session, answers, onAnswer, onStep, onDone, say }: {
           })}
         </div>
       ) : (
-        <p className="text-2xl rounded-2xl bg-sun-soft p-6">町の一覧がまだ登録されていません。「とばす」を押してください。</p>
+        <p className="text-2xl rounded-2xl bg-sun-soft p-6">市町村の一覧がまだ登録されていません。「とばす」を押してください。</p>
       )}
       {error && <p role="alert" className="mt-6 text-2xl font-bold text-alert bg-alert-soft rounded-2xl p-5">{error}</p>}
       <div className="mt-auto pt-8 flex gap-5">

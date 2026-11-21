@@ -18,7 +18,7 @@ export function Participants() {
       <p className="text-ink-soft">名前はこの管理画面だけで表示します。CSV と外部共有モードには名前を含めません。住所は記録していません。</p>
       <div className="rounded-2xl bg-card border border-line p-4 overflow-x-auto">
         <table className="w-full text-left">
-          <thead className="text-sm text-ink-soft"><tr>{["ID", "名前", "同意", "年代", "性別", "町", "老人会", "きっかけ", "一人暮らし", "来た手段", "生まれ年", "登録日"].map((h) => <th key={h} className="py-2 pr-3 whitespace-nowrap">{h}</th>)}</tr></thead>
+          <thead className="text-sm text-ink-soft"><tr>{["ID", "名前", "同意", "年代", "性別", "市町村", "老人会", "きっかけ", "一人暮らし", "来た手段", "生まれ年", "登録日"].map((h) => <th key={h} className="py-2 pr-3 whitespace-nowrap">{h}</th>)}</tr></thead>
           <tbody>
             {q.data?.map((p) => (
               <tr key={p.code} className="border-t border-line">
