@@ -3,11 +3,12 @@ import { Hono, type Context } from "hono";
 import { getSignedCookie, setSignedCookie } from "hono/cookie";
 import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 import { z } from "zod";
-import { and, asc, desc, eq, gte, max } from "drizzle-orm";
+import { and, asc, desc, eq, gte, like, max } from "drizzle-orm";
 import type { Db } from "../db/client.js";
 import { attendances, events, options, participants, settings } from "../db/schema.js";
 import { buildDashboard, nextCode } from "../domain/metrics.js";
 import { CHOICES } from "../domain/choices.js";
+import { DEMO_NAME_PREFIX, DEMO_PLACE, generateDemo } from "../domain/demo.js";
 
 // kioskOpen=true は試用モード: 受付の端末登録（合言葉）なしで使え、運営がその場で会を作れる
 type Deps = { db: Db; sessionSecret: string; kioskOpen?: boolean; authenticateAdmin: (c: Context) => Promise<string | null> };
@@ -269,6 +270,46 @@ export function createApp({ db, sessionSecret, kioskOpen = false, authenticateAd
   adminApi.delete("/attendances/:id", async (c) => {
     await db.delete(attendances).where(eq(attendances.id, Number(c.req.param("id"))));
     return c.json({ ok: true });
+  });
+
+  // ---------- デモデータ（ダッシュボードの見た目を確かめるためのモック。目印付きで入れ、まとめて消せる） ----------
+  adminApi.get("/demo", async (c) => {
+    const [ev] = await db.select({ id: events.id }).from(events).where(eq(events.place, DEMO_PLACE)).limit(1);
+    return c.json({ present: !!ev });
+  });
+
+  adminApi.post("/demo", async (c) => {
+    const [exists] = await db.select({ id: events.id }).from(events).where(eq(events.place, DEMO_PLACE)).limit(1);
+    if (exists) return c.json({ present: true, participants: 0 }, 200);
+    const today = new Date().toLocaleDateString("sv-SE", { timeZone: "Asia/Tokyo" });
+    const demo = generateDemo(today);
+    await db.transaction(async (tx) => {
+      const evIds: number[] = [];
+      for (const e of demo.events) {
+        const [row] = await tx.insert(events).values({ ...e, place: DEMO_PLACE, kioskToken: randomBytes(18).toString("base64url") }).returning({ id: events.id });
+        evIds.push(row.id);
+      }
+      const [{ m }] = await tx.select({ m: max(participants.code) }).from(participants);
+      let last = m ?? null;
+      const pIds: number[] = [];
+      for (const p of demo.people) {
+        last = nextCode(last);
+        const [row] = await tx.insert(participants).values({ code: last, consent: true, ...p }).returning({ id: participants.id });
+        pIds.push(row.id);
+      }
+      const rows = demo.attendances.map((a) => ({ eventId: evIds[a.event], participantId: pIds[a.person], role: a.role, moodBefore: a.moodBefore, moodAfter: a.moodAfter, checkedOutAt: new Date() }));
+      for (let i = 0; i < rows.length; i += 200) await tx.insert(attendances).values(rows.slice(i, i + 200));
+    });
+    for (const club of ["みゆき会", "さくら会", "ひまわり会"]) await db.insert(options).values({ kind: "club", label: club, sort: 999 }).onConflictDoNothing();
+    return c.json({ present: true, participants: demo.people.length, events: demo.events.length, attendances: demo.attendances.length }, 201);
+  });
+
+  adminApi.delete("/demo", async (c) => {
+    await db.transaction(async (tx) => {
+      await tx.delete(events).where(eq(events.place, DEMO_PLACE)); // 出席は会と一緒に消える
+      await tx.delete(participants).where(like(participants.name, `${DEMO_NAME_PREFIX}%`));
+    });
+    return c.json({ present: false });
   });
 
   adminApi.get("/participants", async (c) => c.json(await db.select().from(participants).orderBy(asc(participants.code))));
