@@ -87,7 +87,7 @@ function BigBack({ onClick, label = "← 戻る" }: { onClick: () => void; label
 }
 
 // ---------- 運営: 端末の登録 ----------
-function DeviceSetup({ onDone }: { onDone: () => void }) {
+export function DeviceSetup({ onDone }: { onDone: () => void }) {
   const [pass, setPass] = useState("");
   const [msg, setMsg] = useState("");
   const submit = async () => {
@@ -193,7 +193,7 @@ function StartEvent({ clubs, onOpen }: { clubs: string[]; onOpen: (id: number) =
 }
 
 // ---------- 運営: 老人会を選ぶ ----------
-function ClubPicker({ clubs, onPick }: { clubs: string[]; onPick: (c: string) => void }) {
+export function ClubPicker({ clubs, onPick }: { clubs: string[]; onPick: (c: string) => void }) {
   return (
     <main className="min-h-full p-8 screen-in max-w-5xl mx-auto flex flex-col">
       <p className="text-2xl text-ink-soft mt-4">運営の方へ</p>
@@ -210,7 +210,7 @@ function ClubPicker({ clubs, onPick }: { clubs: string[]; onPick: (c: string) =>
 }
 
 // ---------- 運営: イベントを開く ----------
-function EventPicker({ club, onBack, onOpen }: { club: string; onBack: () => void; onOpen: (id: number) => void }) {
+export function EventPicker({ club, onBack, onOpen }: { club: string; onBack: () => void; onOpen: (id: number) => void }) {
   const q = useQuery({ queryKey: ["kiosk-events", club], queryFn: () => api<EventInfo[]>(`/api/kiosk/events?club=${encodeURIComponent(club)}`) });
   const today = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
   return (
