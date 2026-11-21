@@ -65,11 +65,15 @@ export function Kiosk() {
   });
 
   const open = (id: number) => { localStorage.setItem(EVENT_KEY, String(id)); setEventId(id); };
-  const leave = () => { localStorage.removeItem(EVENT_KEY); setEventId(null); setToken(undefined); };
+  const leave = () => { localStorage.removeItem(EVENT_KEY); setEventId(null); setToken(undefined); setClub(null); clubs.refetch(); };
+
+  const mode = useQuery({ queryKey: ["auth-config"], queryFn: () => api<{ open: boolean }>("/api/auth/config") });
 
   if (eventId) return <EventKiosk eventId={eventId} token={token} onLeave={leave} />;
-  if (clubs.isLoading) return <Center><p className="text-3xl">準備しています…</p></Center>;
+  if (clubs.isLoading || mode.isLoading) return <Center><p className="text-3xl">準備しています…</p></Center>;
   if (clubs.data === null) return <DeviceSetup onDone={() => clubs.refetch()} />;
+  // 試用モード: 運営がその場で「老人会」と「会の種類」を入れて始める
+  if (mode.data?.open) return <StartEvent clubs={clubs.data ?? []} onOpen={open} />;
   if (!club) return <ClubPicker clubs={clubs.data ?? []} onPick={setClub} />;
   return <EventPicker club={club} onBack={() => setClub(null)} onOpen={open} />;
 }
@@ -104,6 +108,87 @@ function DeviceSetup({ onDone }: { onDone: () => void }) {
       <div className="mt-8"><button onClick={submit} disabled={!pass} className="rounded-2xl bg-navy text-white text-3xl font-bold px-14 min-h-24 disabled:opacity-40">はじめる</button></div>
       <p className="mt-8 text-xl text-ink-soft">合言葉は、管理画面の「設定」で決められます。</p>
     </Center>
+  );
+}
+
+// ---------- 運営: 老人会と会の種類を入れて始める（試用モード） ----------
+const KINDS = ["朝ご飯会", "映画会", "ご飯会", "その他"];
+
+function StartEvent({ clubs, onOpen }: { clubs: string[]; onOpen: (id: number) => void }) {
+  const [step, setStep] = useState<"club" | "typing" | "kind" | "next">("club");
+  const [club, setClub] = useState("");
+  const [typed, setTyped] = useState("");
+  const [kind, setKind] = useState("");
+  const [next, setNext] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState("");
+  const start = async (nextDate: string | null) => {
+    setBusy(true);
+    setMsg("");
+    try {
+      const ev = await api<{ id: number }>("/api/kiosk/events", { method: "POST", body: JSON.stringify({ club, kind, nextDate }) });
+      onOpen(ev.id);
+    } catch {
+      setMsg("うまく始められませんでした。もう一度押してください。");
+      setBusy(false);
+    }
+  };
+  const Head = ({ n, title }: { n: number; title: string }) => (
+    <>
+      <p className="text-2xl text-ink-soft mt-4">運営の方へ　{n} / 3</p>
+      <h1 className="text-5xl font-bold mb-8">{title}</h1>
+    </>
+  );
+  return (
+    <main className="min-h-full p-8 screen-in max-w-5xl mx-auto flex flex-col" key={step}>
+      {step === "club" && (
+        <>
+          <Head n={1} title="どの老人会の会ですか？" />
+          <div className="grid gap-5 md:grid-cols-2">
+            {clubs.map((c) => (
+              <button key={c} onClick={() => { setClub(c); setStep("kind"); }} className="rounded-3xl bg-card border-4 border-navy min-h-32 text-4xl font-bold shadow-md active:scale-[.98] transition">{c}</button>
+            ))}
+            <button onClick={() => setStep("typing")} className="rounded-3xl bg-card border-4 border-dashed border-line min-h-32 text-3xl font-bold active:scale-[.98] transition">＋ 老人会の名前を入れる</button>
+          </div>
+        </>
+      )}
+      {step === "typing" && (
+        <>
+          <Head n={1} title="老人会の名前を入れてください" />
+          <input value={typed} onChange={(e) => setTyped(e.target.value)} maxLength={40} autoFocus aria-label="老人会の名前" placeholder="例: みゆき会"
+            className="w-full text-5xl rounded-2xl border-4 border-navy bg-card px-6 py-6" />
+          <button onClick={() => { setClub(typed.trim()); setStep("kind"); }} disabled={!typed.trim()} className="mt-6 rounded-2xl bg-navy text-white text-4xl font-bold min-h-28 disabled:opacity-40">次へ</button>
+          <div className="mt-auto pt-10"><BigBack onClick={() => setStep("club")} /></div>
+        </>
+      )}
+      {step === "kind" && (
+        <>
+          <Head n={2} title={`${club}の、何の会ですか？`} />
+          <div className="grid gap-5 grid-cols-2">
+            {KINDS.map((k) => (
+              <button key={k} onClick={() => { setKind(k); setStep("next"); }} className="rounded-3xl bg-card border-4 border-navy min-h-36 text-5xl font-bold shadow-md active:scale-[.98] transition">{k}</button>
+            ))}
+          </div>
+          <div className="mt-auto pt-10"><BigBack onClick={() => setStep("club")} /></div>
+        </>
+      )}
+      {step === "next" && (
+        <>
+          <Head n={3} title="次回はいつですか？" />
+          <p className="text-2xl text-ink-soft mb-6">参加カードに書く日付です。決まっていなければ「まだ決まっていない」を押してください。</p>
+          <input type="date" value={next} onChange={(e) => setNext(e.target.value)} aria-label="次回の日付" className="w-full max-w-xl text-4xl rounded-2xl border-4 border-navy bg-card px-6 py-5" />
+          <div className="grid gap-5 md:grid-cols-2 mt-8">
+            <button onClick={() => start(next || null)} disabled={!next || busy} className="rounded-2xl bg-navy text-white text-3xl font-bold min-h-28 disabled:opacity-40">この日付で受付を始める</button>
+            <button onClick={() => start(null)} disabled={busy} className="rounded-2xl border-4 border-line bg-card text-3xl font-bold min-h-28">まだ決まっていない</button>
+          </div>
+          {msg && <p role="alert" className="mt-5 text-2xl font-bold text-alert">{msg}</p>}
+          <div className="mt-auto pt-10 flex items-center gap-6">
+            <BigBack onClick={() => setStep("kind")} />
+            <span className="text-2xl text-ink-soft">{club}・{kind}</span>
+          </div>
+        </>
+      )}
+    </main>
   );
 }
 

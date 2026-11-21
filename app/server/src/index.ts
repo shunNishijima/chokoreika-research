@@ -18,6 +18,7 @@ const cfg: AuthConfig = {
   sessionSecret: env.SESSION_SECRET ?? (production ? "" : "dev-only-session-secret-0123456789abcdef"),
   production,
   devBypass: env.AUTH_DEV_BYPASS === "1",
+  open: env.ADMIN_AUTH === "none",
 };
 if (production && cfg.sessionSecret.length < 32) {
   console.error("SESSION_SECRET（32文字以上）が設定されていません");
@@ -27,6 +28,8 @@ if (production && cfg.sessionSecret.length < 32) {
 const { db } = await createDb({ url: env.DATABASE_URL, dataDir: env.PGLITE_DIR });
 
 const app = new Hono();
+// 検索エンジンに載せない（認証なしで公開する場合の最低限の対策）
+app.use("*", async (c, next) => { await next(); c.header("X-Robots-Tag", "noindex, nofollow"); });
 app.use("*", secureHeaders({
   contentSecurityPolicy: {
     defaultSrc: ["'self'"],
@@ -41,7 +44,7 @@ app.use("*", secureHeaders({
   crossOriginOpenerPolicy: "same-origin-allow-popups",
 }));
 app.route("/api/auth", authRoutes(cfg, googleVerifier(cfg.clientId)));
-app.route("/", createApp({ db, sessionSecret: cfg.sessionSecret, authenticateAdmin: makeAdminAuthenticator(cfg) }));
+app.route("/", createApp({ db, sessionSecret: cfg.sessionSecret, kioskOpen: !!cfg.open, authenticateAdmin: makeAdminAuthenticator(cfg) }));
 
 // 画面（SPA）
 const webDist = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../web/dist");

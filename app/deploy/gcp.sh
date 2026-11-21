@@ -7,6 +7,7 @@
 #   ./deploy/gcp.sh deploy                 # コードを更新したとき
 #   ./deploy/gcp.sh set-client-id <ID>     # Google ログインの OAuth クライアント ID を設定
 #   ./deploy/gcp.sh set-admins a@x,b@y     # 管理者のメールを変更
+#   ADMIN_AUTH=none ./deploy/gcp.sh deploy # 管理画面を認証なしにする（URL を知っていれば誰でも見られる）
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -16,7 +17,10 @@ SERVICE=choko-checkin
 INSTANCE=choko-db
 DB_NAME=choko
 DB_USER=app
+# コマンドで渡した ADMIN_AUTH を、保存済みの設定より優先する
+_ADMIN_AUTH_ENV=${ADMIN_AUTH-__unset__}
 [ -f "$CONFIG" ] && source "$CONFIG"
+[ "$_ADMIN_AUTH_ENV" != "__unset__" ] && ADMIN_AUTH=$_ADMIN_AUTH_ENV
 
 save_config() {
   cat > "$CONFIG" <<CFG
@@ -24,6 +28,7 @@ PROJECT_ID=$PROJECT_ID
 REGION=$REGION
 ADMIN_EMAILS=${ADMIN_EMAILS:-}
 GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-}
+ADMIN_AUTH=${ADMIN_AUTH:-}
 CFG
 }
 
@@ -33,7 +38,7 @@ deploy() {
     --allow-unauthenticated \
     --add-cloudsql-instances "$conn" \
     --set-secrets "DATABASE_URL=database-url:latest,SESSION_SECRET=session-secret:latest" \
-    --set-env-vars "^;^ADMIN_EMAILS=${ADMIN_EMAILS:-};GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-}" \
+    --set-env-vars "^;^ADMIN_EMAILS=${ADMIN_EMAILS:-};GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-};ADMIN_AUTH=${ADMIN_AUTH:-}" \
     --min-instances 0 --max-instances 2 --memory 512Mi --quiet
   local url
   url=$(gcloud run services describe "$SERVICE" --project "$PROJECT_ID" --region "$REGION" --format 'value(status.url)')
@@ -86,6 +91,7 @@ case "${1:-}" in
     ;;
   deploy)
     : "${PROJECT_ID:?先に setup を実行してください}"
+    save_config
     deploy
     ;;
   set-client-id)

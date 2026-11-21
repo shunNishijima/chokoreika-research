@@ -3,7 +3,8 @@ import { Hono, type Context } from "hono";
 import { deleteCookie, getSignedCookie, setSignedCookie } from "hono/cookie";
 import { z } from "zod";
 
-export type AuthConfig = { clientId: string; adminEmails: string[]; sessionSecret: string; production: boolean; devBypass: boolean };
+// open=true は「管理画面を認証なしで公開する」設定。環境変数 ADMIN_AUTH=none で明示したときだけ有効
+export type AuthConfig = { clientId: string; adminEmails: string[]; sessionSecret: string; production: boolean; devBypass: boolean; open?: boolean };
 export type GoogleVerifier = (idToken: string) => Promise<{ email?: string; email_verified?: boolean } | null>;
 
 const COOKIE = "admin_session";
@@ -25,6 +26,7 @@ const allowed = (cfg: AuthConfig, email?: string) => !!email && cfg.adminEmails.
 
 export function makeAdminAuthenticator(cfg: AuthConfig) {
   return async (c: Context): Promise<string | null> => {
+    if (cfg.open) return "認証なし";
     if (cfg.devBypass && !cfg.production) return "dev@localhost";
     const v = await getSignedCookie(c, cfg.sessionSecret, COOKIE);
     if (!v) return null;
@@ -36,7 +38,7 @@ export function makeAdminAuthenticator(cfg: AuthConfig) {
 
 export function authRoutes(cfg: AuthConfig, verify: GoogleVerifier) {
   const r = new Hono();
-  r.get("/config", (c) => c.json({ googleClientId: cfg.clientId, devBypass: cfg.devBypass && !cfg.production }));
+  r.get("/config", (c) => c.json({ googleClientId: cfg.clientId, devBypass: cfg.devBypass && !cfg.production, open: !!cfg.open }));
   r.post("/google", async (c) => {
     const body = z.object({ credential: z.string().min(1) }).safeParse(await c.req.json().catch(() => null));
     if (!body.success) return c.json({ error: "invalid" }, 400);

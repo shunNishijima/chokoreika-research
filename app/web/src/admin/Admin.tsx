@@ -81,9 +81,16 @@ function Shell({ email }: { email: string }) {
                 className={({ isActive }) => `px-4 py-2 rounded-xl text-base font-bold whitespace-nowrap ${isActive ? "bg-navy text-white" : "text-ink hover:bg-paper"}`}>{label}</NavLink>
             ))}
           </nav>
-          <span className="ml-auto text-sm text-ink-soft hidden md:inline">{email}</span>
-          <button onClick={logout} className="text-sm font-bold rounded-xl border-2 border-line px-3 py-2">ログアウト</button>
+          {email === "認証なし" ? null : <>
+            <span className="ml-auto text-sm text-ink-soft hidden md:inline">{email}</span>
+            <button onClick={logout} className="text-sm font-bold rounded-xl border-2 border-line px-3 py-2">ログアウト</button>
+          </>}
         </div>
+        {email === "認証なし" && (
+          <p role="note" className="bg-alert-soft text-alert font-bold text-sm px-6 py-2 text-center">
+            この管理画面はログインなしで開けます。URL を知っている人は誰でも、名前などの参加者情報を見られます。URL は運営の中だけで共有してください。
+          </p>
+        )}
       </header>
       <div className="max-w-7xl mx-auto px-6 py-8">
         <Routes>

@@ -9,7 +9,8 @@ import { attendances, events, options, participants, settings } from "../db/sche
 import { buildDashboard, nextCode } from "../domain/metrics.js";
 import { CHOICES } from "../domain/choices.js";
 
-type Deps = { db: Db; sessionSecret: string; authenticateAdmin: (c: Context) => Promise<string | null> };
+// kioskOpen=true は試用モード: 受付の端末登録（合言葉）なしで使え、運営がその場で会を作れる
+type Deps = { db: Db; sessionSecret: string; kioskOpen?: boolean; authenticateAdmin: (c: Context) => Promise<string | null> };
 
 const opt = (values: readonly string[]) => z.enum(values as [string, ...string[]]).nullish();
 const mood = z.number().int().min(1).max(5).nullish();
@@ -58,7 +59,7 @@ const DEVICE_COOKIE = "kiosk_device";
 const DEVICE_TTL_SEC = 180 * 24 * 60 * 60;
 const failures = new Map<string, { n: number; until: number }>();
 
-export function createApp({ db, sessionSecret, authenticateAdmin }: Deps) {
+export function createApp({ db, sessionSecret, kioskOpen = false, authenticateAdmin }: Deps) {
   const app = new Hono();
 
   app.get("/api/health", (c) => c.json({ ok: true }));
@@ -92,6 +93,7 @@ export function createApp({ db, sessionSecret, authenticateAdmin }: Deps) {
 
   // 合言葉を変えると、古い合言葉で登録した端末は使えなくなる
   async function isDevice(c: Context) {
+    if (kioskOpen) return true;
     const v = await getSignedCookie(c, sessionSecret, DEVICE_COOKIE);
     const stored = await getSetting("kioskPasscode");
     return !!v && !!stored && v === `device|${stored.slice(0, 16)}`;
@@ -119,6 +121,27 @@ export function createApp({ db, sessionSecret, authenticateAdmin }: Deps) {
     const rows = await db.select({ id: events.id, date: events.date, kind: events.kind, place: events.place, host: events.host })
       .from(events).where(and(eq(events.host, club), gte(events.date, since))).orderBy(desc(events.date), desc(events.id));
     return c.json(rows);
+  });
+
+  // 試用モード: 運営が「老人会」と「会の種類」を入れて今日の会を始める（同じ組み合わせなら同じ会を開く）
+  app.post("/api/kiosk/events", async (c) => {
+    if (!kioskOpen) return c.json({ error: "unauthorized" }, 401);
+    const body = z.object({
+      club: z.string().trim().min(1).max(40),
+      kind: z.enum(CHOICES.kind as unknown as [string, ...string[]]),
+      nextDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullish(),
+    }).safeParse(await c.req.json().catch(() => null));
+    if (!body.success) return c.json({ error: "invalid" }, 400);
+    const { club, kind, nextDate } = body.data;
+    const today = new Date().toLocaleDateString("sv-SE", { timeZone: "Asia/Tokyo" });
+    await db.insert(options).values({ kind: "club", label: club, sort: 999 }).onConflictDoNothing();
+    const [found] = await db.select().from(events).where(and(eq(events.date, today), eq(events.host, club), eq(events.kind, kind)));
+    if (found) {
+      if (nextDate && found.nextDate !== nextDate) await db.update(events).set({ nextDate }).where(eq(events.id, found.id));
+      return c.json({ id: found.id, date: found.date, kind: found.kind, host: found.host }, 200);
+    }
+    const [ev] = await db.insert(events).values({ date: today, kind, host: club, nextDate: nextDate ?? null, kioskToken: randomBytes(18).toString("base64url") }).returning();
+    return c.json({ id: ev.id, date: ev.date, kind: ev.kind, host: ev.host }, 201);
   });
 
   app.get("/api/kiosk/events/:id/session", async (c) => {

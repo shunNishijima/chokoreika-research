@@ -53,3 +53,16 @@ test("given 開発環境でバイパス有効 / when 判定 / then 開発用の�
   const r = await (await app.request("/who")).json();
   assert.equal(r.email, "dev@localhost");
 });
+
+test("given 認証なし（open）を明示 / when 判定 / then 本番でも管理者として通す", async () => {
+  const app = appWith({ ...base, open: true }, async () => null);
+  const r = await (await app.request("/who")).json();
+  assert.equal(r.email, "認証なし");
+  const cfg = await (await app.request("/api/auth/config")).json();
+  assert.equal(cfg.open, true);
+});
+
+test("given open を指定しない / when 判定 / then 従来どおり認証が必要", async () => {
+  const app = appWith(base, async () => null);
+  assert.equal((await (await app.request("/who")).json()).email, null);
+});

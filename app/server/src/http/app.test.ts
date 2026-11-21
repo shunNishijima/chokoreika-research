@@ -151,3 +151,36 @@ test("given 管理者 / when 参加者CSV / then 名前は含めない（集計�
   assert.ok(text.startsWith("code,consent,"));
   assert.ok(!text.split("\n")[0].includes("name"));
 });
+
+// ---------- 試用モード（認証なし）: 運営がその場で老人会と会を入力して始める ----------
+const openApp = () => createApp({ db, sessionSecret: SECRET, kioskOpen: true, authenticateAdmin: async () => "認証なし" });
+const openPost = (path: string, body: unknown) => openApp().request(path, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+
+test("given 試用モード / when 端末登録なしで老人会一覧 / then 開ける", async () => {
+  assert.equal((await openApp().request("/api/kiosk/clubs")).status, 200);
+});
+
+test("given 試用モード / when 運営が老人会と会の種類を入れて始める / then 今日の会ができ、同じ組み合わせなら同じ会を開く", async () => {
+  const a = await json(await openPost("/api/kiosk/events", { club: "ひまわり会", kind: "朝ご飯会", nextDate: "2026-12-06" }));
+  assert.equal(a.status, 201);
+  assert.equal(a.body.host, "ひまわり会");
+  assert.equal(a.body.kind, "朝ご飯会");
+  const b = await json(await openPost("/api/kiosk/events", { club: "ひまわり会", kind: "朝ご飯会" }));
+  assert.equal(b.body.id, a.body.id);
+  const c = await json(await openPost("/api/kiosk/events", { club: "ひまわり会", kind: "映画会" }));
+  assert.notEqual(c.body.id, a.body.id);
+  // 新しい老人会は一覧にも加わる
+  const clubs = await json(await openApp().request("/api/kiosk/clubs"));
+  assert.ok(clubs.body.includes("ひまわり会"));
+  // そのまま受付できる
+  const reg = await json(await openPost(`/api/kiosk/events/${a.body.id}/register`, { consent: true, name: "試用 太郎" }));
+  assert.equal(reg.status, 201);
+});
+
+test("given 試用モードでない / when 会を作ろうとする / then 401", async () => {
+  assert.equal((await app().request("/api/kiosk/events", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ club: "x", kind: "朝ご飯会" }) })).status, 401);
+});
+
+test("given 空の老人会名 / when 会を作る / then 400", async () => {
+  assert.equal((await openPost("/api/kiosk/events", { club: " ", kind: "朝ご飯会" })).status, 400);
+});
